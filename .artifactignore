@@ -1,0 +1,6 @@
+*
+!scripts/**/*
+!src/**/*
+!CHANGELOG.md
+!README.md
+!VERSION

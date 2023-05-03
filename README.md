@@ -1,20 +1,33 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# data-pipelines-compound
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+Deploys Azure Data Factory configuration, i.e. pipelines, linked services, integration runtimes etc.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+## Dependencies
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+- [Guppy/data-factory-compound](https://dev.azure.com/mpcoderepo/Guppy/_git/data-factory-compound)
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+## Configuration
+
+### Config
+
+* [ci1](https://dev.azure.com/mpcoderepo/Guppy/_git/fat-config?path=/config/compounds/data-pipelines-test/ci1)
+* [sit1](https://dev.azure.com/mpcoderepo/Guppy/_git/sit-config?path=/config/compounds/data-pipelines-test/sit1)
+* [uat1](https://dev.azure.com/mpcoderepo/Guppy/_git/uat-config?path=/config/compounds/data-pipelines-test/uat1)
+* [prd1](https://dev.azure.com/mpcoderepo/Guppy/_git/prd-config?path=/config/compounds/data-pipelines-test/prd1)
+
+### Secrets
+
+(none)
+
+## Testing
+
+* Run `./scripts/test.sh`.
+
+## Contributing
+
+See our [Contributing Guide][contributing] for full details,
+including versioning and branching strategy.
+
+Add an entry to the `CHANGELOG.md` if you introduce new functionality or a breaking change.
+
+[contributing]: https://ctapdocs-prudentialplc.msappproxy.net/docs/contributing/ "Contributing"

@@ -1,0 +1,67 @@
+---
+parameters:
+  - name: action
+    displayName: Action (select "Deploy" to deploy from feature branches)
+    type: string
+    values:
+      - Default
+      - Deploy
+    default: Default
+
+resources:
+  repositories:
+    - repository: self
+    - repository: templates
+      type: git
+      name: DevOps/azp-templates
+      ref: refs/tags/guppy-rc2
+
+extends:
+  template: pipelines/compound.yml@templates
+  parameters:
+    deployStages:
+      - template: stages/deploy.yml@templates
+        parameters:
+          dependsOn: build
+          deploySteps:
+            - template: ./azure-pipelines.deploy.yml
+              parameters:
+                environment: fat
+                logicalEnvironment: ci1
+          environment: fat
+          logicalEnvironment: ci1
+          runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
+          useWindowsAgents: true
+      - template: stages/deploy.yml@templates
+        parameters:
+          dependsOn: deploy_fat_ci1
+          deploySteps:
+            - template: ./azure-pipelines.deploy.yml
+              parameters:
+                environment: sit
+                logicalEnvironment: sit1
+          environment: sit
+          logicalEnvironment: sit1
+          useWindowsAgents: true
+      - template: stages/deploy.yml@templates
+        parameters:
+          dependsOn: deploy_sit_sit1
+          deploySteps:
+            - template: ./azure-pipelines.deploy.yml
+              parameters:
+                environment: uat
+                logicalEnvironment: uat1
+          environment: uat
+          logicalEnvironment: uat1
+          useWindowsAgents: true
+      - template: stages/deploy.yml@templates
+        parameters:
+          dependsOn: deploy_uat_uat1
+          deploySteps:
+            - template: ./azure-pipelines.deploy.yml
+              parameters:
+                environment: prd
+                logicalEnvironment: prd
+          environment: prd
+          logicalEnvironment: prd
+          useWindowsAgents: true

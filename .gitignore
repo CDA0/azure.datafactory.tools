@@ -1,0 +1,9 @@
+# ide
+.env
+.vscode
+
+# internal
+.config
+.secrets
+
+# other

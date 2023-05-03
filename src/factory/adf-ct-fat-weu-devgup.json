@@ -1,0 +1,16 @@
+{
+	"name": "adf-ct-fat-weu-devgup",
+	"properties": {
+		"globalParameters": {
+			"environment": {
+				"type": "string",
+				"value": "fat"
+			},
+			"logicalEnvironment": {
+				"type": "string",
+				"value": "dev"
+			}
+		}
+	},
+	"location": "westeurope"
+}

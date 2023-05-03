@@ -1,0 +1,48 @@
+---
+parameters:
+  - name: environment
+    type: string
+    values:
+      - fat
+      - prd
+      - sit
+      - uat
+  - name: location
+    type: string
+    default: westeurope
+  - name: logicalEnvironment
+    type: string
+
+steps:
+  - template: steps/get-subscription-id.yml@templates
+    parameters:
+      serviceConnectionName: sub-customer-${{ parameters.environment }}-t1-01-deploy
+      subscriptionName: sub-customer-${{ parameters.environment }}-t1-01
+
+  - template: steps/get-short-location.yml@templates
+    parameters:
+      location: ${{ parameters.location }}
+
+  - task: SQLPlayer.DataFactoryTools.BuildADF.BuildADFTask@1
+    displayName: Validate
+    inputs:
+      Action: Build
+      DataFactoryCodePath: $(System.DefaultWorkingDirectory)/src
+
+  - task: SQLPlayer.DataFactoryTools.PublishADF.PublishADFTask@1
+    displayName: Publish
+    inputs:
+      CreateNewInstance: false
+      azureSubscription: sub-customer-${{ parameters.environment }}-t1-01-deploy
+      ResourceGroupName: rg-ct-${{ parameters.environment }}-$(shortLocation)-${{ parameters.logicalEnvironment }}gup
+      DataFactoryName: adf-ct-${{ parameters.environment }}-$(shortLocation)-${{ parameters.logicalEnvironment }}gup
+      DataFactoryCodePath: $(System.DefaultWorkingDirectory)/src
+      Location: ${{ parameters.location }}
+      DeleteNotInSource: true
+      DoNotDeleteExcludedObjects: false
+      DoNotStopStartExcludedTriggers: false
+      StopStartTriggers: true
+      StageType: FilePath
+      StageConfigFile: $(System.DefaultWorkingDirectory)\.config\config.csv
+      FilteringType: FilePath
+      FilterTextFile: $(System.DefaultWorkingDirectory)\.config\filter.txt
