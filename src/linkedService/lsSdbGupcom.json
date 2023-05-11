@@ -1,0 +1,29 @@
+{
+	"name": "lsSdbGupcom",
+	"properties": {
+		"parameters": {
+			"environment": {
+				"type": "string"
+			},
+			"shortLocation": {
+				"type": "string"
+			},
+			"logicalEnvironment": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=sql-ct-@{linkedService().environment}-@{linkedService().shortLocation}-gupcom.database.windows.net;Initial Catalog=sdb-ct-@{linkedService().environment}-@{linkedService().shortLocation}-@{linkedService().logicalEnvironment}gup",
+			"credential": {
+				"referenceName": "credGupcom",
+				"type": "CredentialReference"
+			}
+		},
+		"connectVia": {
+			"referenceName": "Azure",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

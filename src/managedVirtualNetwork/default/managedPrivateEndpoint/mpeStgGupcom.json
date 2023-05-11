@@ -1,0 +1,7 @@
+{
+	"name": "mpeStgGupcom",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/b362fbc7-82bd-4c39-b979-bea67f8e1178/resourceGroups/rg-ct-fat-weu-gupcom/providers/Microsoft.Storage/storageAccounts/stg0ct0fat0weu0gupcom",
+		"groupId": "dfs"
+	}
+}

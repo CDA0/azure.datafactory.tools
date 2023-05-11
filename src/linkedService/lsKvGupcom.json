@@ -1,0 +1,22 @@
+{
+	"name": "lsKvGupcom",
+	"properties": {
+		"parameters": {
+			"environment": {
+				"type": "string"
+			},
+			"shortLocation": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://kv-ct-@{linkedService().environment}-@{linkedService().shortLocation}-gupcom.vault.azure.net",
+			"credential": {
+				"referenceName": "credGupcom",
+				"type": "CredentialReference"
+			}
+		}
+	}
+}
