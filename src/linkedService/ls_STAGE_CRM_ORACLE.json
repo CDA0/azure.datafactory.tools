@@ -19,7 +19,7 @@
 			"password": {
 				"type": "AzureKeyVaultSecret",
 				"store": {
-					"referenceName": "lsKvGupcom",
+					"referenceName": "ls_KeyVaultCom",
 					"type": "LinkedServiceReference",
 					"parameters": {
 						"ENVIRONMENT": {
