@@ -2,13 +2,17 @@
 	"name": "adf-ct-fat-weu-devgup",
 	"properties": {
 		"globalParameters": {
-			"environment": {
+			"ENVIRONMENT": {
 				"type": "string",
 				"value": "fat"
 			},
-			"logicalEnvironment": {
+			"LOGICAL_ENVIRONMENT": {
 				"type": "string",
 				"value": "dev"
+			},
+			"SHORT_LOCATION": {
+				"type": "string",
+				"value": "weu"
 			}
 		}
 	},

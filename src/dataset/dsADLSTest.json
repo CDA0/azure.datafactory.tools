@@ -1,0 +1,60 @@
+{
+	"name": "dsADLSTest",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_ADLS2",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"ENVIRONMENT": {
+					"value": "@dataset().ENVIRONMENT",
+					"type": "Expression"
+				},
+				"SHORT_LOCATION": {
+					"value": "@dataset().SHORT_LOCATION",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"FILE_PATH": {
+				"type": "string"
+			},
+			"FILE_NAME": {
+				"type": "string"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string"
+			},
+			"ENVIRONMENT": {
+				"type": "string"
+			},
+			"SHORT_LOCATION": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().FILE_NAME",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().FILE_PATH",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": "|",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

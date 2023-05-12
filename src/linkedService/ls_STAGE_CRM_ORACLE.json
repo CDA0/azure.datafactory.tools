@@ -1,14 +1,14 @@
 {
-	"name": "lsOracleStageCrm",
+	"name": "ls_STAGE_CRM_ORACLE",
 	"properties": {
 		"parameters": {
-			"environment": {
+			"ENVIRONMENT": {
 				"type": "string"
 			},
-			"logicalEnvironment": {
+			"LOGICAL_ENVIRONMENT": {
 				"type": "string"
 			},
-			"shortLocation": {
+			"SHORT_LOCATION": {
 				"type": "string"
 			}
 		},
@@ -22,18 +22,18 @@
 					"referenceName": "lsKvGupcom",
 					"type": "LinkedServiceReference",
 					"parameters": {
-						"environment": {
-							"value": "@linkedService().environment",
+						"ENVIRONMENT": {
+							"value": "@linkedService().ENVIRONMENT",
 							"type": "Expression"
 						},
-						"shortLocation": {
-							"value": "@linkedService().shortLocation",
+						"SHORT_LOCATION": {
+							"value": "@linkedService().SHORT_LOCATION",
 							"type": "Expression"
 						}
 					}
 				},
 				"secretName": {
-					"value": "@{linkedService().logicalEnvironment}-stagecrm-password",
+					"value": "@{linkedService().LOGICAL_ENVIRONMENT}-stagecrm-password",
 					"type": "Expression"
 				}
 			}
