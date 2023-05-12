@@ -62,12 +62,9 @@ extends:
           environment: prd
           logicalEnvironment: prd
     testSteps:
-      - task: AzurePowerShell@5
+      - task: PowerShell@2
         displayName: Test
         inputs:
-          azureSubscription: sub-customer-hub-t1-01-build
           pwsh: true
-          azurePowerShellVersion: LatestVersion
-          ScriptType: FilePath
-          ScriptPath: $(System.DefaultWorkingDirectory)/scripts/test.ps1
-          ScriptArguments: -DataFactoryCodePath $(System.DefaultWorkingDirectory)/src
+          filePath: $(System.DefaultWorkingDirectory)/scripts/test.ps1
+          arguments: -DataFactoryCodePath $(System.DefaultWorkingDirectory)/src

@@ -3,10 +3,11 @@ Param(
     [Parameter(Mandatory)][string] $DataFactoryCodePath
 )
 
-Install-Module azure.datafactory.tools -Force
+Install-Module Az.DataFactory -MinimumVersion "1.10.0" -Force
+Install-Module azure.datafactory.tools -MinimumVersion "1.4.0" -Force
 Import-Module azure.datafactory.tools
 
-$global:ErrorActionPreference = 'Continue'
+$global:ErrorActionPreference = "Continue"
 
 $result = Test-AdfCode -RootFolder "$DataFactoryCodePath"
 
