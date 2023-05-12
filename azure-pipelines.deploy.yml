@@ -23,26 +23,21 @@ steps:
     parameters:
       location: ${{ parameters.location }}
 
-  - task: SQLPlayer.DataFactoryTools.BuildADF.BuildADFTask@1
-    displayName: Validate
-    inputs:
-      Action: Build
-      DataFactoryCodePath: $(System.DefaultWorkingDirectory)/src
-
-  - task: SQLPlayer.DataFactoryTools.PublishADF.PublishADFTask@1
+  - task: AzurePowerShell@5
     displayName: Publish
     inputs:
-      CreateNewInstance: false
       azureSubscription: sub-customer-${{ parameters.environment }}-t1-01-deploy
-      ResourceGroupName: rg-ct-${{ parameters.environment }}-$(shortLocation)-${{ parameters.logicalEnvironment }}gup
-      DataFactoryName: adf-ct-${{ parameters.environment }}-$(shortLocation)-${{ parameters.logicalEnvironment }}gup
-      DataFactoryCodePath: $(System.DefaultWorkingDirectory)/src
-      Location: ${{ parameters.location }}
-      DeleteNotInSource: true
-      DoNotDeleteExcludedObjects: false
-      DoNotStopStartExcludedTriggers: false
-      StopStartTriggers: true
-      StageType: FilePath
-      StageConfigFile: $(System.DefaultWorkingDirectory)\.config\config.csv
-      FilteringType: FilePath
-      FilterTextFile: $(System.DefaultWorkingDirectory)\.config\filter.txt
+      pwsh: true
+      azurePowerShellVersion: LatestVersion
+      ScriptType: FilePath
+      ScriptPath: $(System.DefaultWorkingDirectory)/scripts/publish.ps1
+      ScriptArguments: |
+        -DataFactoryCodePath $(System.DefaultWorkingDirectory)/src `
+        -ResourceGroupName "rg-ct-${{ parameters.environment }}-$(shortLocation)-${{ parameters.logicalEnvironment }}gup" `
+        -DataFactoryName "adf-ct-${{ parameters.environment }}-$(shortLocation)-${{ parameters.logicalEnvironment }}gup" `
+        -Location "${{ parameters.location }}" `
+        -CreateNewInstance $false `
+        -DeleteNotInSource $true `
+        -DoNotDeleteExcludedObjects $false `
+        -StageConfigFile "$(System.DefaultWorkingDirectory)/.config/config.csv" `
+        -FilterTextFile "$(System.DefaultWorkingDirectory)/.config/filter.txt"

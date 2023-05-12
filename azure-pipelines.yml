@@ -31,7 +31,6 @@ extends:
           environment: fat
           logicalEnvironment: ci1
           runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
-          useWindowsAgents: true
       - template: stages/deploy.yml@templates
         parameters:
           dependsOn: deploy_fat_ci1
@@ -42,7 +41,6 @@ extends:
                 logicalEnvironment: sit1
           environment: sit
           logicalEnvironment: sit1
-          useWindowsAgents: true
       - template: stages/deploy.yml@templates
         parameters:
           dependsOn: deploy_sit_sit1
@@ -53,7 +51,6 @@ extends:
                 logicalEnvironment: uat1
           environment: uat
           logicalEnvironment: uat1
-          useWindowsAgents: true
       - template: stages/deploy.yml@templates
         parameters:
           dependsOn: deploy_uat_uat1
@@ -64,4 +61,13 @@ extends:
                 logicalEnvironment: prd
           environment: prd
           logicalEnvironment: prd
-          useWindowsAgents: true
+    testSteps:
+      - task: AzurePowerShell@5
+        displayName: Test
+        inputs:
+          azureSubscription: sub-customer-hub-t1-01-build
+          pwsh: true
+          azurePowerShellVersion: LatestVersion
+          ScriptType: FilePath
+          ScriptPath: $(System.DefaultWorkingDirectory)/scripts/test.ps1
+          ScriptArguments: -DataFactoryCodePath $(System.DefaultWorkingDirectory)/src
