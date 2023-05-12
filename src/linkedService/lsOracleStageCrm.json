@@ -1,0 +1,46 @@
+{
+	"name": "lsOracleStageCrm",
+	"properties": {
+		"parameters": {
+			"environment": {
+				"type": "string"
+			},
+			"logicalEnvironment": {
+				"type": "string"
+			},
+			"shortLocation": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Oracle",
+		"typeProperties": {
+			"connectionString": "host=AXORADEV11;port=1531;sid=CRM01A;user id=stage_crm_ro",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "lsKvGupcom",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"environment": {
+							"value": "@linkedService().environment",
+							"type": "Expression"
+						},
+						"shortLocation": {
+							"value": "@linkedService().shortLocation",
+							"type": "Expression"
+						}
+					}
+				},
+				"secretName": {
+					"value": "@{linkedService().logicalEnvironment}-stagecrm-password",
+					"type": "Expression"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "Lansing",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
