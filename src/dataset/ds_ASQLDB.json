@@ -1,0 +1,47 @@
+{
+	"name": "ds_ASQLDB",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_AzureSQLDB",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+				"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+				"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+			}
+		},
+		"parameters": {
+			"SCHEMA": {
+				"type": "string"
+			},
+			"TABLE_NAME": {
+				"type": "string"
+			},
+			"ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@dataset().ENVIRONMENT"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@dataset().SHORT_LOCATION"
+			},
+			"SHORT_LOCATION": {
+				"type": "string",
+				"defaultValue": "@dataset().LOGICAL_ENVIRONMENT"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().SCHEMA",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().TABLE_NAME",
+				"type": "Expression"
+			}
+		}
+	}
+}

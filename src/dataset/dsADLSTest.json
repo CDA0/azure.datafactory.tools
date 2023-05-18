@@ -23,13 +23,16 @@
 				"type": "string"
 			},
 			"LOGICAL_ENVIRONMENT": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
 			},
 			"ENVIRONMENT": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
 			},
 			"SHORT_LOCATION": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
 			}
 		},
 		"annotations": [],

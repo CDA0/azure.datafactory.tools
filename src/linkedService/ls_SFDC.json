@@ -1,0 +1,19 @@
+{
+	"name": "ls_SFDC",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "Connects to Salesforce (Retirement Account platform)",
+		"annotations": [],
+		"type": "Salesforce",
+		"typeProperties": {
+			"environmentUrl": "https://pru--sat.sandbox.my.salesforce.com",
+			"username": "iics@mandg.com.dist.sat",
+			"apiVersion": "54.0",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI3OGE4ZjljMC0wMTJjLTQ5OTYtYWEyMy0xNjhjMTAwYzY3ODAiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "Woking",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
