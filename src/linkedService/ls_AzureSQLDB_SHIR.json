@@ -1,0 +1,30 @@
+{
+	"name": "ls_AzureSQLDB_SHIR",
+	"properties": {
+		"description": "Connects to Azure SQL DB via the Self Hosted Integration Runtime in Lansing",
+		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string"
+			},
+			"SHORT_LOCATION": {
+				"type": "string"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=sql-ct-@{linkedService().ENVIRONMENT}-@{linkedService().SHORT_LOCATION}-gupcom.database.windows.net;Initial Catalog=sdb-ct-@{linkedService().ENVIRONMENT}-@{linkedService().SHORT_LOCATION}-@{linkedService().LOGICAL_ENVIRONMENT}gup",
+			"credential": {
+				"referenceName": "cred_GUPCOM",
+				"type": "CredentialReference"
+			}
+		},
+		"connectVia": {
+			"referenceName": "Lansing",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

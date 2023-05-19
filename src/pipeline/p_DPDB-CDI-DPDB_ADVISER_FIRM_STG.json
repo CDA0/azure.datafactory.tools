@@ -239,7 +239,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "ds_ASQLDB",
+						"referenceName": "ds_ASQLDB_SHIR",
 						"type": "DatasetReference",
 						"parameters": {
 							"SCHEMA": "STAGE_LOAD",
@@ -753,6 +753,9 @@
 				]
 			}
 		],
+		"folder": {
+			"name": "Digital Account/Adviser"
+		},
 		"annotations": []
 	}
 }

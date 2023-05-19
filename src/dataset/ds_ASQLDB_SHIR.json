@@ -1,0 +1,57 @@
+{
+	"name": "ds_ASQLDB_SHIR",
+	"properties": {
+		"description": "Data set for accessing tables in Azure SQL DB when connecting from / to an on-premise database",
+		"linkedServiceName": {
+			"referenceName": "ls_AzureSQLDB_SHIR",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"ENVIRONMENT": {
+					"value": "@dataset().ENVIRONMENT",
+					"type": "Expression"
+				},
+				"SHORT_LOCATION": {
+					"value": "@dataset().SHORT_LOCATION",
+					"type": "Expression"
+				},
+				"LOGICAL_ENVIRONMENT": {
+					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"SCHEMA": {
+				"type": "string"
+			},
+			"TABLE_NAME": {
+				"type": "string"
+			},
+			"ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@dataset().ENVIRONMENT"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@dataset().SHORT_LOCATION"
+			},
+			"SHORT_LOCATION": {
+				"type": "string",
+				"defaultValue": "@dataset().LOGICAL_ENVIRONMENT"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().SCHEMA",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().TABLE_NAME",
+				"type": "Expression"
+			}
+		}
+	}
+}
