@@ -31,23 +31,24 @@ extends:
             - template: ./azure-pipelines.deploy.yml
               parameters:
                 environment: fat
-                logicalEnvironment: dev
-                deploySql: ${{ parameters.deploySql }}
-          environment: fat
-          logicalEnvironment: dev
-          runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
-      - template: stages/deploy.yml@templates
-        parameters:
-          dependsOn: build
-          deploySteps:
-            - template: ./azure-pipelines.deploy.yml
-              parameters:
-                environment: fat
                 logicalEnvironment: ci1
                 deploySql: ${{ parameters.deploySql }}
           environment: fat
           logicalEnvironment: ci1
           runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
+      - ${{ if eq(parameters.deploySql, true) }}:
+          - template: stages/deploy.yml@templates
+            parameters:
+              dependsOn: build
+              deploySteps:
+                - template: ./azure-pipelines.deploy.yml
+                  parameters:
+                    environment: fat
+                    logicalEnvironment: dev
+                    deploySql: ${{ parameters.deploySql }}
+              environment: fat
+              logicalEnvironment: dev
+              runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
       - template: stages/deploy.yml@templates
         parameters:
           dependsOn: deploy_fat_ci1
