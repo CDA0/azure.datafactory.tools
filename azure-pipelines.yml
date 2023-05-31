@@ -32,7 +32,7 @@ extends:
               parameters:
                 environment: fat
                 logicalEnvironment: dev
-                deplySql: ${{ parameters.deploySql }}
+                deploySql: ${{ parameters.deploySql }}
           environment: fat
           logicalEnvironment: dev
           runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
@@ -44,7 +44,7 @@ extends:
               parameters:
                 environment: fat
                 logicalEnvironment: ci1
-                deplySql: ${{ parameters.deploySql }}
+                deploySql: ${{ parameters.deploySql }}
           environment: fat
           logicalEnvironment: ci1
           runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
@@ -56,7 +56,7 @@ extends:
               parameters:
                 environment: sit
                 logicalEnvironment: sit1
-                deplySql: ${{ parameters.deploySql }}
+                deploySql: ${{ parameters.deploySql }}
           environment: sit
           logicalEnvironment: sit1
       - template: stages/deploy.yml@templates
@@ -67,7 +67,7 @@ extends:
               parameters:
                 environment: uat
                 logicalEnvironment: uat1
-                deplySql: ${{ parameters.deploySql }}
+                deploySql: ${{ parameters.deploySql }}
           environment: uat
           logicalEnvironment: uat1
       - template: stages/deploy.yml@templates
@@ -78,7 +78,7 @@ extends:
               parameters:
                 environment: prd
                 logicalEnvironment: prd
-                deplySql: ${{ parameters.deploySql }}
+                deploySql: ${{ parameters.deploySql }}
           environment: prd
           logicalEnvironment: prd
     testSteps:
