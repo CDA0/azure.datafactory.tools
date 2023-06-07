@@ -1,5 +1,5 @@
 {
-	"name": "dsADLSTest",
+	"name": "ds_ADLS",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_ADLS2",

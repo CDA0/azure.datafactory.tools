@@ -5,9 +5,18 @@
 			"referenceName": "ls_AzureSQLDB",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
-				"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
-				"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+				"ENVIRONMENT": {
+					"value": "@dataset().ENVIRONMENT",
+					"type": "Expression"
+				},
+				"SHORT_LOCATION": {
+					"value": "@dataset().SHORT_LOCATION",
+					"type": "Expression"
+				},
+				"LOGICAL_ENVIRONMENT": {
+					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
+				}
 			}
 		},
 		"parameters": {
@@ -19,15 +28,15 @@
 			},
 			"ENVIRONMENT": {
 				"type": "string",
-				"defaultValue": "@dataset().ENVIRONMENT"
+				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
 			},
 			"LOGICAL_ENVIRONMENT": {
 				"type": "string",
-				"defaultValue": "@dataset().SHORT_LOCATION"
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
 			},
 			"SHORT_LOCATION": {
 				"type": "string",
-				"defaultValue": "@dataset().LOGICAL_ENVIRONMENT"
+				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
 			}
 		},
 		"annotations": [],

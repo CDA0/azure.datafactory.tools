@@ -4,7 +4,37 @@
 		"description": "Dataset description for tables in DPDB",
 		"linkedServiceName": {
 			"referenceName": "ls_DPDB",
-			"type": "LinkedServiceReference"
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"ENVIRONMENT": {
+					"value": "@dataset().ENVIRONMENT",
+					"type": "Expression"
+				},
+				"SHORT_LOCATION": {
+					"value": "@dataset().SHORT_LOCATION",
+					"type": "Expression"
+				},
+				"DPDB": {
+					"value": "@dataset().DPDB",
+					"type": "Expression"
+				},
+				"DPDB_HOST": {
+					"value": "@dataset().DPDB_HOST",
+					"type": "Expression"
+				},
+				"DPDB_PORT": {
+					"value": "@dataset().DPDB_PORT",
+					"type": "Expression"
+				},
+				"DPDB_USERNAME": {
+					"value": "@dataset().DPDB_USERNAME",
+					"type": "Expression"
+				},
+				"LOGICAL_ENVIRONMENT": {
+					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
+				}
+			}
 		},
 		"parameters": {
 			"SCHEMA": {
@@ -12,6 +42,34 @@
 			},
 			"TABLE": {
 				"type": "string"
+			},
+			"ENVIRONMENT": {
+				"type": "String",
+				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
+			},
+			"SHORT_LOCATION": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
+			},
+			"DPDB": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.DPDB"
+			},
+			"DPDB_HOST": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.DPDB_HOST"
+			},
+			"DPDB_PORT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.DPDB_PORT"
+			},
+			"DPDB_USERNAME": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.DBDB_USERNAME"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
 			}
 		},
 		"annotations": [],

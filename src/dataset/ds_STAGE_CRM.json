@@ -3,34 +3,14 @@
 	"properties": {
 		"description": "Connects to STAGE_CRM (CRM01A)",
 		"linkedServiceName": {
-			"referenceName": "ls_STAGE_CRM_ORACLE",
-			"type": "LinkedServiceReference",
-			"parameters": {
-				"ENVIRONMENT": "@dataset().ENVIRONMENT",
-				"LOGICAL_ENVIRONMENT": {
-					"value": "@dataset().LOGICAL_ENVIRONMENT",
-					"type": "Expression"
-				},
-				"SHORT_LOCATION": {
-					"value": "@dataset().SHORT_LOCATION",
-					"type": "Expression"
-				}
-			}
+			"referenceName": "ls_STAGE_CRM",
+			"type": "LinkedServiceReference"
 		},
 		"parameters": {
 			"SCHEMA": {
 				"type": "string"
 			},
 			"TABLE": {
-				"type": "string"
-			},
-			"ENVIRONMENT": {
-				"type": "string"
-			},
-			"LOGICAL_ENVIRONMENT": {
-				"type": "string"
-			},
-			"SHORT_LOCATION": {
 				"type": "string"
 			}
 		},

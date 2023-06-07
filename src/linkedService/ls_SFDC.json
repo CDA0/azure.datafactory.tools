@@ -1,19 +1,44 @@
 {
 	"name": "ls_SFDC",
-	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"description": "Connects to Salesforce (Retirement Account platform)",
+		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string"
+			},
+			"SHORT_LOCATION": {
+				"type": "string"
+			}
+		},
 		"annotations": [],
 		"type": "Salesforce",
 		"typeProperties": {
-			"environmentUrl": "https://pru--sat.sandbox.my.salesforce.com",
-			"username": "iics@mandg.com.dist.sat",
-			"apiVersion": "54.0",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI3OGE4ZjljMC0wMTJjLTQ5OTYtYWEyMy0xNjhjMTAwYzY3ODAiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"environmentUrl": "https://test.salesforce.com",
+			"username": "integrationuser@prudential.co.uk.pru.fatr2",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_KeyVaultCom",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@linkedService().ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@linkedService().SHORT_LOCATION",
+							"type": "Expression"
+						}
+					}
+				},
+				"secretName": "dev-sfdc-integrationuserpassword"
+			},
+			"apiVersion": "54.0"
 		},
 		"connectVia": {
 			"referenceName": "Woking",
 			"type": "IntegrationRuntimeReference"
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
 }

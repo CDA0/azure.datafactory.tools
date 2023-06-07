@@ -13,6 +13,34 @@
 			"SHORT_LOCATION": {
 				"type": "string",
 				"value": "weu"
+			},
+			"CRM_DB": {
+				"type": "string",
+				"value": "CRM01A"
+			},
+			"CRM_DB_HOST": {
+				"type": "string",
+				"value": "AXORADEV11"
+			},
+			"CRM_DB_PORT": {
+				"type": "string",
+				"value": "1531"
+			},
+			"DPDB_HOST": {
+				"type": "string",
+				"value": "AXORAUAT04"
+			},
+			"DPDB_PORT": {
+				"type": "string",
+				"value": "1521"
+			},
+			"DPDB": {
+				"type": "string",
+				"value": "DISPR02T"
+			},
+			"DBDB_USERNAME": {
+				"type": "string",
+				"value": "dpdb02t"
 			}
 		}
 	},
