@@ -18,7 +18,7 @@ resources:
     - repository: templates
       type: git
       name: DevOps/azp-templates
-      ref: refs/tags/guppy-rc3
+      ref: refs/tags/5.1.7
 
 extends:
   template: pipelines/compound.yml@templates
