@@ -31,6 +31,42 @@ extends:
             - template: ./azure-pipelines.deploy.yml
               parameters:
                 environment: fat
+                logicalEnvironment: fat1
+                deploySql: ${{ parameters.deploySql }}
+          environment: fat
+          logicalEnvironment: fat1
+          runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
+      - template: stages/deploy.yml@templates
+        parameters:
+          dependsOn: build
+          deploySteps:
+            - template: ./azure-pipelines.deploy.yml
+              parameters:
+                environment: fat
+                logicalEnvironment: fat2
+                deploySql: ${{ parameters.deploySql }}
+          environment: fat
+          logicalEnvironment: fat2
+          runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
+      - template: stages/deploy.yml@templates
+        parameters:
+          dependsOn: build
+          deploySteps:
+            - template: ./azure-pipelines.deploy.yml
+              parameters:
+                environment: fat
+                logicalEnvironment: fat3
+                deploySql: ${{ parameters.deploySql }}
+          environment: fat
+          logicalEnvironment: fat3
+          runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
+      - template: stages/deploy.yml@templates
+        parameters:
+          dependsOn: build
+          deploySteps:
+            - template: ./azure-pipelines.deploy.yml
+              parameters:
+                environment: fat
                 logicalEnvironment: ci1
                 deploySql: ${{ parameters.deploySql }}
           environment: fat
@@ -51,7 +87,7 @@ extends:
               runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
       - template: stages/deploy.yml@templates
         parameters:
-          dependsOn: deploy_fat_ci1
+          dependsOn: deploy_fat_fat1
           deploySteps:
             - template: ./azure-pipelines.deploy.yml
               parameters:
@@ -60,6 +96,28 @@ extends:
                 deploySql: ${{ parameters.deploySql }}
           environment: sit
           logicalEnvironment: sit1
+      - template: stages/deploy.yml@templates
+        parameters:
+          dependsOn: deploy_fat_fat2
+          deploySteps:
+            - template: ./azure-pipelines.deploy.yml
+              parameters:
+                environment: sit
+                logicalEnvironment: sit2
+                deploySql: ${{ parameters.deploySql }}
+          environment: sit
+          logicalEnvironment: sit2
+      - template: stages/deploy.yml@templates
+        parameters:
+          dependsOn: deploy_fat_fat3
+          deploySteps:
+            - template: ./azure-pipelines.deploy.yml
+              parameters:
+                environment: sit
+                logicalEnvironment: sit3
+                deploySql: ${{ parameters.deploySql }}
+          environment: sit
+          logicalEnvironment: sit3
       - template: stages/deploy.yml@templates
         parameters:
           dependsOn: deploy_sit_sit1
@@ -73,7 +131,51 @@ extends:
           logicalEnvironment: uat1
       - template: stages/deploy.yml@templates
         parameters:
+          dependsOn: deploy_sit_sit1
+          deploySteps:
+            - template: ./azure-pipelines.deploy.yml
+              parameters:
+                environment: uat
+                logicalEnvironment: uat4
+                deploySql: ${{ parameters.deploySql }}
+          environment: uat
+          logicalEnvironment: uat4
+      - template: stages/deploy.yml@templates
+        parameters:
+          dependsOn: deploy_sit_sit2
+          deploySteps:
+            - template: ./azure-pipelines.deploy.yml
+              parameters:
+                environment: uat
+                logicalEnvironment: uat2
+                deploySql: ${{ parameters.deploySql }}
+          environment: uat
+          logicalEnvironment: uat2
+      - template: stages/deploy.yml@templates
+        parameters:
+          dependsOn: deploy_sit_sit3
+          deploySteps:
+            - template: ./azure-pipelines.deploy.yml
+              parameters:
+                environment: uat
+                logicalEnvironment: uat3
+                deploySql: ${{ parameters.deploySql }}
+          environment: uat
+          logicalEnvironment: uat3
+      - template: stages/deploy.yml@templates
+        parameters:
           dependsOn: deploy_uat_uat1
+          deploySteps:
+            - template: ./azure-pipelines.deploy.yml
+              parameters:
+                environment: prd
+                logicalEnvironment: pre
+                deploySql: ${{ parameters.deploySql }}
+          environment: prd
+          logicalEnvironment: pre
+      - template: stages/deploy.yml@templates
+        parameters:
+          dependsOn: deploy_prd_pre
           deploySteps:
             - template: ./azure-pipelines.deploy.yml
               parameters:
