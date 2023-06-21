@@ -1,0 +1,27 @@
+{
+	"name": "ls_SFDC_DPDB",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "Connects to Salesforce Wealth Operations Org using ADFdpdbintegrationuser account",
+		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string"
+			},
+			"SHORT_LOCATION": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Salesforce",
+		"typeProperties": {
+			"environmentUrl": "https://login.salesforce.com",
+			"username": "ADFdpdbintegrationuser@prudential.co.uk.pru.sit1",
+			"apiVersion": "54.0",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJlMjVjZDIzZC1iY2RmLTQ5OTItOTY3OC04NjExMDBkNWZiZDkiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "Woking",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

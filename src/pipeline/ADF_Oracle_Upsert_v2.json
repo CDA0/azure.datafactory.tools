@@ -1,0 +1,123 @@
+{
+	"name": "ADF_Oracle_Upsert_v2",
+	"properties": {
+		"activities": [
+			{
+				"name": "spt-READ-DATA",
+				"description": "Script to read data from DPDB_ADVISER_FIRM_STG from Azure SQL DB",
+				"type": "Script",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+						"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+						"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+					}
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": "select PARTY_ROLE_ID,\n       ORGANISATION_NAME,\n       FIRM_REFERENCE_NUMBER,\n       STATUS,\n       REGULATORY_STATUS_ID,\n       PARTY_ROLE_TYPE_ID,\n       PERM_INVESTMENT_ADVICE,\n       PERM_MORTGAGE_ADVICE,\n       PERM_INSURANCE_ADVICE,\n       PERM_PENSION_ADVICE,\n       ADDRESS_LINE_1,\n       ADDRESS_LINE_2,\n       ADDRESS_LINE_3,\n       ADDRESS_LINE_4,\n       POSTCODE,\n       EMAIL_URL_ADDRESS,\n       PHONE_FAX_NUMBER,\n       RECORD_UPDATE_IND,\n       RECORD_DELETE_IND,\n       CREATE_USER_ID,\n       INSERT_DATE_TIME,\n       UPDATE_DATE_TIME\n  from STAGE_CDI.DPDB_ADVISER_FIRM_STG\n where UPDATE_DATE_TIME >= \n         (select PARAMETER_VALUE_DT\n            from STAGE_CDI.BATCH_PARAMETER\n           where PROCESS_NAME = 'ADVISER_ASQLDB_ORACLE_DELTA' \n             and PARAMETER_NAME = 'DPDB_ADVISER_FIRM_STG'\n             and PARAMETER_VALUE_CHAR = 'Y')"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "fe-RECORD-RETURNED",
+				"description": "Process each record returned by the script",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "spt-READ-DATA",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('spt-READ-DATA').output.resultSets[0].rows",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "spt-UPDATE-TARGET",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "ls_STAGE_CRM",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+									"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+									"CRM_DB": "@pipeline().globalParameters.CRM_DB",
+									"CRM_DB_HOST": "@pipeline().globalParameters.CRM_DB_HOST",
+									"CRM_DB_PORT": "@pipeline().globalParameters.CRM_DB_PORT",
+									"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+								}
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"parameters": [
+											{
+												"name": "PARTY_ROLE_ID",
+												"type": "String",
+												"value": {
+													"value": "@item().PARTY_ROLE_ID",
+													"type": "Expression"
+												},
+												"direction": "Input"
+											},
+											{
+												"name": "ORGANISATION_NAME",
+												"type": "String",
+												"value": {
+													"value": "@item().ORGANISATION_NAME",
+													"type": "Expression"
+												},
+												"direction": "Input"
+											}
+										],
+										"type": "NonQuery",
+										"text": {
+											"value": "merge \n into STAGE_CRM.RK_ADF_TEST trg\n using (select '@{item().PARTY_ROLE_ID}' as PARTY_ROLE_ID, \n         '@{item().ORGANISATION_NAME}' as ORGANISATION_NAME\n    from dual) src\non (trg.PARTY_ROLE_ID = src.PARTY_ROLE_ID)\n WHEN MATCHED THEN\n   update \n      set trg.ORGANISATION_NAME = src.ORGANISATION_NAME\n WHEN NOT MATCHED THEN\n   insert (PARTY_ROLE_ID, ORGANISATION_NAME)\n   values (src.PARTY_ROLE_ID, src.ORGANISATION_NAME)",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						}
+					]
+				}
+			}
+		],
+		"folder": {
+			"name": "Sandbox/Rizaul"
+		},
+		"annotations": []
+	}
+}

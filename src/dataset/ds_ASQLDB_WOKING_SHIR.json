@@ -1,9 +1,9 @@
 {
-	"name": "ds_STAGE_CRM",
+	"name": "ds_ASQLDB_WOKING_SHIR",
 	"properties": {
-		"description": "Connects to STAGE_CRM (CRM01A)",
+		"description": "Data set for accessing tables in Azure SQL DB when connecting from / to an on-premise database via Woking SHIR",
 		"linkedServiceName": {
-			"referenceName": "ls_STAGE_CRM",
+			"referenceName": "ls_AzureSQLDB_WOKING_SHIR",
 			"type": "LinkedServiceReference",
 			"parameters": {
 				"ENVIRONMENT": {
@@ -12,18 +12,6 @@
 				},
 				"SHORT_LOCATION": {
 					"value": "@dataset().SHORT_LOCATION",
-					"type": "Expression"
-				},
-				"CRM_DB": {
-					"value": "@dataset().CRM_DB",
-					"type": "Expression"
-				},
-				"CRM_DB_HOST": {
-					"value": "@dataset().CRM_DB_HOST",
-					"type": "Expression"
-				},
-				"CRM_DB_PORT": {
-					"value": "@dataset().CRM_DB_PORT",
 					"type": "Expression"
 				},
 				"LOGICAL_ENVIRONMENT": {
@@ -36,36 +24,24 @@
 			"SCHEMA": {
 				"type": "string"
 			},
-			"TABLE": {
+			"TABLE_NAME": {
 				"type": "string"
 			},
 			"ENVIRONMENT": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
 			},
-			"SHORT_LOCATION": {
-				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
-			},
-			"CRM_DB": {
-				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.CRM_DB"
-			},
-			"CRM_DB_HOST": {
-				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.CRM_DB_HOST"
-			},
-			"CRM_DB_PORT": {
-				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.CRM_DB_PORT"
-			},
 			"LOGICAL_ENVIRONMENT": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+			},
+			"SHORT_LOCATION": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
 			}
 		},
 		"annotations": [],
-		"type": "OracleTable",
+		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
 			"schema": {
@@ -73,7 +49,7 @@
 				"type": "Expression"
 			},
 			"table": {
-				"value": "@dataset().TABLE",
+				"value": "@dataset().TABLE_NAME",
 				"type": "Expression"
 			}
 		}

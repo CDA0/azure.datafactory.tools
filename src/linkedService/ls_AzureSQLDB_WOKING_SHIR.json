@@ -1,18 +1,16 @@
 {
-	"name": "ls_AzureSQLDB",
+	"name": "ls_AzureSQLDB_WOKING_SHIR",
 	"properties": {
+		"description": "Connects to Azure SQL DB via the Self Hosted Integration Runtime in Woking",
 		"parameters": {
 			"ENVIRONMENT": {
-				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
+				"type": "string"
 			},
 			"SHORT_LOCATION": {
-				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
+				"type": "string"
 			},
 			"LOGICAL_ENVIRONMENT": {
-				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+				"type": "string"
 			}
 		},
 		"annotations": [],
@@ -25,7 +23,7 @@
 			}
 		},
 		"connectVia": {
-			"referenceName": "Azure",
+			"referenceName": "Woking",
 			"type": "IntegrationRuntimeReference"
 		}
 	}

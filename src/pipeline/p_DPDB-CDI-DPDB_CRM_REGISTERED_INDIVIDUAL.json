@@ -1,15 +1,15 @@
 {
-	"name": "p_DPDB-CDI-DPDB_ADVISER_FIRM_STG",
+	"name": "p_DPDB-CDI-DPDB_CRM_REGISTERED_INDIVIDUAL",
 	"properties": {
-		"description": "Name : Nextpathway\nDate : 31/05/2023\nDescription : pulls data from oracle tables and loads into transient table. Compares transient table with staging table to identify new/updated records in the target/staging table and load target table.",
+		"description": "Name : Nextpathway\nDate : 29/05/2023\nDescription : pulls data from oracle tables and loads into transient table. Compares transient table with staging DPDB_REGISTERED_INDIVIDUAL_STG table to identify new/updated records in the target/staging table and load target table.",
 		"activities": [
 			{
-				"name": "cd-TD_DPDB_ADVISER_FIRM_STG",
-				"description": "pulls data from oracle tables, loads into transient table.",
+				"name": "cd-TD_DPDB_REGISTERED_INDIVIDUAL_STG",
+				"description": "Name - NextPathway\nDate - 29/05/2023\nDescription - pulls data from oracle tables, loads into transient table.",
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "sp-TRUNCATE-TD_DPDB_ADVISER_FIRM_STG",
+						"activity": "sp-TRUNCATE-TD_DPDB_REGISTERED_INDIVIDUAL",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -22,12 +22,25 @@
 					"secureOutput": false,
 					"secureInput": false
 				},
-				"userProperties": [],
+				"userProperties": [
+					{
+						"name": "Source",
+						"value": "."
+					},
+					{
+						"name": "Destination",
+						"value": "TD_DPDB_REGISTERED_INDIVIDUAL_STG"
+					}
+				],
 				"typeProperties": {
 					"source": {
 						"type": "OracleSource",
-						"oracleReaderQuery": "with PARTY_DETAILS\nas\t\n(select P.ORGANISATION_NAME,\n        PR.PARTY_ROLE_ID,\n        PR.PARTY_ROLE_TYPE_ID,\n        OPR.STATUS,\n        OPR.FIRM_REFERENCE_NUMBER,\n        OPR.REGULATORY_STATUS_ID,\n        OPR.REGULATION_TYPE_ID\n   from PARTY P\n  inner join PARTY_ROLE PR\n     on (PR.PARTY_ID = P.PARTY_ID)\n  inner join ORGANISATION_PARTY_ROLE OPR\n     on (OPR.PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n  where PR.PARTY_ROLE_TYPE_ID in ('adv_firm', 'par_org', 'os_firm', 'sp_firm')\n    and PR.PARTY_ROLE_ID in\n          (select distinct\n                  PRR.PARTY_ROLE_ID\n             from COMMISSION_ACCOUNT CA\n            inner join LEGACY_ACCOUNT_DETAIL LAD\n               on (LAD.COMMISSION_ACCOUNT_ID = CA.COMMISSION_ACCOUNT_ID)\n            inner join PARTY_ROLE_RELATIONSHIP PRR\n               on (PRR.RELATED_PARTY_ROLE_ID = CA.PARTY_ROLE_ID)\n            where RELATIONSHIP_TYPE_ID = 'rel_afoff'\n           )\n),\nHEAD_OFFICE\nas\n(select PRR.PARTY_ROLE_ID,\n        PRR.RELATED_PARTY_ROLE_ID as HEAD_OFFICE_PARTY_ROLE_ID\n   from PARTY_ROLE_RELATIONSHIP PRR\n  inner join PARTY_ROLE PR\n     on (PRR.RELATED_PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n  where PRR.RELATIONSHIP_TYPE_ID = 'rel_afoff'\n    and PRR.END_DATE is null\n    and PR.PARTY_ROLE_TYPE_ID = 'head_off'\n),\nHO_ADDRESS\nas\n(select ADDRESS.PARTY_ROLE_ID,\n        ADDRESS.ADDRESS_LINE_1,\n        ADDRESS.ADDRESS_LINE_2,\n        ADDRESS.ADDRESS_LINE_3,\n        ADDRESS.ADDRESS_LINE_4,\n        ADDRESS.POSTCODE\n   from (select CPR.PARTY_ROLE_ID,\n                trim(PA.ADDRESS_LINE_1) as ADDRESS_LINE_1,\n                trim(PA.ADDRESS_LINE_2) as ADDRESS_LINE_2,\n                trim(PA.ADDRESS_LINE_3) as ADDRESS_LINE_3,\n                trim(PA.ADDRESS_LINE_4) as ADDRESS_LINE_4,\n                trim(PA.POSTCODE) as POSTCODE,\n                row_number() over (partition by CPR.PARTY_ROLE_ID\n                                       order by CPR.UPDATED_DATE desc) RN\n           from PARTY_ROLE PR\n          inner join CONTACT_POINT_ROLE CPR\n             on (PR.PARTY_ROLE_ID = CPR.PARTY_ROLE_ID)\n          inner join CONTACT_POINT CP\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\n          inner join POSTAL_ADDRESS PA\n             on (PA.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\n          where CPR.END_DATE is null\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_addr'\n            and nvl(CPR.CONTACT_POINT_ROLE_TYPE_ID, 'A') != 'cpr_rig'\n            and PR.PARTY_ROLE_TYPE_ID = 'head_off'\n        ) ADDRESS\n  where ADDRESS.RN = 1\n),\nPARTY_ROLE_NETWORK\nas\n(select PARTY_ROLE_ID,\n        RELATED_PARTY_ROLE_ID\n   from PARTY_ROLE_RELATIONSHIP\n  where RELATIONSHIP_TYPE_ID = 'rel_netmem'\n    and END_DATE is null\n    and DEFAULT_REPORT_RELATIONSHIP = 'Y'\n    and RELATED_PARTY_ROLE_ID in\n          (select PARTY_ROLE_ID\n             from ORGANISATION_PARTY_ROLE\n            where REGULATION_TYPE_ID = 'rt_apprep'\n              and status = 'A'\n           )\n),\nAUTHORISATION\nas\n(select PARTY_ROLE_ID,\n        PROD_GRP_ID\n   from PRODUCT_AUTHORISATION\n  where END_DATE is null\n    and PROD_GRP_ID in (10002, 10003, 10004)\n),\nROLE_PERMISSION\nas\n(select PERMISSION_TYPE_ID,\n        PARTY_ROLE_ID\n   from PARTY_ROLE_PERMISSIONS\n  where END_DATE is null\n    and PERMISSION_TYPE_ID = 'prp_penstrans'\n),\nHO_EMAIL\nas\n(select EMAIL.PARTY_ROLE_ID,\n        EMAIL.EMAIL_URL_ADDRESS\n   from (select CPR.PARTY_ROLE_ID,\n                trim(EUA.EMAIL_URL_ADDRESS) as EMAIL_URL_ADDRESS,\n                row_number() over(partition by CPR.PARTY_ROLE_ID\n                                      order by CPR.UPDATED_DATE desc) RN\n           from CONTACT_POINT_ROLE CPR\n          inner join CONTACT_POINT CP\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\n          inner join EMAIL_URL_ADDRESS EUA\n             on (EUA.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\n          inner join PARTY_ROLE PR\n             on (PR.PARTY_ROLE_ID = CPR.PARTY_ROLE_ID)\n          where CPR.END_DATE is null\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_email'\n            and PR.PARTY_ROLE_TYPE_ID = 'head_off'\n        ) EMAIL\n  where EMAIL.RN = 1\n),\nHO_PHONE\nas\n(select PHONE.PARTY_ROLE_ID,\n        PHONE.PHONE_FAX_NUMBER\n   from (select CPR.PARTY_ROLE_ID,\n                PFN.PHONE_FAX_NUMBER,\n                row_number() over(partition by CPR.PARTY_ROLE_ID\n                                      order by CPR.UPDATED_DATE desc) RN\n           from CONTACT_POINT_ROLE CPR\n          inner join CONTACT_POINT CP\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\n          inner join PHONE_FAX_NUMBER PFN\n             on (PFN.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\n          inner join PARTY_ROLE PR\n             on (PR.PARTY_ROLE_ID = CPR.PARTY_ROLE_ID)\n          where CPR.END_DATE is null\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_phone'\n            and PR.PARTY_ROLE_TYPE_ID = 'head_off'\n        ) PHONE\n  where PHONE.RN = 1\n)\nselect PD.PARTY_ROLE_ID,\n       PD.ORGANISATION_NAME,\n       PD.FIRM_REFERENCE_NUMBER,\n       PD.STATUS,\n       PD.REGULATORY_STATUS_ID,\n       PD.PARTY_ROLE_TYPE_ID,\n       nvl2(AIA.PROD_GRP_ID, 1, 0) as PERM_INVESTMENT_ADVICE,\n       nvl2(AMA.PROD_GRP_ID, 1, 0) as PERM_MORTGAGE_ADVICE,\n       nvl2(APA.PROD_GRP_ID, 1, 0) as PERM_INSURANCE_ADVICE,\n       nvl2(RP.PERMISSION_TYPE_ID, 1, 0) as PERM_PENSION_ADVICE,\n       HA.ADDRESS_LINE_1,\n       HA.ADDRESS_LINE_2,\n       HA.ADDRESS_LINE_3,\n       HA.ADDRESS_LINE_4,\n       HA.POSTCODE,\n       HE.EMAIL_URL_ADDRESS,\n       HP.PHONE_FAX_NUMBER\n  from PARTY_DETAILS PD\n  left join HEAD_OFFICE HO\n    on (PD.PARTY_ROLE_ID = HO.PARTY_ROLE_ID)\n  left join HO_ADDRESS HA\n    on (HA.PARTY_ROLE_ID = HO.HEAD_OFFICE_PARTY_ROLE_ID)\n  left join PARTY_ROLE_NETWORK PRN\n    on (PRN.RELATED_PARTY_ROLE_ID = PD.PARTY_ROLE_ID)\n  left join AUTHORISATION AIA\n    on (    AIA.PROD_GRP_ID = 10004\n        and AIA.PARTY_ROLE_ID = case \n                                  when PD.REGULATION_TYPE_ID = 'rt_apprep' then\n                                    PRN.PARTY_ROLE_ID\n                                else\n                                  PD.PARTY_ROLE_ID \n                                end)\n  left join AUTHORISATION AMA\n    on (       AMA.PROD_GRP_ID = 10003\n          and AMA.PARTY_ROLE_ID = case \n                                    when PD.REGULATION_TYPE_ID = 'rt_apprep' then\n                                      PRN.PARTY_ROLE_ID\n                                  else\n                                    PD.PARTY_ROLE_ID \n                                  end)\n  left join AUTHORISATION APA\n    on (       APA.PROD_GRP_ID = 10002\n          and APA.PARTY_ROLE_ID = case \n                                    when PD.REGULATION_TYPE_ID = 'rt_apprep' then\n                                      PRN.PARTY_ROLE_ID\n                                  else\n                                    PD.PARTY_ROLE_ID \n                                  end)\n  left join ROLE_PERMISSION RP\n    on (RP.PARTY_ROLE_ID = case \n                             when PD.REGULATION_TYPE_ID = 'rt_apprep' then\n                              PRN.PARTY_ROLE_ID\n                           else\n                             PD.PARTY_ROLE_ID \n                           end)\n  left join HO_PHONE HP\n    on (HP.PARTY_ROLE_ID = HO.HEAD_OFFICE_PARTY_ROLE_ID)\n  left join HO_EMAIL HE\n    on (HE.PARTY_ROLE_ID = HO.HEAD_OFFICE_PARTY_ROLE_ID);",
+						"oracleReaderQuery": {
+							"value": "with PARTY_DETAILS    \nas\n(select P.TITLE_ID,\n        P.FORENAME,\n        P.MIDDLE_NAMES,\n        P.SURNAME,\n        P.GENDER,\n        P.ORGANISATION_NAME,\n        PR.PARTY_ROLE_ID,\n        IPR.INDIVIDUAL_REFERENCE_NUMBER,\n        IPR.JOB_TITLE_ID,\n        IPR.STATUS,\n        CA.COMMISSION_ACCOUNT_ID,\n        CA.PARTY_ROLE_ID as OFFICE_PARTY_ROLE_ID,\n        LAD.ACCOUNT_NUMBER,\n        LAD.ACCOUNT_STATUS,\n        LAD.ACCOUNT_TYPE_ID,\n        LAD.LEGACY_SYSTEM_ID \n   from PARTY P\n  inner join PARTY_ROLE PR\n     on (P.PARTY_ID = PR.PARTY_ID)\n  inner join INDIVIDUAL_PARTY_ROLE IPR\n     on (PR.PARTY_ROLE_ID = IPR.PARTY_ROLE_ID)\n  inner join COMMISSION_ACCOUNT CA\n     on (IPR.PARTY_ROLE_ID = CA.INDIVIDUAL_PARTY_ROLE_ID)\n  inner join LEGACY_ACCOUNT_DETAIL LAD\n     on (CA.COMMISSION_ACCOUNT_ID = LAD.COMMISSION_ACCOUNT_ID)\n  where PR.PARTY_ROLE_TYPE_ID in ( 'sp_emp', 'af_emp', 'par_emp' ) \n    and IPR.JOB_TITLE_ID ='jt_ri' \n),\nHO_ADDRESS\nas\n(select ADDRESS.PARTY_ROLE_ID,\n        ADDRESS.UPDATED_DATE,\n        ADDRESS.ADDRESS_LINE_1,\n        ADDRESS.ADDRESS_LINE_2,\n        ADDRESS.ADDRESS_LINE_3,\n        ADDRESS.ADDRESS_LINE_4,\n        ADDRESS.POSTCODE\n   from (select CPR.PARTY_ROLE_ID,\n                CPR.UPDATED_DATE,\n                trim(PA.ADDRESS_LINE_1) as ADDRESS_LINE_1,\n                trim(PA.ADDRESS_LINE_2) as ADDRESS_LINE_2,\n                trim(PA.ADDRESS_LINE_3) as ADDRESS_LINE_3,\n                trim(PA.ADDRESS_LINE_4) as ADDRESS_LINE_4,\n                trim(PA.POSTCODE) as POSTCODE,\n                row_number() over (partition by CPR.PARTY_ROLE_ID\n                                       order by CPR.UPDATED_DATE desc) RN\n           from PARTY_ROLE PR\n          inner join CONTACT_POINT_ROLE CPR\n             on (PR.PARTY_ROLE_ID = CPR.PARTY_ROLE_ID) \n          inner join CONTACT_POINT CP\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\n          inner join POSTAL_ADDRESS PA\n             on (PA.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\n          where CPR.END_DATE is null\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_addr'\n            and nvl(CPR.CONTACT_POINT_ROLE_TYPE_ID, 'A') != 'cpr_rig'\n        ) ADDRESS\n  where ADDRESS.RN = 1\n),\nHEAD_OFFICE\nas\n(select PRR.PARTY_ROLE_ID,\n        PRR.RELATED_PARTY_ROLE_ID as HEAD_OFFICE_PARTY_ROLE_ID,\n        PRR.RELATIONSHIP_TYPE_ID as HEAD_OFFICE_RELATIONSHIP_TYPE_ID\n   from PARTY_ROLE_RELATIONSHIP PRR\n  inner join PARTY_ROLE PR\n     on (PRR.RELATED_PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n  where PRR.RELATIONSHIP_TYPE_ID = 'rel_afoff'\n    and PRR.END_DATE is null\n),\nHO_ORG_ROLE\nas\n(select OPR.FIRM_REFERENCE_NUMBER,\n        OPR.PARTY_ROLE_ID as ORGANISATION_PARTY_ROLE_ID\n   from PARTY_ROLE PR\n  inner join ORGANISATION_PARTY_ROLE OPR\n     on (OPR.PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n),\nHEAD_OFFICE_REL\nas\n(select PRR.PARTY_ROLE_ID,\n        PRR.RELATED_PARTY_ROLE_ID as HEAD_OFFICE_REL_PARTY_ROLE_ID,\n        PRR.RELATIONSHIP_TYPE_ID as HEAD_OFFICE_REL_RELATIONSHIP_TYPE_ID\n   from PARTY_ROLE_RELATIONSHIP PRR\n  inner join PARTY_ROLE PR\n     on (PRR.RELATED_PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n  where PRR.RELATIONSHIP_TYPE_ID  ='rel_offafe'\n    and PRR.END_DATE is null\n)\nselect PD.ACCOUNT_NUMBER,\n       PD.PARTY_ROLE_ID, \n       PD.OFFICE_PARTY_ROLE_ID,\n       case \n         when HO.PARTY_ROLE_ID is not null then\n           HO.PARTY_ROLE_ID\n       else\n         '0'\n       end as FIRM_PARTY_ROLE_ID,\n       case \n         when HOR.PARTY_ROLE_ID is not null then\n           HOR.PARTY_ROLE_ID\n       else\n         '0'\n       end as REL_OFFICE_PARTY_ROLE_ID,\n       case \n         when     HOR.PARTY_ROLE_ID is not null \n\t\t      and HO.PARTY_ROLE_ID is not null then\n           HOR.PARTY_ROLE_ID\n        else\n          '0'\n        end as REL_FIRM_PARTY_ROLE_ID,\n        PD.TITLE_ID,\n        PD.FORENAME,\n        PD.SURNAME,\n        PD.INDIVIDUAL_REFERENCE_NUMBER,\n        PD.STATUS,\n        HORGR.FIRM_REFERENCE_NUMBER,\n        PD.ACCOUNT_STATUS,\n        PD.JOB_TITLE_ID,\n        HA.ADDRESS_LINE_1,\n        HA.ADDRESS_LINE_2,\n        HA.ADDRESS_LINE_3,\n        HA.ADDRESS_LINE_4,\n        HA.POSTCODE,\n        PD.ACCOUNT_TYPE_ID ,\n        PD.LEGACY_SYSTEM_ID\n  from PARTY_DETAILS PD\n  left outer join HEAD_OFFICE HO\n    on (PD.OFFICE_PARTY_ROLE_ID = HO.PARTY_ROLE_ID)\n  left outer join HEAD_OFFICE_REL HOR\n    on (PD.OFFICE_PARTY_ROLE_ID = HOR.PARTY_ROLE_ID)\n  left outer join HO_ORG_ROLE HORGR\n    on (PD.PARTY_ROLE_ID = HORGR.ORGANISATION_PARTY_ROLE_ID)\n  left outer join HO_ADDRESS HA\n    on (HA.PARTY_ROLE_ID = PD.PARTY_ROLE_ID)",
+							"type": "Expression"
+						},
 						"partitionOption": "None",
+						"convertDecimalToInteger": false,
 						"queryTimeout": "02:00:00"
 					},
 					"sink": {
@@ -42,6 +55,17 @@
 						"mappings": [
 							{
 								"source": {
+									"name": "ACCOUNT_NUMBER",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ACCOUNT_NUMBER",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
 									"name": "PARTY_ROLE_ID",
 									"type": "String"
 								},
@@ -53,22 +77,88 @@
 							},
 							{
 								"source": {
-									"name": "ORGANISATION_NAME",
+									"name": "OFFICE_PARTY_ROLE_ID",
 									"type": "String"
 								},
 								"sink": {
-									"name": "ORGANISATION_NAME",
+									"name": "OFFICE_PARTY_ROLE_ID",
 									"type": "String",
 									"physicalType": "varchar"
 								}
 							},
 							{
 								"source": {
-									"name": "FIRM_REFERENCE_NUMBER",
+									"name": "FIRM_PARTY_ROLE_ID",
 									"type": "String"
 								},
 								"sink": {
-									"name": "FIRM_REFERENCE_NUMBER",
+									"name": "FIRM_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "REL_OFFICE_PARTY_ROLE_ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "REL_OFFICE_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "REL_FIRM_PARTY_ROLE_ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "REL_FIRM_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "TITLE_ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "TITLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "FORENAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FORENAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "SURNAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SURNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "INDIVIDUAL_REFERENCE_NUMBER",
+									"type": "String"
+								},
+								"sink": {
+									"name": "INDIVIDUAL_REFERENCE_NUMBER",
 									"type": "String",
 									"physicalType": "varchar"
 								}
@@ -86,68 +176,35 @@
 							},
 							{
 								"source": {
-									"name": "REGULATORY_STATUS_ID",
+									"name": "FIRM_REFERENCE_NUMBER",
 									"type": "String"
 								},
 								"sink": {
-									"name": "REGULATORY_STATUS_ID",
+									"name": "FIRM_REFERENCE_NUMBER",
 									"type": "String",
 									"physicalType": "varchar"
 								}
 							},
 							{
 								"source": {
-									"name": "PARTY_ROLE_TYPE_ID",
+									"name": "ACCOUNT_STATUS",
 									"type": "String"
 								},
 								"sink": {
-									"name": "PARTY_ROLE_TYPE_ID",
+									"name": "ACCOUNT_STATUS",
 									"type": "String",
 									"physicalType": "varchar"
 								}
 							},
 							{
 								"source": {
-									"name": "PERM_INVESTMENT_ADVICE",
-									"type": "Double"
+									"name": "JOB_TITLE_ID",
+									"type": "String"
 								},
 								"sink": {
-									"name": "PERM_INVESTMENT_ADVICE",
-									"type": "Int32",
-									"physicalType": "int"
-								}
-							},
-							{
-								"source": {
-									"name": "PERM_MORTGAGE_ADVICE",
-									"type": "Double"
-								},
-								"sink": {
-									"name": "PERM_MORTGAGE_ADVICE",
-									"type": "Int32",
-									"physicalType": "int"
-								}
-							},
-							{
-								"source": {
-									"name": "PERM_INSURANCE_ADVICE",
-									"type": "Double"
-								},
-								"sink": {
-									"name": "PERM_INSURANCE_ADVICE",
-									"type": "Int32",
-									"physicalType": "int"
-								}
-							},
-							{
-								"source": {
-									"name": "PERM_PENSION_ADVICE",
-									"type": "Double"
-								},
-								"sink": {
-									"name": "PERM_PENSION_ADVICE",
-									"type": "Int32",
-									"physicalType": "int"
+									"name": "JOB_TITLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
 								}
 							},
 							{
@@ -207,22 +264,22 @@
 							},
 							{
 								"source": {
-									"name": "EMAIL_URL_ADDRESS",
+									"name": "LEGACY_SYSTEM_ID",
 									"type": "String"
 								},
 								"sink": {
-									"name": "EMAIL_URL_ADDRESS",
+									"name": "LEGACY_SYSTEM_ID",
 									"type": "String",
 									"physicalType": "varchar"
 								}
 							},
 							{
 								"source": {
-									"name": "PHONE_FAX_NUMBER",
+									"name": "ACCOUNT_TYPE_ID",
 									"type": "String"
 								},
 								"sink": {
-									"name": "PHONE_FAX_NUMBER",
+									"name": "ACCOUNT_TYPE_ID",
 									"type": "String",
 									"physicalType": "varchar"
 								}
@@ -230,7 +287,7 @@
 						],
 						"typeConversion": true,
 						"typeConversionSettings": {
-							"allowDataTruncation": true,
+							"allowDataTruncation": false,
 							"treatBooleanAsNumber": false
 						}
 					}
@@ -267,7 +324,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"SCHEMA": "STAGE_LOAD",
-							"TABLE_NAME": "TD_DPDB_ADVISER_FIRM_STG",
+							"TABLE_NAME": "TD_DPDB_REGISTERED_INDIVIDUAL_STG",
 							"ENVIRONMENT": {
 								"value": "@pipeline().globalParameters.ENVIRONMENT",
 								"type": "Expression"
@@ -285,12 +342,12 @@
 				]
 			},
 			{
-				"name": "cd-DPDB_ADVISER_FIRM_STG_Upsert",
-				"description": "compares transient table with staging table to identify new/updated records in the target/staging table.",
+				"name": "cd-DPDB_REGISTERED_INDIVIDUAL_STG_Upsert",
+				"description": "Name - NextPathway\nDate - 29/05/2023 \nDescription - compares transient table with staging table to identify new/updated records in the target/staging table.",
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "cd-TD_DPDB_ADVISER_FIRM_STG",
+						"activity": "cd-TD_DPDB_REGISTERED_INDIVIDUAL_STG",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -303,7 +360,16 @@
 					"secureOutput": false,
 					"secureInput": false
 				},
-				"userProperties": [],
+				"userProperties": [
+					{
+						"name": "Source",
+						"value": "STAGE_LOAD.TD_DPDB_REGISTERED_INDIVIDUAL_STG"
+					},
+					{
+						"name": "Destination",
+						"value": "STAGE_CDI.DPDB_REGISTERED_INDIVIDUAL_STG"
+					}
+				],
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
@@ -316,7 +382,10 @@
 								}
 							}
 						],
-						"sqlReaderQuery": "select TDAFS.PARTY_ROLE_ID,\n       TDAFS.ORGANISATION_NAME,\n       TDAFS.FIRM_REFERENCE_NUMBER,\n       TDAFS.STATUS,\n       TDAFS.REGULATORY_STATUS_ID,\n       TDAFS.PARTY_ROLE_TYPE_ID,\n       TDAFS.PERM_INVESTMENT_ADVICE,\n       TDAFS.PERM_MORTGAGE_ADVICE,\n       TDAFS.PERM_INSURANCE_ADVICE,\n       TDAFS.PERM_PENSION_ADVICE,\n       TDAFS.ADDRESS_LINE_1,\n       TDAFS.ADDRESS_LINE_2,\n       TDAFS.ADDRESS_LINE_3,\n       TDAFS.ADDRESS_LINE_4,\n       TDAFS.POSTCODE,\n       TDAFS.EMAIL_URL_ADDRESS,\n       TDAFS.PHONE_FAX_NUMBER,\n       TDAFS.RECORD_UPDATE_IND,\n       cast(0 as bit) as RECORD_DELETE_IND,\n       cast(sysdatetimeoffset() at time zone 'GMT STANDARD Time' as datetime) as UPDATE_DATE_TIME\n  from (select PARTY_ROLE_ID,\n               ORGANISATION_NAME,\n               FIRM_REFERENCE_NUMBER,\n               STATUS,\n               REGULATORY_STATUS_ID,\n               PARTY_ROLE_TYPE_ID,\n               PERM_INVESTMENT_ADVICE,\n               PERM_MORTGAGE_ADVICE,\n               PERM_INSURANCE_ADVICE,\n               PERM_PENSION_ADVICE,\n               ADDRESS_LINE_1,\n               ADDRESS_LINE_2,\n               ADDRESS_LINE_3,\n               ADDRESS_LINE_4,\n               POSTCODE,\n               EMAIL_URL_ADDRESS,\n               PHONE_FAX_NUMBER,\n               convert(nvarchar(32), HashBytes('sha2_256', concat(PARTY_ROLE_ID,\n                                                                  ORGANISATION_NAME,\n                                                                  FIRM_REFERENCE_NUMBER,\n                                                                  STATUS,\n                                                                  REGULATORY_STATUS_ID,\n                                                                  PARTY_ROLE_TYPE_ID,\n                                                                  PERM_INVESTMENT_ADVICE,\n                                                                  PERM_MORTGAGE_ADVICE,\n                                                                  PERM_INSURANCE_ADVICE,\n                                                                  PERM_PENSION_ADVICE,\n                                                                  ADDRESS_LINE_1,\n                                                                  ADDRESS_LINE_2,\n                                                                  ADDRESS_LINE_3,\n                                                                  ADDRESS_LINE_4,\n                                                                  POSTCODE,\n                                                                  EMAIL_URL_ADDRESS,\n                                                                  PHONE_FAX_NUMBER)), 2) as RECORD_UPDATE_IND\n          from STAGE_LOAD.TD_DPDB_ADVISER_FIRM_STG\n       ) TDAFS\n  left outer join STAGE_CDI.DPDB_ADVISER_FIRM_STG DAFS\n    on (    TDAFS.PARTY_ROLE_ID = DAFS.PARTY_ROLE_ID\n        and TDAFS.RECORD_UPDATE_IND = DAFS.RECORD_UPDATE_IND)\n where DAFS.PARTY_ROLE_ID is null",
+						"sqlReaderQuery": {
+							"value": "select TDRIS.ACCOUNT_NUMBER,\n\t   TDRIS.PARTY_ROLE_ID,    \n       TDRIS.OFFICE_PARTY_ROLE_ID,\n       TDRIS.FIRM_PARTY_ROLE_ID,\n       TDRIS.REL_OFFICE_PARTY_ROLE_ID,\n       TDRIS.REL_FIRM_PARTY_ROLE_ID,\n       TDRIS.TITLE_ID,\n       TDRIS.FORENAME,\n       TDRIS.SURNAME,\n       TDRIS.INDIVIDUAL_REFERENCE_NUMBER,\n       TDRIS.STATUS,\n       TDRIS.FIRM_REFERENCE_NUMBER,\n       TDRIS.ACCOUNT_STATUS,\n       TDRIS.JOB_TITLE_ID,\n       TDRIS.ADDRESS_LINE_1,\n       TDRIS.ADDRESS_LINE_2,\n       TDRIS.ADDRESS_LINE_3,\n       TDRIS.ADDRESS_LINE_4,\n       TDRIS.POSTCODE,\n       TDRIS.ACCOUNT_TYPE_ID ,\n       TDRIS.LEGACY_SYSTEM_ID,\n       TDRIS.RECORD_UPDATE_IND,\n       cast(0 as bit) as RECORD_DELETE_IND,\n       cast(sysdatetimeoffset() at time zone 'GMT Standard Time' as datetime) as UPDATE_DATE_TIME\n  from (select ACCOUNT_NUMBER,\n               PARTY_ROLE_ID, \n               OFFICE_PARTY_ROLE_ID,\n               FIRM_PARTY_ROLE_ID,\n               REL_OFFICE_PARTY_ROLE_ID,\n               REL_FIRM_PARTY_ROLE_ID,\n               TITLE_ID,\n               FORENAME,\n               SURNAME,\n               INDIVIDUAL_REFERENCE_NUMBER,\n               STATUS,\n               FIRM_REFERENCE_NUMBER,\n               ACCOUNT_STATUS,\n               JOB_TITLE_ID,\n               ADDRESS_LINE_1,\n               ADDRESS_LINE_2,\n               ADDRESS_LINE_3,\n               ADDRESS_LINE_4,\n               POSTCODE,\n               ACCOUNT_TYPE_ID ,\n               LEGACY_SYSTEM_ID,\n               convert(nvarchar(32), HashBytes('SHA2_256', concat(ACCOUNT_NUMBER,\n                                                                  PARTY_ROLE_ID, \n                                                                  OFFICE_PARTY_ROLE_ID,\n                                                                  FIRM_PARTY_ROLE_ID,\n                                                                  REL_OFFICE_PARTY_ROLE_ID,\n                                                                  REL_FIRM_PARTY_ROLE_ID,\n                                                                  TITLE_ID,\n                                                                  FORENAME,\n                                                                  SURNAME,\n                                                                  INDIVIDUAL_REFERENCE_NUMBER,\n                                                                  STATUS,\n                                                                  FIRM_REFERENCE_NUMBER,\n                                                                  ACCOUNT_STATUS,\n                                                                  JOB_TITLE_ID,\n                                                                  ADDRESS_LINE_1,\n                                                                  ADDRESS_LINE_2,\n                                                                  ADDRESS_LINE_3,\n                                                                  ADDRESS_LINE_4,\n                                                                  POSTCODE,\n                                                                  ACCOUNT_TYPE_ID ,\n                                                                  LEGACY_SYSTEM_ID)), 2) as RECORD_UPDATE_IND\n         from STAGE_LOAD.TD_DPDB_REGISTERED_INDIVIDUAL_STG \n        ) TDRIS\n  left outer join STAGE_CDI.DPDB_REGISTERED_INDIVIDUAL_STG DRIS\n    on (    TDRIS.ACCOUNT_NUMBER = DRIS.ACCOUNT_NUMBER\n        and TDRIS.RECORD_UPDATE_IND = DRIS.RECORD_UPDATE_IND)\n where DRIS.ACCOUNT_NUMBER is null",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -326,7 +395,7 @@
 						"upsertSettings": {
 							"useTempDB": true,
 							"keys": [
-								"PARTY_ROLE_ID"
+								"ACCOUNT_NUMBER"
 							]
 						},
 						"sqlWriterUseTableLock": false,
@@ -338,6 +407,42 @@
 						"mappings": [
 							{
 								"source": {
+									"name": "LEGACY_SYSTEM_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "LEGACY_SYSTEM_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ACCOUNT_TYPE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "ACCOUNT_TYPE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ACCOUNT_NUMBER",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "ACCOUNT_NUMBER",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
 									"name": "PARTY_ROLE_ID",
 									"type": "String",
 									"physicalType": "varchar"
@@ -350,24 +455,96 @@
 							},
 							{
 								"source": {
-									"name": "ORGANISATION_NAME",
+									"name": "OFFICE_PARTY_ROLE_ID",
 									"type": "String",
 									"physicalType": "varchar"
 								},
 								"sink": {
-									"name": "ORGANISATION_NAME",
+									"name": "OFFICE_PARTY_ROLE_ID",
 									"type": "String",
 									"physicalType": "varchar"
 								}
 							},
 							{
 								"source": {
-									"name": "FIRM_REFERENCE_NUMBER",
+									"name": "FIRM_PARTY_ROLE_ID",
 									"type": "String",
 									"physicalType": "varchar"
 								},
 								"sink": {
-									"name": "FIRM_REFERENCE_NUMBER",
+									"name": "FIRM_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "REL_OFFICE_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "REL_OFFICE_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "REL_FIRM_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "REL_FIRM_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "TITLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "TITLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "FORENAME",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "FORENAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "SURNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "SURNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "INDIVIDUAL_REFERENCE_NUMBER",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "INDIVIDUAL_REFERENCE_NUMBER",
 									"type": "String",
 									"physicalType": "varchar"
 								}
@@ -386,74 +563,38 @@
 							},
 							{
 								"source": {
-									"name": "REGULATORY_STATUS_ID",
+									"name": "FIRM_REFERENCE_NUMBER",
 									"type": "String",
 									"physicalType": "varchar"
 								},
 								"sink": {
-									"name": "REGULATORY_STATUS_ID",
-									"type": "String",
-									"physicalType": "varchar"
-								}
-							},
-							{
-								"source": {
-									"name": "PARTY_ROLE_TYPE_ID",
-									"type": "String",
-									"physicalType": "varchar"
-								},
-								"sink": {
-									"name": "PARTY_ROLE_TYPE_ID",
+									"name": "FIRM_REFERENCE_NUMBER",
 									"type": "String",
 									"physicalType": "varchar"
 								}
 							},
 							{
 								"source": {
-									"name": "PERM_INVESTMENT_ADVICE",
-									"type": "Int32",
-									"physicalType": "int"
+									"name": "ACCOUNT_STATUS",
+									"type": "String",
+									"physicalType": "varchar"
 								},
 								"sink": {
-									"name": "PERM_INVESTMENT_ADVICE",
-									"type": "Int32",
-									"physicalType": "int"
+									"name": "ACCOUNT_STATUS",
+									"type": "String",
+									"physicalType": "varchar"
 								}
 							},
 							{
 								"source": {
-									"name": "PERM_MORTGAGE_ADVICE",
-									"type": "Int32",
-									"physicalType": "int"
+									"name": "JOB_TITLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
 								},
 								"sink": {
-									"name": "PERM_MORTGAGE_ADVICE",
-									"type": "Int32",
-									"physicalType": "int"
-								}
-							},
-							{
-								"source": {
-									"name": "PERM_INSURANCE_ADVICE",
-									"type": "Int32",
-									"physicalType": "int"
-								},
-								"sink": {
-									"name": "PERM_INSURANCE_ADVICE",
-									"type": "Int32",
-									"physicalType": "int"
-								}
-							},
-							{
-								"source": {
-									"name": "PERM_PENSION_ADVICE",
-									"type": "Int32",
-									"physicalType": "int"
-								},
-								"sink": {
-									"name": "PERM_PENSION_ADVICE",
-									"type": "Int32",
-									"physicalType": "int"
+									"name": "JOB_TITLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
 								}
 							},
 							{
@@ -512,30 +653,6 @@
 								},
 								"sink": {
 									"name": "POSTCODE",
-									"type": "String",
-									"physicalType": "varchar"
-								}
-							},
-							{
-								"source": {
-									"name": "EMAIL_URL_ADDRESS",
-									"type": "String",
-									"physicalType": "varchar"
-								},
-								"sink": {
-									"name": "EMAIL_URL_ADDRESS",
-									"type": "String",
-									"physicalType": "varchar"
-								}
-							},
-							{
-								"source": {
-									"name": "PHONE_FAX_NUMBER",
-									"type": "String",
-									"physicalType": "varchar"
-								},
-								"sink": {
-									"name": "PHONE_FAX_NUMBER",
 									"type": "String",
 									"physicalType": "varchar"
 								}
@@ -555,13 +672,13 @@
 							{
 								"source": {
 									"name": "RECORD_DELETE_IND",
-									"type": "Int32",
-									"physicalType": "int"
+									"type": "Boolean",
+									"physicalType": "bit"
 								},
 								"sink": {
 									"name": "RECORD_DELETE_IND",
-									"type": "Int32",
-									"physicalType": "int"
+									"type": "Boolean",
+									"physicalType": "bit"
 								}
 							},
 							{
@@ -573,6 +690,140 @@
 									"name": "CREATE_USER_ID",
 									"type": "String",
 									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "UPDATE_DATE_TIME",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "UPDATE_DATE_TIME",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_ASQLDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_LOAD",
+							"TABLE_NAME": "TD_DPDB_REGISTERED_INDIVIDUAL_STG",
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_ASQLDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "DPDB_REGISTERED_INDIVIDUAL_STG",
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "cd-DPDB_REGISTERED_INDIVIDUAL_STG_Del",
+				"description": "Name - NextPathway\nDate - 29/05/2023\nDescription - compares transient table with staging table to identify deleted records in the target/staging table.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "cd-DPDB_REGISTERED_INDIVIDUAL_STG_Upsert",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select DRIS.ACCOUNT_NUMBER,\n         cast(1 as bit) as RECORD_DELETE_IND,\n         cast(sysdatetimeoffset() at time zone 'GMT Standard Time' as datetime) as UPDATE_DATE_TIME\n  from STAGE_CDI.DPDB_REGISTERED_INDIVIDUAL_STG DRIS\n  left outer join STAGE_LOAD.TD_DPDB_REGISTERED_INDIVIDUAL_STG TDRIS\n    on (TDRIS.ACCOUNT_NUMBER = DRIS.ACCOUNT_NUMBER)\n where DRIS.RECORD_DELETE_IND = 0\n   and TDRIS.ACCOUNT_NUMBER is NULL",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "upsert",
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"ACCOUNT_NUMBER"
+							]
+						},
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ACCOUNT_NUMBER",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "ACCOUNT_NUMBER",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "RECORD_DELETE_IND",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "RECORD_DELETE_IND",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
 								}
 							},
 							{
@@ -601,7 +852,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"SCHEMA": "STAGE_LOAD",
-							"TABLE_NAME": "TD_DPDB_ADVISER_FIRM_STG",
+							"TABLE_NAME": "TD_DPDB_REGISTERED_INDIVIDUAL_STG",
 							"ENVIRONMENT": {
 								"value": "@pipeline().globalParameters.ENVIRONMENT",
 								"type": "Expression"
@@ -623,7 +874,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"SCHEMA": "STAGE_CDI",
-							"TABLE_NAME": "DPDB_ADVISER_FIRM_STG",
+							"TABLE_NAME": "DPDB_REGISTERED_INDIVIDUAL_STG",
 							"ENVIRONMENT": {
 								"value": "@pipeline().globalParameters.ENVIRONMENT",
 								"type": "Expression"
@@ -641,142 +892,8 @@
 				]
 			},
 			{
-				"name": "cd-DPDB_ADVISER_FIRM_STG_Del",
-				"description": "compares transient table with staging table to identify deleted records in the target/staging table.",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "cd-DPDB_ADVISER_FIRM_STG_Upsert",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "AzureSqlSource",
-						"sqlReaderQuery": "select DAFS.PARTY_ROLE_ID,\n       cast(1 as bit) as RECORD_DELETE_IND,\n       cast(sysdatetimeoffset() at time zone 'GMT Standard Time' as datetime) as UPDATE_DATE_TIME\n  from STAGE_CDI.DPDB_ADVISER_FIRM_STG DAFS\n  left outer join STAGE_LOAD.TD_DPDB_ADVISER_FIRM_STG TDAFS\n    on (TDAFS.PARTY_ROLE_ID = DAFS.PARTY_ROLE_ID)\n where DAFS.RECORD_DELETE_IND = 0\n   and TDAFS.PARTY_ROLE_ID is null",
-						"queryTimeout": "02:00:00",
-						"partitionOption": "None"
-					},
-					"sink": {
-						"type": "AzureSqlSink",
-						"writeBehavior": "upsert",
-						"upsertSettings": {
-							"useTempDB": true,
-							"keys": [
-								"PARTY_ROLE_ID"
-							]
-						},
-						"sqlWriterUseTableLock": false,
-						"disableMetricsCollection": false
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"name": "PARTY_ROLE_ID",
-									"type": "String",
-									"physicalType": "varchar"
-								},
-								"sink": {
-									"name": "PARTY_ROLE_ID",
-									"type": "String",
-									"physicalType": "varchar"
-								}
-							},
-							{
-								"source": {
-									"name": "UPDATE_DATE_TIME",
-									"type": "DateTime",
-									"physicalType": "datetime"
-								},
-								"sink": {
-									"name": "UPDATE_DATE_TIME",
-									"type": "DateTime",
-									"physicalType": "datetime2"
-								}
-							},
-							{
-								"source": {
-									"name": "RECORD_DELETE_IND",
-									"type": "Int32",
-									"physicalType": "int"
-								},
-								"sink": {
-									"name": "RECORD_DELETE_IND",
-									"type": "Decimal",
-									"physicalType": "decimal",
-									"scale": 0,
-									"precision": 1
-								}
-							}
-						],
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "ds_ASQLDB",
-						"type": "DatasetReference",
-						"parameters": {
-							"SCHEMA": "STAGE_LOAD",
-							"TABLE_NAME": "TD_DPDB_ADVISER_FIRM_STG",
-							"ENVIRONMENT": {
-								"value": "@pipeline().globalParameters.ENVIRONMENT",
-								"type": "Expression"
-							},
-							"LOGICAL_ENVIRONMENT": {
-								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
-								"type": "Expression"
-							},
-							"SHORT_LOCATION": {
-								"value": "@pipeline().globalParameters.SHORT_LOCATION",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "ds_ASQLDB",
-						"type": "DatasetReference",
-						"parameters": {
-							"SCHEMA": "STAGE_CDI",
-							"TABLE_NAME": "DPDB-CDI-DPDB_ADVISER_FIRM_STG",
-							"ENVIRONMENT": {
-								"value": "@pipeline().globalParameters.ENVIRONMENT",
-								"type": "Expression"
-							},
-							"LOGICAL_ENVIRONMENT": {
-								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
-								"type": "Expression"
-							},
-							"SHORT_LOCATION": {
-								"value": "@pipeline().globalParameters.SHORT_LOCATION",
-								"type": "Expression"
-							}
-						}
-					}
-				]
-			},
-			{
-				"name": "sp-TRUNCATE-TD_DPDB_ADVISER_FIRM_STG",
-				"description": "This step truncates the transient table, TD_DPDB_ADVISER_FIRM_STG.",
+				"name": "sp-TRUNCATE-TD_DPDB_REGISTERED_INDIVIDUAL",
+				"description": "This step truncates the transient table, TD_DPDB_REGISTERED_INDIVIDUAL.",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [],
 				"policy": {
@@ -791,10 +908,7 @@
 					"storedProcedureName": "[STAGE_LOAD].[PRC_TRUNCATE_TD_TABLE]",
 					"storedProcedureParameters": {
 						"p_table_name": {
-							"value": {
-								"value": "TD_DPDB_ADVISER_FIRM_STG",
-								"type": "Expression"
-							},
+							"value": "TD_DPDB_REGISTERED_INDIVIDUAL_STG",
 							"type": "String"
 						}
 					}
@@ -803,10 +917,6 @@
 					"referenceName": "ls_AzureSQLDB",
 					"type": "LinkedServiceReference",
 					"parameters": {
-						"ENVIRONMENT": {
-							"value": "@pipeline().globalParameters.ENVIRONMENT",
-							"type": "Expression"
-						},
 						"SHORT_LOCATION": {
 							"value": "@pipeline().globalParameters.SHORT_LOCATION",
 							"type": "Expression"
@@ -814,16 +924,20 @@
 						"LOGICAL_ENVIRONMENT": {
 							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
 							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
 						}
 					}
 				}
 			},
 			{
-				"name": "sp-UPDATE_BATCH_AUDIT-TD_DPDB_ADVISER_FIRM_STG",
+				"name": "sp-UPDATE_BATCH_AUDIT-TD_DPDB_REGISTERED_INDIVIDUAL_STG",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "cd-TD_DPDB_ADVISER_FIRM_STG",
+						"activity": "cd-TD_DPDB_REGISTERED_INDIVIDUAL_STG",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -842,21 +956,21 @@
 					"storedProcedureParameters": {
 						"p_billable_duration": {
 							"value": {
-								"value": "@activity('cd-TD_DPDB_ADVISER_FIRM_STG').output.billingReference.billableDuration[0].duration\n",
+								"value": "@activity('cd-TD_DPDB_REGISTERED_INDIVIDUAL_STG').output.billingReference.billableDuration[0].duration\n",
 								"type": "Expression"
 							},
 							"type": "Decimal"
 						},
 						"p_billable_unit": {
 							"value": {
-								"value": "@activity('cd-TD_DPDB_ADVISER_FIRM_STG').output.billingReference.billableDuration[0].unit",
+								"value": "@activity('cd-TD_DPDB_REGISTERED_INDIVIDUAL_STG').output.billingReference.billableDuration[0].unit",
 								"type": "Expression"
 							},
 							"type": "String"
 						},
 						"p_duration": {
 							"value": {
-								"value": "@activity('cd-TD_DPDB_ADVISER_FIRM_STG').output.copyDuration",
+								"value": "@activity('cd-TD_DPDB_REGISTERED_INDIVIDUAL_STG').output.copyDuration",
 								"type": "Expression"
 							},
 							"type": "Int32"
@@ -870,27 +984,27 @@
 						},
 						"p_process_start_dt": {
 							"value": {
-								"value": "@activity('cd-TD_DPDB_ADVISER_FIRM_STG').output.executionDetails[0].start",
+								"value": "@activity('cd-TD_DPDB_REGISTERED_INDIVIDUAL_STG').output.executionDetails[0].start",
 								"type": "Expression"
 							},
 							"type": "String"
 						},
 						"p_records_read": {
 							"value": {
-								"value": "@activity('cd-TD_DPDB_ADVISER_FIRM_STG').output.rowsRead",
+								"value": "@activity('cd-TD_DPDB_REGISTERED_INDIVIDUAL_STG').output.rowsRead",
 								"type": "Expression"
 							},
 							"type": "Int32"
 						},
 						"p_records_written": {
 							"value": {
-								"value": "@activity('cd-TD_DPDB_ADVISER_FIRM_STG').output.rowsCopied",
+								"value": "@activity('cd-TD_DPDB_REGISTERED_INDIVIDUAL_STG').output.rowsCopied",
 								"type": "Expression"
 							},
 							"type": "Int32"
 						},
 						"p_table_name": {
-							"value": "TD_DPDB_ADVISER_FIRM_STG",
+							"value": "TD_DPDB_REGISTERED_INDIVIDUAL_STG",
 							"type": "String"
 						},
 						"p_trigger_name": {
@@ -922,11 +1036,11 @@
 				}
 			},
 			{
-				"name": "sp-UPDATE_BATCH_AUDIT-DPDB_ADVISER_FIRM_STG_Upsert",
+				"name": "sp-UPDATE_BATCH_AUDIT-DPDB_REGISTERED_INDIVIDUAL_STG_U",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "cd-DPDB_ADVISER_FIRM_STG_Upsert",
+						"activity": "cd-DPDB_REGISTERED_INDIVIDUAL_STG_Upsert",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -945,21 +1059,21 @@
 					"storedProcedureParameters": {
 						"p_billable_duration": {
 							"value": {
-								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.billingReference.billableDuration[0].duration\n",
+								"value": "@activity('cd-DPDB_REGISTERED_INDIVIDUAL_STG_Upsert').output.billingReference.billableDuration[0].duration\n",
 								"type": "Expression"
 							},
 							"type": "Decimal"
 						},
 						"p_billable_unit": {
 							"value": {
-								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.billingReference.billableDuration[0].unit",
+								"value": "@activity('cd-DPDB_REGISTERED_INDIVIDUAL_STG_Upsert').output.billingReference.billableDuration[0].unit",
 								"type": "Expression"
 							},
 							"type": "String"
 						},
 						"p_duration": {
 							"value": {
-								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.copyDuration",
+								"value": "@activity('cd-DPDB_REGISTERED_INDIVIDUAL_STG_Upsert').output.copyDuration",
 								"type": "Expression"
 							},
 							"type": "Int32"
@@ -973,27 +1087,27 @@
 						},
 						"p_process_start_dt": {
 							"value": {
-								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.executionDetails[0].start",
+								"value": "@activity('cd-DPDB_REGISTERED_INDIVIDUAL_STG_Upsert').output.executionDetails[0].start",
 								"type": "Expression"
 							},
 							"type": "String"
 						},
 						"p_records_read": {
 							"value": {
-								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.rowsRead",
+								"value": "@activity('cd-DPDB_REGISTERED_INDIVIDUAL_STG_Upsert').output.rowsRead",
 								"type": "Expression"
 							},
 							"type": "Int32"
 						},
 						"p_records_written": {
 							"value": {
-								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.rowsCopied",
+								"value": "@activity('cd-DPDB_REGISTERED_INDIVIDUAL_STG_Upsert').output.rowsCopied",
 								"type": "Expression"
 							},
 							"type": "Int32"
 						},
 						"p_table_name": {
-							"value": "DPDB_ADVISER_FIRM_STG",
+							"value": "DPDB_REGISTERED_INDIVIDUAL_STG",
 							"type": "String"
 						},
 						"p_trigger_name": {
@@ -1025,11 +1139,11 @@
 				}
 			},
 			{
-				"name": "sp-UPDATE_BATCH_AUDIT-DPDB_ADVISER_FIRM_STG_Del",
+				"name": "sp-UPDATE_BATCH_AUDIT-DPDB_REGISTERED_INDIVIDUAL_STG_D",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "cd-DPDB_ADVISER_FIRM_STG_Del",
+						"activity": "cd-DPDB_REGISTERED_INDIVIDUAL_STG_Del",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -1048,21 +1162,21 @@
 					"storedProcedureParameters": {
 						"p_billable_duration": {
 							"value": {
-								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.billingReference.billableDuration[0].duration\n",
+								"value": "@activity('cd-DPDB_REGISTERED_INDIVIDUAL_STG_Del').output.billingReference.billableDuration[0].duration\n",
 								"type": "Expression"
 							},
 							"type": "Decimal"
 						},
 						"p_billable_unit": {
 							"value": {
-								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.billingReference.billableDuration[0].unit",
+								"value": "@activity('cd-DPDB_REGISTERED_INDIVIDUAL_STG_Del').output.billingReference.billableDuration[0].unit",
 								"type": "Expression"
 							},
 							"type": "String"
 						},
 						"p_duration": {
 							"value": {
-								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.copyDuration",
+								"value": "@activity('cd-DPDB_REGISTERED_INDIVIDUAL_STG_Del').output.copyDuration",
 								"type": "Expression"
 							},
 							"type": "Int32"
@@ -1076,27 +1190,27 @@
 						},
 						"p_process_start_dt": {
 							"value": {
-								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.executionDetails[0].start",
+								"value": "@activity('cd-DPDB_REGISTERED_INDIVIDUAL_STG_Del').output.executionDetails[0].start",
 								"type": "Expression"
 							},
 							"type": "String"
 						},
 						"p_records_read": {
 							"value": {
-								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.rowsRead",
+								"value": "@activity('cd-DPDB_REGISTERED_INDIVIDUAL_STG_Del').output.rowsRead",
 								"type": "Expression"
 							},
 							"type": "Int32"
 						},
 						"p_records_written": {
 							"value": {
-								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.rowsCopied",
+								"value": "@activity('cd-DPDB_REGISTERED_INDIVIDUAL_STG_Del').output.rowsCopied",
 								"type": "Expression"
 							},
 							"type": "Int32"
 						},
 						"p_table_name": {
-							"value": "DPDB_ADVISER_FIRM_STG-Del",
+							"value": "DPDB_REGISTERED_INDIVIDUAL_STG",
 							"type": "String"
 						},
 						"p_trigger_name": {
@@ -1132,6 +1246,6 @@
 			"name": "Digital Account/Adviser"
 		},
 		"annotations": [],
-		"lastPublishTime": "2023-06-19T18:04:45Z"
+		"lastPublishTime": "2023-06-20T06:33:24Z"
 	}
 }

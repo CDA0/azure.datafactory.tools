@@ -1,0 +1,316 @@
+{
+	"name": "cp_CRM-CDI-MSDynamics-ONEOFF",
+	"properties": {
+		"description": "Author: Rizaul Kamal\nDate: 24/04/2022\nDescription: Copies date from STAGE_CRM (Oracle) to STAGE_CDI (Azure SQL DB). The process is driven by the BATCH_PARAMETER table. Up to 5 batches can run at any one time. This should only be used for tables which do not have the RECORD_UPDATE_IND field",
+		"activities": [
+			{
+				"name": "lkp-BATCH_PARAMETER",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select PARAMETER_NAME as TABLE_NAME\n  from STAGE_CDI.BATCH_PARAMETER\n where PROCESS_NAME = 'ORA_STAGE_CRM_TO_SQLDB_MSD' \n   and PARAMETER_VALUE_CHAR = 'P'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_ASQLDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "BATCH_PARAMETER",
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForTableReturned",
+				"description": "Process each record passed from the lookup",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "lkp-BATCH_PARAMETER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('lkp-BATCH_PARAMETER').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 3,
+					"activities": [
+						{
+							"name": "cd-MSDynamics-Oracle-Azure_SQL_DB",
+							"description": "Parameter driven process to copy data from Oracle (STAGE_CRM) to Azure SQL DB (STAGE_CDI) for Adviser related tables. The process does not truncate the target tables on purpose. This is to ensure the process only runs once in any environment. Should it be required to run more than once, the target table will need to be manually truncated",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "OracleSource",
+									"partitionOption": "None",
+									"queryTimeout": "02:00:00"
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": true,
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_STAGE_CRM",
+									"type": "DatasetReference",
+									"parameters": {
+										"SCHEMA": "STAGE_CRM",
+										"TABLE": {
+											"value": "@item().TABLE_NAME",
+											"type": "Expression"
+										},
+										"ENVIRONMENT": {
+											"value": "@pipeline().globalParameters.ENVIRONMENT",
+											"type": "Expression"
+										},
+										"SHORT_LOCATION": {
+											"value": "@pipeline().globalParameters.SHORT_LOCATION",
+											"type": "Expression"
+										},
+										"CRM_DB": {
+											"value": "@pipeline().globalParameters.CRM_DB",
+											"type": "Expression"
+										},
+										"CRM_DB_HOST": {
+											"value": "@pipeline().globalParameters.CRM_DB_HOST",
+											"type": "Expression"
+										},
+										"CRM_DB_PORT": {
+											"value": "@pipeline().globalParameters.CRM_DB_PORT",
+											"type": "Expression"
+										},
+										"LOGICAL_ENVIRONMENT": {
+											"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_ASQLDB_SHIR",
+									"type": "DatasetReference",
+									"parameters": {
+										"SCHEMA": "STAGE_CDI",
+										"TABLE_NAME": {
+											"value": "@item().TABLE_NAME",
+											"type": "Expression"
+										},
+										"ENVIRONMENT": {
+											"value": "@pipeline().globalParameters.ENVIRONMENT",
+											"type": "Expression"
+										},
+										"LOGICAL_ENVIRONMENT": {
+											"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+											"type": "Expression"
+										},
+										"SHORT_LOCATION": {
+											"value": "@pipeline().globalParameters.SHORT_LOCATION",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "lkp-UPDATE_BATCH_PARAMETER",
+							"description": "A query in the lookup is used to update the BATCH_PARAMETER to mark the processed table as 'C' - this will stop the table from being copied again if the pipeline is rerun",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "cd-MSDynamics-Oracle-Azure_SQL_DB",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "update STAGE_CDI.BATCH_PARAMETER\n   set PARAMETER_VALUE_CHAR = 'C',\n\t   LASTMODIFIEDDT = (select cast(sysdatetimeoffset() at time zone 'GMT Standard Time' as datetime)),\n\t   LASTMODIFIEDBY = '@{pipeline().Pipeline}'\n where PROCESS_NAME = 'ORA_STAGE_CRM_TO_SQLDB_MSD'\n   and PARAMETER_NAME = '@{item().TABLE_NAME}'\n\nselect 0",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "ds_ASQLDB",
+									"type": "DatasetReference",
+									"parameters": {
+										"SCHEMA": "STAGE_CDI",
+										"TABLE_NAME": "BATCH_PARAMETER",
+										"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+										"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+										"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+									}
+								}
+							}
+						},
+						{
+							"name": "sp-UPDATE_BATCH_AUDIT-DPDB_ADVISER_FIRM_STG_Del",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "cd-MSDynamics-Oracle-Azure_SQL_DB",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+								"storedProcedureParameters": {
+									"p_billable_duration": {
+										"value": {
+											"value": "@activity('cd-MSDynamics-Oracle-Azure_SQL_DB').output.billingReference.billableDuration[0].duration",
+											"type": "Expression"
+										},
+										"type": "Decimal"
+									},
+									"p_billable_unit": {
+										"value": {
+											"value": "@activity('cd-MSDynamics-Oracle-Azure_SQL_DB').output.billingReference.billableDuration[0].unit",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"p_duration": {
+										"value": {
+											"value": "@activity('cd-MSDynamics-Oracle-Azure_SQL_DB').output.copyDuration",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"p_pipeline_name": {
+										"value": {
+											"value": "@pipeline().Pipeline",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"p_process_start_dt": {
+										"value": {
+											"value": "@activity('cd-MSDynamics-Oracle-Azure_SQL_DB').output.executionDetails[0].start",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"p_records_read": {
+										"value": {
+											"value": "@activity('cd-MSDynamics-Oracle-Azure_SQL_DB').output.rowsRead",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"p_records_written": {
+										"value": {
+											"value": "@activity('cd-MSDynamics-Oracle-Azure_SQL_DB').output.rowsCopied",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"p_table_name": {
+										"value": {
+											"value": "@{item().TABLE_NAME}_Ora",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"p_trigger_name": {
+										"value": {
+											"value": "@pipeline().TriggerName",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_AzureSQLDB",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"ENVIRONMENT": {
+										"value": "@pipeline().globalParameters.ENVIRONMENT",
+										"type": "Expression"
+									},
+									"SHORT_LOCATION": {
+										"value": "@pipeline().globalParameters.SHORT_LOCATION",
+										"type": "Expression"
+									},
+									"LOGICAL_ENVIRONMENT": {
+										"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"folder": {
+			"name": "MSDynamics Migration/MSDynamics - OneOff"
+		},
+		"annotations": []
+	}
+}

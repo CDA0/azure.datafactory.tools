@@ -1,0 +1,311 @@
+{
+	"name": "p_CDI-CRM-ADVISER",
+	"properties": {
+		"description": "Author: Rizaul Kamal\nDate: 24/04/2022\nDescription: Copies date from STAGE_CDI (Azure SQL DB) back to STAGE_CRM (Oracle). \n\nThe process is driven by the BATCH_PARAMETER table. Up to 5 batches can run at any one time.\n\nThe data copy is to keep Oracle in sync with Azure SQL. This process should be switched off when IICS has been decommissioned",
+		"activities": [
+			{
+				"name": "lkp-BATCH_PARAMETER",
+				"description": "Lookup BATCH_PARAMETER to get the list of tables to process",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select PARAMETER_NAME as TABLE_NAME,\n       PARAMETER_VALUE_DT as PRM_EXTRACT\n  from STAGE_CDI.BATCH_PARAMETER\n where PROCESS_NAME = 'ADVISER_ASQLDB_ORACLE_DELTA'\n   and PARAMETER_VALUE_CHAR = 'Y'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_ASQLDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "BATCH_PARAMETER",
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForTableReturned",
+				"description": "Process each record passed from the lookup",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "lkp-BATCH_PARAMETER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('lkp-BATCH_PARAMETER').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "cd-ADVISER-Azure_SQL_DB-Oracle",
+							"description": "Parameter driven process to copy data from Azure SQL DB (STAGE_CDI) to  Oracle (STAGE_CRM) for Adviser related tables. ",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "OracleSink",
+									"writeBatchSize": 10000
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_ASQLDB_SHIR",
+									"type": "DatasetReference",
+									"parameters": {
+										"SCHEMA": "STAGE_CDI",
+										"TABLE_NAME": {
+											"value": "@item().TABLE_NAME",
+											"type": "Expression"
+										},
+										"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+										"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+										"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_STAGE_CDI",
+									"type": "DatasetReference",
+									"parameters": {
+										"SCHEMA": "STAGE_CDI",
+										"TABLE": "@item().TABLE_NAME",
+										"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+										"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+										"CRM_DB": "@pipeline().globalParameters.CRM_DB",
+										"CRM_DB_HOST": "@pipeline().globalParameters.CRM_DB_HOST",
+										"CRM_DB_PORT": "@pipeline().globalParameters.CRM_DB_PORT",
+										"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+									}
+								}
+							]
+						},
+						{
+							"name": "sp-UPDATE_BATCH_AUDIT",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "cd-ADVISER-Azure_SQL_DB-Oracle",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[STAGE_CDI].[PRC_UPDATE_PARAMETER_VIA_TABLE]",
+								"storedProcedureParameters": {
+									"p_column_name": {
+										"value": "UPDATE_DATE_TIME",
+										"type": "String"
+									},
+									"p_parameter_name": {
+										"value": "@item().TABLE_NAME",
+										"type": "String"
+									},
+									"p_process_name": {
+										"value": "ADVISER_ASQLDB_ORACLE_DELTA",
+										"type": "String"
+									},
+									"p_table_name": {
+										"value": {
+											"value": "@concat('STAGE_CDI.',item().TABLE_NAME)",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"p_updated_by": {
+										"value": {
+											"value": "@pipeline().Pipeline",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_AzureSQLDB",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"ENVIRONMENT": {
+										"value": "@pipeline().globalParameters.ENVIRONMENT",
+										"type": "Expression"
+									},
+									"SHORT_LOCATION": {
+										"value": "@pipeline().globalParameters.SHORT_LOCATION",
+										"type": "Expression"
+									},
+									"LOGICAL_ENVIRONMENT": {
+										"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "sp-UPDATE_BATCH_PARAMETER",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "cd-ADVISER-Azure_SQL_DB-Oracle",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+								"storedProcedureParameters": {
+									"p_billable_duration": {
+										"value": {
+											"value": "@activity('cd-ADVISER-Azure_SQL_DB-Oracle').output.billingReference.billableDuration[0].duration",
+											"type": "Expression"
+										},
+										"type": "Decimal"
+									},
+									"p_billable_unit": {
+										"value": {
+											"value": "@activity('cd-ADVISER-Azure_SQL_DB-Oracle').output.billingReference.billableDuration[0].unit",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"p_duration": {
+										"value": {
+											"value": "@activity('cd-ADVISER-Azure_SQL_DB-Oracle').output.copyDuration",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"p_pipeline_name": {
+										"value": {
+											"value": "@pipeline().Pipeline",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"p_process_start_dt": {
+										"value": {
+											"value": "@activity('cd-ADVISER-Azure_SQL_DB-Oracle').output.executionDetails[0].start",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"p_records_read": {
+										"value": {
+											"value": "@activity('cd-ADVISER-Azure_SQL_DB-Oracle').output.rowsRead",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"p_records_written": {
+										"value": {
+											"value": "@activity('cd-ADVISER-Azure_SQL_DB-Oracle').output.rowsCopied",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"p_table_name": {
+										"value": {
+											"value": "@{item().TABLE_NAME}_Ora",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"p_trigger_name": {
+										"value": {
+											"value": "@pipeline().TriggerName",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_AzureSQLDB",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"ENVIRONMENT": {
+										"value": "@pipeline().globalParameters.ENVIRONMENT",
+										"type": "Expression"
+									},
+									"SHORT_LOCATION": {
+										"value": "@pipeline().globalParameters.SHORT_LOCATION",
+										"type": "Expression"
+									},
+									"LOGICAL_ENVIRONMENT": {
+										"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"folder": {
+			"name": "Digital Account/Adviser"
+		},
+		"annotations": []
+	}
+}

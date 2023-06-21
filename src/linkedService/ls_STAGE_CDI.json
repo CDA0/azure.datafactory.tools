@@ -1,0 +1,37 @@
+{
+	"name": "ls_STAGE_CDI",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "Connects to BI Integration Hub (STAGE_CDI) via Lansing SHIR using the STAGE_CDI_ADF account",
+		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string"
+			},
+			"SHORT_LOCATION": {
+				"type": "string"
+			},
+			"CRM_DB": {
+				"type": "string"
+			},
+			"CRM_DB_HOST": {
+				"type": "string"
+			},
+			"CRM_DB_PORT": {
+				"type": "string"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Oracle",
+		"typeProperties": {
+			"connectionString": "host=@{linkedService().CRM_DB_HOST};port=@{linkedService().CRM_DB_PORT};sid=@{linkedService().CRM_DB};user id=STAGE_CDI_ADF",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIwOWU1MWM4Mi1mYWU4LTRiNDItOWY2ZS1mZTUzNjgzNjAzNzAiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "Lansing",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

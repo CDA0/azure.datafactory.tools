@@ -1,7 +1,7 @@
 {
-	"name": "ds_STAGE_CRM",
+	"name": "ds_STAGE_CDI",
 	"properties": {
-		"description": "Connects to STAGE_CRM (CRM01A)",
+		"description": "Connects to STAGE_CDI (CRM01A)",
 		"linkedServiceName": {
 			"referenceName": "ls_STAGE_CRM",
 			"type": "LinkedServiceReference",
