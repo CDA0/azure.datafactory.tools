@@ -36,7 +36,7 @@
 					"source": {
 						"type": "OracleSource",
 						"oracleReaderQuery": {
-							"value": "with PARTY_DETAILS    \nas\n(select P.TITLE_ID,\n        P.FORENAME,\n        P.MIDDLE_NAMES,\n        P.SURNAME,\n        P.GENDER,\n        P.ORGANISATION_NAME,\n        PR.PARTY_ROLE_ID,\n        IPR.INDIVIDUAL_REFERENCE_NUMBER,\n        IPR.JOB_TITLE_ID,\n        IPR.STATUS,\n        CA.COMMISSION_ACCOUNT_ID,\n        CA.PARTY_ROLE_ID as OFFICE_PARTY_ROLE_ID,\n        LAD.ACCOUNT_NUMBER,\n        LAD.ACCOUNT_STATUS,\n        LAD.ACCOUNT_TYPE_ID,\n        LAD.LEGACY_SYSTEM_ID \n   from PARTY P\n  inner join PARTY_ROLE PR\n     on (P.PARTY_ID = PR.PARTY_ID)\n  inner join INDIVIDUAL_PARTY_ROLE IPR\n     on (PR.PARTY_ROLE_ID = IPR.PARTY_ROLE_ID)\n  inner join COMMISSION_ACCOUNT CA\n     on (IPR.PARTY_ROLE_ID = CA.INDIVIDUAL_PARTY_ROLE_ID)\n  inner join LEGACY_ACCOUNT_DETAIL LAD\n     on (CA.COMMISSION_ACCOUNT_ID = LAD.COMMISSION_ACCOUNT_ID)\n  where PR.PARTY_ROLE_TYPE_ID in ( 'sp_emp', 'af_emp', 'par_emp' ) \n    and IPR.JOB_TITLE_ID ='jt_ri' \n),\nHO_ADDRESS\nas\n(select ADDRESS.PARTY_ROLE_ID,\n        ADDRESS.UPDATED_DATE,\n        ADDRESS.ADDRESS_LINE_1,\n        ADDRESS.ADDRESS_LINE_2,\n        ADDRESS.ADDRESS_LINE_3,\n        ADDRESS.ADDRESS_LINE_4,\n        ADDRESS.POSTCODE\n   from (select CPR.PARTY_ROLE_ID,\n                CPR.UPDATED_DATE,\n                trim(PA.ADDRESS_LINE_1) as ADDRESS_LINE_1,\n                trim(PA.ADDRESS_LINE_2) as ADDRESS_LINE_2,\n                trim(PA.ADDRESS_LINE_3) as ADDRESS_LINE_3,\n                trim(PA.ADDRESS_LINE_4) as ADDRESS_LINE_4,\n                trim(PA.POSTCODE) as POSTCODE,\n                row_number() over (partition by CPR.PARTY_ROLE_ID\n                                       order by CPR.UPDATED_DATE desc) RN\n           from PARTY_ROLE PR\n          inner join CONTACT_POINT_ROLE CPR\n             on (PR.PARTY_ROLE_ID = CPR.PARTY_ROLE_ID) \n          inner join CONTACT_POINT CP\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\n          inner join POSTAL_ADDRESS PA\n             on (PA.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\n          where CPR.END_DATE is null\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_addr'\n            and nvl(CPR.CONTACT_POINT_ROLE_TYPE_ID, 'A') != 'cpr_rig'\n        ) ADDRESS\n  where ADDRESS.RN = 1\n),\nHEAD_OFFICE\nas\n(select PRR.PARTY_ROLE_ID,\n        PRR.RELATED_PARTY_ROLE_ID as HEAD_OFFICE_PARTY_ROLE_ID,\n        PRR.RELATIONSHIP_TYPE_ID as HEAD_OFFICE_RELATIONSHIP_TYPE_ID\n   from PARTY_ROLE_RELATIONSHIP PRR\n  inner join PARTY_ROLE PR\n     on (PRR.RELATED_PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n  where PRR.RELATIONSHIP_TYPE_ID = 'rel_afoff'\n    and PRR.END_DATE is null\n),\nHO_ORG_ROLE\nas\n(select OPR.FIRM_REFERENCE_NUMBER,\n        OPR.PARTY_ROLE_ID as ORGANISATION_PARTY_ROLE_ID\n   from PARTY_ROLE PR\n  inner join ORGANISATION_PARTY_ROLE OPR\n     on (OPR.PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n),\nHEAD_OFFICE_REL\nas\n(select PRR.PARTY_ROLE_ID,\n        PRR.RELATED_PARTY_ROLE_ID as HEAD_OFFICE_REL_PARTY_ROLE_ID,\n        PRR.RELATIONSHIP_TYPE_ID as HEAD_OFFICE_REL_RELATIONSHIP_TYPE_ID\n   from PARTY_ROLE_RELATIONSHIP PRR\n  inner join PARTY_ROLE PR\n     on (PRR.RELATED_PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n  where PRR.RELATIONSHIP_TYPE_ID  ='rel_offafe'\n    and PRR.END_DATE is null\n)\nselect PD.ACCOUNT_NUMBER,\n       PD.PARTY_ROLE_ID, \n       PD.OFFICE_PARTY_ROLE_ID,\n       case \n         when HO.PARTY_ROLE_ID is not null then\n           HO.PARTY_ROLE_ID\n       else\n         '0'\n       end as FIRM_PARTY_ROLE_ID,\n       case \n         when HOR.PARTY_ROLE_ID is not null then\n           HOR.PARTY_ROLE_ID\n       else\n         '0'\n       end as REL_OFFICE_PARTY_ROLE_ID,\n       case \n         when     HOR.PARTY_ROLE_ID is not null \n\t\t      and HO.PARTY_ROLE_ID is not null then\n           HOR.PARTY_ROLE_ID\n        else\n          '0'\n        end as REL_FIRM_PARTY_ROLE_ID,\n        PD.TITLE_ID,\n        PD.FORENAME,\n        PD.SURNAME,\n        PD.INDIVIDUAL_REFERENCE_NUMBER,\n        PD.STATUS,\n        HORGR.FIRM_REFERENCE_NUMBER,\n        PD.ACCOUNT_STATUS,\n        PD.JOB_TITLE_ID,\n        HA.ADDRESS_LINE_1,\n        HA.ADDRESS_LINE_2,\n        HA.ADDRESS_LINE_3,\n        HA.ADDRESS_LINE_4,\n        HA.POSTCODE,\n        PD.ACCOUNT_TYPE_ID ,\n        PD.LEGACY_SYSTEM_ID\n  from PARTY_DETAILS PD\n  left outer join HEAD_OFFICE HO\n    on (PD.OFFICE_PARTY_ROLE_ID = HO.PARTY_ROLE_ID)\n  left outer join HEAD_OFFICE_REL HOR\n    on (PD.OFFICE_PARTY_ROLE_ID = HOR.PARTY_ROLE_ID)\n  left outer join HO_ORG_ROLE HORGR\n    on (PD.PARTY_ROLE_ID = HORGR.ORGANISATION_PARTY_ROLE_ID)\n  left outer join HO_ADDRESS HA\n    on (HA.PARTY_ROLE_ID = PD.PARTY_ROLE_ID)",
+							"value": "with PARTY_DETAILS\nas\n(select P.TITLE_ID,\n        P.FORENAME,\n        P.MIDDLE_NAMES,\n        P.SURNAME,\n        P.GENDER,\n        P.ORGANISATION_NAME,\n        PR.PARTY_ROLE_ID,\n        IPR.INDIVIDUAL_REFERENCE_NUMBER,\n        IPR.JOB_TITLE_ID,\n        IPR.STATUS,\n        CA.COMMISSION_ACCOUNT_ID,\n        CA.PARTY_ROLE_ID as OFFICE_PARTY_ROLE_ID,\n        LAD.ACCOUNT_NUMBER,\n        LAD.ACCOUNT_STATUS,\n        LAD.ACCOUNT_TYPE_ID,\n        LAD.LEGACY_SYSTEM_ID \n   from PARTY P\n  inner join PARTY_ROLE PR\n     on (P.PARTY_ID = PR.PARTY_ID)\n  inner join INDIVIDUAL_PARTY_ROLE IPR\n     on (PR.PARTY_ROLE_ID = IPR.PARTY_ROLE_ID)\n  inner join COMMISSION_ACCOUNT CA\n     on (IPR.PARTY_ROLE_ID = CA.INDIVIDUAL_PARTY_ROLE_ID)\n  inner join LEGACY_ACCOUNT_DETAIL LAD\n     on (CA.COMMISSION_ACCOUNT_ID = LAD.COMMISSION_ACCOUNT_ID)\n  where PR.PARTY_ROLE_TYPE_ID in ('sp_emp', 'af_emp', 'par_emp') \n    and IPR.JOB_TITLE_ID = 'jt_ri' \n),\nHO_ADDRESS\nas\n(select ADDRESS.PARTY_ROLE_ID,\n        ADDRESS.UPDATED_DATE,\n        ADDRESS.ADDRESS_LINE_1,\n        ADDRESS.ADDRESS_LINE_2,\n        ADDRESS.ADDRESS_LINE_3,\n        ADDRESS.ADDRESS_LINE_4,\n        ADDRESS.POSTCODE\n   from (select CPR.PARTY_ROLE_ID,\n                CPR.UPDATED_DATE,\n                trim(PA.ADDRESS_LINE_1) as ADDRESS_LINE_1,\n                trim(PA.ADDRESS_LINE_2) as ADDRESS_LINE_2,\n                trim(PA.ADDRESS_LINE_3) as ADDRESS_LINE_3,\n                trim(PA.ADDRESS_LINE_4) as ADDRESS_LINE_4,\n                trim(PA.POSTCODE) as POSTCODE,\n                row_number() over (partition by CPR.PARTY_ROLE_ID\n                                       order by CPR.UPDATED_DATE desc) RN\n           from PARTY_ROLE PR\n          inner join CONTACT_POINT_ROLE CPR\n             on (PR.PARTY_ROLE_ID = CPR.PARTY_ROLE_ID) \n          inner join CONTACT_POINT CP\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\n          inner join POSTAL_ADDRESS PA\n             on (PA.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\n          where CPR.END_DATE is null\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_addr'\n            and nvl(CPR.CONTACT_POINT_ROLE_TYPE_ID, 'A') != 'cpr_rig'\n        ) ADDRESS\n  where ADDRESS.RN = 1\n),\nHEAD_OFFICE\nas\n(select PRR.PARTY_ROLE_ID\n   from PARTY_ROLE_RELATIONSHIP PRR\n  inner join PARTY_ROLE PR\n     on (PRR.RELATED_PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n  where PRR.RELATIONSHIP_TYPE_ID = 'rel_afoff'\n    and PRR.END_DATE is null\n),\nHO_ORG_ROLE\nas\n(select OPR.FIRM_REFERENCE_NUMBER,\n        OPR.PARTY_ROLE_ID as ORGANISATION_PARTY_ROLE_ID\n   from PARTY_ROLE PR\n  inner join ORGANISATION_PARTY_ROLE OPR\n     on (OPR.PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n),\nHEAD_OFFICE_REL\nas\n(select PRR.PARTY_ROLE_ID\n   from PARTY_ROLE_RELATIONSHIP PRR\n  inner join PARTY_ROLE PR\n     on (PRR.RELATED_PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n  where PRR.RELATIONSHIP_TYPE_ID = 'rel_offafe'\n    and PRR.END_DATE is null\n)\nselect PD.ACCOUNT_NUMBER,\n       PD.PARTY_ROLE_ID, \n       PD.OFFICE_PARTY_ROLE_ID,\n       case \n         when HO.PARTY_ROLE_ID is not null then\n           HO.PARTY_ROLE_ID\n       else\n         '0'\n       end as FIRM_PARTY_ROLE_ID,\n       case \n         when HOR.PARTY_ROLE_ID is not null then\n           HOR.PARTY_ROLE_ID\n       else\n         '0'\n       end as REL_OFFICE_PARTY_ROLE_ID,\n       case \n         when     HOR.PARTY_ROLE_ID is not null \n              and HO.PARTY_ROLE_ID is not null then\n           HOR.PARTY_ROLE_ID\n       else\n         '0'\n       end as REL_FIRM_PARTY_ROLE_ID,\n       PD.TITLE_ID,\n       PD.FORENAME,\n       PD.SURNAME,\n       PD.INDIVIDUAL_REFERENCE_NUMBER,\n       PD.STATUS,\n       HORGR.FIRM_REFERENCE_NUMBER,\n       PD.ACCOUNT_STATUS,\n       PD.JOB_TITLE_ID,\n       HA.ADDRESS_LINE_1,\n       HA.ADDRESS_LINE_2,\n       HA.ADDRESS_LINE_3,\n       HA.ADDRESS_LINE_4,\n       HA.POSTCODE,\n       PD.ACCOUNT_TYPE_ID ,\n       PD.LEGACY_SYSTEM_ID\n  from PARTY_DETAILS PD\n  left outer join HEAD_OFFICE HO\n    on (PD.OFFICE_PARTY_ROLE_ID = HO.PARTY_ROLE_ID)\n  left outer join HEAD_OFFICE_REL HOR\n    on (PD.OFFICE_PARTY_ROLE_ID = HOR.PARTY_ROLE_ID)\n  left outer join HO_ORG_ROLE HORGR\n    on (PD.PARTY_ROLE_ID = HORGR.ORGANISATION_PARTY_ROLE_ID)\n  left outer join HO_ADDRESS HA\n    on (HA.PARTY_ROLE_ID = PD.PARTY_ROLE_ID)",
 							"type": "Expression"
 						},
 						"partitionOption": "None",
@@ -55,6 +55,28 @@
 						"mappings": [
 							{
 								"source": {
+									"name": "LEGACY_SYSTEM_ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "LEGACY_SYSTEM_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ACCOUNT_TYPE_ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ACCOUNT_TYPE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
 									"name": "ACCOUNT_NUMBER",
 									"type": "String"
 								},
@@ -258,28 +280,6 @@
 								},
 								"sink": {
 									"name": "POSTCODE",
-									"type": "String",
-									"physicalType": "varchar"
-								}
-							},
-							{
-								"source": {
-									"name": "LEGACY_SYSTEM_ID",
-									"type": "String"
-								},
-								"sink": {
-									"name": "LEGACY_SYSTEM_ID",
-									"type": "String",
-									"physicalType": "varchar"
-								}
-							},
-							{
-								"source": {
-									"name": "ACCOUNT_TYPE_ID",
-									"type": "String"
-								},
-								"sink": {
-									"name": "ACCOUNT_TYPE_ID",
 									"type": "String",
 									"physicalType": "varchar"
 								}

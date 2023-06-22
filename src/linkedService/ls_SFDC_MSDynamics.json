@@ -1,0 +1,29 @@
+{
+	"name": "ls_SFDC_MSDynamics",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"parameters": {
+			"SFDC_MS_DYNAMICS_USER": {
+				"type": "string"
+			},
+			"SFDC_MS_DYNAMICS_URL": {
+				"type": "string"
+			},
+			"SFDC_MS_DYNAMICS_API_VERSION": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Salesforce",
+		"typeProperties": {
+			"environmentUrl": "@{linkedService().SFDC_MS_DYNAMICS_URL}",
+			"username": "@{linkedService().SFDC_MS_DYNAMICS_USER}",
+			"apiVersion": "@{linkedService().SFDC_MS_DYNAMICS_API_VERSION}",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIyMzhlODc0Zi0wZjg4LTRhMzAtODA5OS00NTRiZmIzNjIwN2MiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "Woking",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

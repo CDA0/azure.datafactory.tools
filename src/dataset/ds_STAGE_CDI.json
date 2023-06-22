@@ -3,7 +3,7 @@
 	"properties": {
 		"description": "Connects to STAGE_CDI (CRM01A)",
 		"linkedServiceName": {
-			"referenceName": "ls_STAGE_CRM",
+			"referenceName": "ls_STAGE_CDI",
 			"type": "LinkedServiceReference",
 			"parameters": {
 				"ENVIRONMENT": {

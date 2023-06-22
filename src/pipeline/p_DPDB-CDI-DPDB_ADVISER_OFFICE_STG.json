@@ -272,7 +272,7 @@
 								}
 							}
 						],
-						"sqlReaderQuery": "select TDAOS.PARTY_ROLE_ID,   \n       TDAOS.PARTY_ROLE_TYPE_ID,\n       TDAOS.STATUS,\n       TDAOS.PARTY_ROLE_NAME,\n       TDAOS.ADDRESS_LINE_1,\n       TDAOS.ADDRESS_LINE_2,\n       TDAOS.ADDRESS_LINE_3,\n       TDAOS.ADDRESS_LINE_4,\n       TDAOS.POSTCODE,\n       TDAOS.EMAIL_URL_ADDRESS,\n       TDAOS.PHONE_FAX_NUMBER,\n       TDAOS.RECORD_UPDATE_IND,\n       cast(0 as bit) as RECORD_DELETE_IND,\n       TDAOS.FIRM_PARTY_ROLE_ID,\n       cast(sysdatetimeoffset() at time zone 'GMT Standard Time' as datetime) as UPDATE_DATE_TIME\n  from (select ORGANISATION_NAME,\n               PARTY_ROLE_ID,\n               PARTY_ROLE_TYPE_ID,\n               STATUS,\n               PARTY_ROLE_NAME,\n               UPDATED_DATE,\n               ADDRESS_LINE_1,\n               ADDRESS_LINE_2,\n               ADDRESS_LINE_3,\n               ADDRESS_LINE_4,\n               POSTCODE,\n               EMAIL_URL_ADDRESS,\n               PHONE_FAX_NUMBER,\n               FIRM_PARTY_ROLE_ID,\n               convert(nvarchar(32), HashBytes('SHA2_256', concat(PARTY_ROLE_NAME,\n                                                                  STATUS,\n                                                                  PARTY_ROLE_TYPE_ID,\n                                                                  ADDRESS_LINE_1,\n                                                                  ADDRESS_LINE_2,\n                                                                  ADDRESS_LINE_3,\n                                                                  ADDRESS_LINE_4,\n                                                                  POSTCODE,\n                                                                  EMAIL_URL_ADDRESS,\n                                                                  PHONE_FAX_NUMBER)), 2) as RECORD_UPDATE_IND\n          from STAGE_LOAD.TD_DPDB_ADVISER_OFFICE_STG\n        ) TDAOS\n  left join STAGE_CDI.DPDB_ADVISER_OFFICE_STG DAOS\n    on (    TDAOS.PARTY_ROLE_ID = DAOS.PARTY_ROLE_ID\n        and TDAOS.RECORD_UPDATE_IND = DAOS.RECORD_UPDATE_IND)\n where DAOS.PARTY_ROLE_ID is null",
+						"sqlReaderQuery": "select TDAOS.PARTY_ROLE_ID,\n       TDAOS.FIRM_PARTY_ROLE_ID,\n       TDAOS.PARTY_ROLE_NAME,\n\t   TDAOS.STATUS,\n\t   TDAOS.PARTY_ROLE_TYPE_ID,\n       TDAOS.ADDRESS_LINE_1,\n       TDAOS.ADDRESS_LINE_2,\n       TDAOS.ADDRESS_LINE_3,\n       TDAOS.ADDRESS_LINE_4,\n       TDAOS.POSTCODE,\n       TDAOS.EMAIL_URL_ADDRESS,\n       TDAOS.PHONE_FAX_NUMBER,\n       TDAOS.RECORD_UPDATE_IND,\n       cast(0 as bit) as RECORD_DELETE_IND,\n       cast(sysdatetimeoffset() at time zone 'GMT Standard Time' as datetime) as UPDATE_DATE_TIME\n  from (select PARTY_ROLE_ID,\n               FIRM_PARTY_ROLE_ID,\n\t\t\t   PARTY_ROLE_NAME,\n\t\t\t   STATUS,\n\t\t\t   PARTY_ROLE_TYPE_ID,\n               ADDRESS_LINE_1,\n               ADDRESS_LINE_2,\n               ADDRESS_LINE_3,\n               ADDRESS_LINE_4,\n               POSTCODE,\n               EMAIL_URL_ADDRESS,\n               PHONE_FAX_NUMBER,\n               convert(nvarchar(32), HashBytes('SHA2_256', concat(PARTY_ROLE_ID,\n                                                                  FIRM_PARTY_ROLE_ID,\n                                                                  PARTY_ROLE_NAME,\n                                                                  STATUS,\n                                                                  PARTY_ROLE_TYPE_ID,\n                                                                  ADDRESS_LINE_1,\n                                                                  ADDRESS_LINE_2,\n                                                                  ADDRESS_LINE_3,\n                                                                  ADDRESS_LINE_4,\n                                                                  POSTCODE,\n                                                                  EMAIL_URL_ADDRESS,\n                                                                  PHONE_FAX_NUMBER)), 2) as RECORD_UPDATE_IND\n          from STAGE_LOAD.TD_DPDB_ADVISER_OFFICE_STG\n        ) TDAOS\n  left join STAGE_CDI.DPDB_ADVISER_OFFICE_STG DAOS\n    on (    TDAOS.PARTY_ROLE_ID = DAOS.PARTY_ROLE_ID\n        and TDAOS.RECORD_UPDATE_IND = DAOS.RECORD_UPDATE_IND)\n where DAOS.PARTY_ROLE_ID is null",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -451,15 +451,13 @@
 							{
 								"source": {
 									"name": "RECORD_DELETE_IND",
-									"type": "Int32",
-									"physicalType": "int"
+									"type": "Boolean",
+									"physicalType": "bit"
 								},
 								"sink": {
 									"name": "RECORD_DELETE_IND",
-									"type": "Decimal",
-									"physicalType": "decimal",
-									"scale": 0,
-									"precision": 1
+									"type": "Boolean",
+									"physicalType": "bit"
 								}
 							},
 							{
@@ -596,15 +594,13 @@
 							{
 								"source": {
 									"name": "RECORD_DELETE_IND",
-									"type": "Int32",
-									"physicalType": "int"
+									"type": "Boolean",
+									"physicalType": "bit"
 								},
 								"sink": {
 									"name": "RECORD_DELETE_IND",
-									"type": "Decimal",
-									"physicalType": "decimal",
-									"scale": 0,
-									"precision": 1
+									"type": "Boolean",
+									"physicalType": "bit"
 								}
 							},
 							{
@@ -654,8 +650,8 @@
 						"referenceName": "ds_ASQLDB",
 						"type": "DatasetReference",
 						"parameters": {
-							"SCHEMA": "STAGE_LOAD",
-							"TABLE_NAME": "TD_DPDB_ADVISER_OFFICE_STG",
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "DPDB_ADVISER_OFFICE_STG",
 							"ENVIRONMENT": {
 								"value": "@pipeline().globalParameters.ENVIRONMENT",
 								"type": "Expression"

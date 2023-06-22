@@ -151,7 +151,10 @@
 										"type": "String"
 									},
 									"p_parameter_name": {
-										"value": "@item().TABLE_NAME",
+										"value": {
+											"value": "@item().TABLE_NAME",
+											"type": "Expression"
+										},
 										"type": "String"
 									},
 									"p_process_name": {

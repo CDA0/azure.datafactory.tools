@@ -1,0 +1,49 @@
+{
+	"name": "ds_SFDC_MS_DYNAMICS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_SFDC_MSDynamics",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"SFDC_MS_DYNAMICS_USER": {
+					"value": "@dataset().SFDC_MS_DYNAMICS_USER",
+					"type": "Expression"
+				},
+				"SFDC_MS_DYNAMICS_URL": {
+					"value": "@dataset().SFDC_MS_DYNAMICS_URL",
+					"type": "Expression"
+				},
+				"SFDC_MS_DYNAMICS_API_VERSION": {
+					"value": "@dataset().SFDC_MS_DYNAMICS_API_VERSION",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"OBJECT_NAME": {
+				"type": "string"
+			},
+			"SFDC_MS_DYNAMICS_USER": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SFDC_MS_DYNAMICS_USER"
+			},
+			"SFDC_MS_DYNAMICS_URL": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SFDC_MS_DYNAMICS_URL"
+			},
+			"SFDC_MS_DYNAMICS_API_VERSION": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SFDC_MS_DYNAMICS_API_VERSION"
+			}
+		},
+		"annotations": [],
+		"type": "SalesforceObject",
+		"schema": [],
+		"typeProperties": {
+			"objectApiName": {
+				"value": "@dataset().OBJECT_NAME",
+				"type": "Expression"
+			}
+		}
+	}
+}

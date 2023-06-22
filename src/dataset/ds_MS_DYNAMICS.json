@@ -1,0 +1,64 @@
+{
+	"name": "ds_MS_DYNAMICS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_MS_DYNAMICS",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"MS_DYNAMICS_HOST": {
+					"value": "@dataset().MS_DYNAMICS_HOST",
+					"type": "Expression"
+				},
+				"MS_DYNAMICS_PORT": {
+					"value": "@dataset().MS_DYNAMICS_PORT",
+					"type": "Expression"
+				},
+				"MS_DYNAMICS_DATABASE": {
+					"value": "@dataset().MS_DYNAMICS_DATABASE",
+					"type": "Expression"
+				},
+				"MS_DYNAMICS_USERNAME": {
+					"value": "@dataset().MS_DYNAMICS_USERNAME",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"SCHEMA": {
+				"type": "string"
+			},
+			"TABLE_NAME": {
+				"type": "string"
+			},
+			"MS_DYNAMICS_HOST": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.MS_DYNAMICS_HOST"
+			},
+			"MS_DYNAMICS_PORT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.MS_DYNAMICS_PORT"
+			},
+			"MS_DYNAMICS_DATABASE": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.MS_DYNAMICS_DATABASE"
+			},
+			"MS_DYNAMICS_USERNAME": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.MS_DYNAMICS_USERNAME"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().SCHEMA",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().TABLE_NAME",
+				"type": "Expression"
+			}
+		}
+	}
+}
