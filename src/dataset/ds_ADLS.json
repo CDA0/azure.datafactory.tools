@@ -12,6 +12,10 @@
 				"SHORT_LOCATION": {
 					"value": "@dataset().SHORT_LOCATION",
 					"type": "Expression"
+				},
+				"LOGICAL_ENVIRONMENT": {
+					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
 				}
 			}
 		},

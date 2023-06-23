@@ -21,7 +21,7 @@
 		"type": "SqlServer",
 		"typeProperties": {
 			"connectionString": "integrated security=False;data source=@{linkedService().MS_DYNAMICS_HOST};initial catalog=@{linkedService().MS_DYNAMICS_DATABASE};user id=@{linkedService().MS_DYNAMICS_USERNAME}",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJmYWI0ODdkOS05ZGExLTRhMmItYmFiNy0xMWVlODMxNDU4MDEiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIxZjkzMTJkZS1jYjA0LTQyYTQtYmNjYS03ZTlkNTkxOTFmZTgiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
 			"referenceName": "Woking",
