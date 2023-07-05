@@ -69,6 +69,38 @@
 			"SFDC_MS_DYNAMICS_API_VERSION": {
 				"type": "float",
 				"value": 57
+			},
+			"DOCMAN_HOST": {
+				"type": "string",
+				"value": "AXORAUAT05"
+			},
+			"DOCMAN_PORT": {
+				"type": "string",
+				"value": "1521"
+			},
+			"DOCMAN": {
+				"type": "string",
+				"value": "DMR01T"
+			},
+			"DOCMAN_USERNAME": {
+				"type": "string",
+				"value": "docman_uat2"
+			},
+			"OSDB_HOST": {
+				"type": "string",
+				"value": "AXORADEV01"
+			},
+			"OSDB_PORT": {
+				"type": "string",
+				"value": "1521"
+			},
+			"OSDB": {
+				"type": "string",
+				"value": "OUTPT01A"
+			},
+			"OSDB_USERNAME": {
+				"type": "string",
+				"value": "OUTPUTSERVICE_ST_RO"
 			}
 		}
 	},

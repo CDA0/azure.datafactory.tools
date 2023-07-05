@@ -1,0 +1,89 @@
+{
+	"name": "ds_OSDB",
+	"properties": {
+		"description": "Dataset description for tables in OSDB",
+		"linkedServiceName": {
+			"referenceName": "ls_OSDB",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"ENVIRONMENT": {
+					"value": "@dataset().ENVIRONMENT",
+					"type": "Expression"
+				},
+				"SHORT_LOCATION": {
+					"value": "@dataset().SHORT_LOCATION",
+					"type": "Expression"
+				},
+				"OSDB": {
+					"value": "@dataset().OSDB",
+					"type": "Expression"
+				},
+				"OSDB_HOST": {
+					"value": "@dataset().OSDB_HOST",
+					"type": "Expression"
+				},
+				"OSDB_PORT": {
+					"value": "@dataset().OSDB_PORT",
+					"type": "Expression"
+				},
+				"OSDB_USERNAME": {
+					"value": "@dataset().OSDB_USERNAME",
+					"type": "Expression"
+				},
+				"LOGICAL_ENVIRONMENT": {
+					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"SCHEMA": {
+				"type": "string"
+			},
+			"TABLE": {
+				"type": "string"
+			},
+			"ENVIRONMENT": {
+				"type": "String",
+				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
+			},
+			"SHORT_LOCATION": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
+			},
+			"OSDB": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.OSDB"
+			},
+			"OSDB_HOST": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.OSDB_HOST"
+			},
+			"OSDB_PORT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.OSDB_PORT"
+			},
+			"OSDB_USERNAME": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.DBDB_USERNAME"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+			}
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().SCHEMA",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().TABLE",
+				"type": "Expression"
+			}
+		}
+	}
+}

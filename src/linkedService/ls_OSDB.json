@@ -1,0 +1,60 @@
+{
+	"name": "ls_OSDB",
+	"properties": {
+		"description": "Connection for OSDB Oracle database",
+		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string"
+			},
+			"SHORT_LOCATION": {
+				"type": "string"
+			},
+			"OSDB": {
+				"type": "string"
+			},
+			"OSDB_HOST": {
+				"type": "string"
+			},
+			"OSDB_PORT": {
+				"type": "string"
+			},
+			"OSDB_USERNAME": {
+				"type": "string"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Oracle",
+		"typeProperties": {
+			"connectionString": "host=@{linkedService().OSDB_HOST};port=@{linkedService().OSDB_PORT};serviceName=@{linkedService().OSDB};user id=@{linkedService().OSDB_USERNAME}_adf",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_KeyVaultCom",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@linkedService().ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@linkedService().SHORT_LOCATION",
+							"type": "Expression"
+						}
+					}
+				},
+				"secretName": {
+					"value": "@{linkedService().LOGICAL_ENVIRONMENT}-@{linkedService().OSDB}",
+					"type": "Expression"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "Lansing",
+			"type": "IntegrationRuntimeReference"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
+}
