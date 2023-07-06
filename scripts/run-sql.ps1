@@ -18,7 +18,7 @@ $pass = $adminPassword | ConvertTo-SecureString -AsPlainText -Force
 $pass.MakeReadOnly()
 
 Write-Host $filePath
-$sqlCmd = Get-Content $filePath
+$sqlCmd = Get-Content -raw $filePath
 
 Invoke-SQLQuery $sqlServer $databaseName $adminUser $pass $sqlCmd
 Write-Host $sqlCmd
