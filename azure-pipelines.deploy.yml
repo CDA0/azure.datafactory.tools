@@ -41,11 +41,14 @@ steps:
             sqlServerPassword=$(az keyvault secret show -n sql-server-password --vault-name $keyVault --query value -o tsv)
             sqlDatabaseName=sdb-ct-${{ parameters.environment }}-$(shortLocation)-${{ parameters.logicalEnvironment }}gup
 
-            while IFS='' read -r line || [[ -n "$line" ]]; do
-              echo $(System.DefaultWorkingDirectory)/.config/sql/$line
-              cat $(System.DefaultWorkingDirectory)/.config/sql/$line
-              pwsh -c $(System.DefaultWorkingDirectory)/scripts/run-sql.ps1 "$sqlServerFqdn" "sqladmin" "$sqlServerPassword" "$sqlDatabaseName" "$(System.DefaultWorkingDirectory)/.config/sql/$line"
-            done < $(System.DefaultWorkingDirectory)/.config/sql.txt
+            for filePath in $(System.DefaultWorkingDirectory)/scripts/sql/*; do
+              file_name=$(basename "$filePath")
+              if grep -Fxq "$file_name" $(System.DefaultWorkingDirectory)/.config/sql.txt; then
+                echo "$filePath"
+                cat "$filePath"
+                pwsh -c $(System.DefaultWorkingDirectory)/scripts/run-sql.ps1 "$sqlServerFqdn" "sqladmin" "$sqlServerPassword" "$sqlDatabaseName" "$filePath"
+              fi
+            done
         displayName: Run SQL commands
 
   - ${{ if ne(parameters.logicalEnvironment, 'dev') }}:
