@@ -1,27 +1,53 @@
 function Invoke-SQLQuery {
-    param (
-      [Parameter(Mandatory = $true)]
-      [String]$sqlServer,
-      [Parameter(Mandatory = $true)]
-      [String]$dbName,
-      [Parameter(Mandatory = $true)]
-      [String]$adminUser,
-      [Parameter(Mandatory = $true)]
-      [SecureString]$password,
-      [Parameter(Mandatory = $true)]
-      [String]$query
-    )
-    $credentials = New-Object System.Data.SqlClient.SqlCredential($adminUser,$password)
-    $connection = New-Object System.Data.SqlClient.SqlConnection
-    $connection.ConnectionString = "Server=tcp:$sqlServer,1433;Initial Catalog=$dbName;TrustServerCertificate=False;Encrypt=True;"
-    $connection.Credential = $credentials
-    $sqlCmd = New-Object System.Data.SqlClient.SqlCommand
-    $sqlCmd.CommandText = $query
-    $sqlCmd.Connection = $connection
-    $connection.Open()
-    [void]$sqlCmd.ExecuteNonQuery()
-    $connection.Close()
+  param (
+    [Parameter(Mandatory = $true)]
+    [String]$sqlServer,
+    [Parameter(Mandatory = $true)]
+    [String]$dbName,
+    [Parameter(Mandatory = $true)]
+    [String]$adminUser,
+    [Parameter(Mandatory = $true)]
+    [SecureString]$password,
+    [Parameter(Mandatory = $true)]
+    [String]$query
+  )
+
+  $ErrorActionPreference = 'Stop'
+
+  $retryCount = 3
+  $retryInterval = 20
+  $credentials = New-Object System.Data.SqlClient.SqlCredential($adminUser,$password)
+  $connection = New-Object System.Data.SqlClient.SqlConnection
+  $connection.ConnectionString = "Server=tcp:$sqlServer,1433;Initial Catalog=$dbName;TrustServerCertificate=False;Encrypt=True;"
+  $connection.Credential = $credentials
+  $sqlCmd = New-Object System.Data.SqlClient.SqlCommand
+  $sqlCmd.CommandText = $query
+  $sqlCmd.Connection = $connection
+
+  for ($i = 0; $i -le $retryCount; $i++) {
+    try {
+      $connection.Open()
+      break
+    }
+    catch [System.Management.Automation.MethodInvocationException], [System.Management.Automation.ParentContainsErrorRecordException] {
+      if ($_.Exception.InnerException.Message -match 'Connection Timeout Expired' -or $_.Exception.InnerException.Message -match 'not currently available') {
+        if ($i -eq $retryCount) {
+          throw
+        }
+        else {
+          Write-Host "Waiting for serverless instance to start..."
+          Start-Sleep -Seconds $retryInterval
+        }
+      }
+      else {
+        Write-Host "Unhandled SQL exception."
+        throw
+      }
+    }
   }
+  [void]$sqlCmd.ExecuteNonQuery()
+  $connection.Close()
+}
 
 function Get-Sid {
   param (

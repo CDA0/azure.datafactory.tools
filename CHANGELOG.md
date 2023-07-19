@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.5.0
+* Add retry for serverless SQL instances.
+
 ## 1.4.0
 * Added /scripts/sql directory for deployable SQL scripts.
 
