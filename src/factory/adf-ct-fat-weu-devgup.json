@@ -68,7 +68,7 @@
 			},
 			"SFDC_MS_DYNAMICS_API_VERSION": {
 				"type": "string",
-				"value": 57.0
+				"value": "57.0"
 			},
 			"DOCMAN_HOST": {
 				"type": "string",

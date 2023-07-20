@@ -20,6 +20,18 @@
 				"MS_DYNAMICS_USERNAME": {
 					"value": "@dataset().MS_DYNAMICS_USERNAME",
 					"type": "Expression"
+				},
+				"ENVIRONMENT": {
+					"value": "@dataset().ENVIRONMENT",
+					"type": "Expression"
+				},
+				"LOGICAL_ENVIRONMENT": {
+					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
+				},
+				"SHORT_LOCATION": {
+					"value": "@dataset().SHORT_LOCATION",
+					"type": "Expression"
 				}
 			}
 		},
@@ -45,6 +57,18 @@
 			"MS_DYNAMICS_USERNAME": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.MS_DYNAMICS_USERNAME"
+			},
+			"ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+			},
+			"SHORT_LOCATION": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
 			}
 		},
 		"annotations": [],
