@@ -1,0 +1,795 @@
+{
+	"name": "p_MSD-CDI-CRM_PLAT_DYN_DEMATACTIVITY_STG",
+	"properties": {
+		"description": "Author: Jilly Webster\nDate: 20/07/2023\nDescription: ASCD-20271 - this pipeline loads data from Ms Dynamics (SQL Server) Asc_Dematactivity table to STAGE_CDI (Oracle) CRM_PLAT_DYN_DEMATACTIVITY_STG table.",
+		"activities": [
+			{
+				"name": "cd-CRM_PLAT_DYN_DEMATACTIVITY_STG",
+				"description": "pulls data from MS Dynamic table Asc_Dematactivity and copies to the STAGE_CDI table CRM_PLAT_DYN_DEMATACTIVITY_STG using SQL query",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "sp-TRUNCATE-CRM_PLAT_DYN_DEMATACTIVITY_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "select ACTIVITYID,\n       ACTIVITYTYPECODE,\n       ASC_CLIENTMASTERID,\n       ASC_CLIENTMASTERIDNAME,\n       OWNERID,\n       OWNERIDNAME,\n       STATUSCODE,\n       STATECODE,\n       SUBJECT,\n       DESCRIPTION,\n       ASC_CEDINGCOMPETITOR,\n       ASC_CEDINGCOMPETITORNAME,\n       ACTUALSTART,\n       ACTUALEND,\n       CREATEDON,\n       CREATEDBY,\n       CREATEDBYNAME,\n       MODIFIEDON,\n       MODIFIEDBY,\n       MODIFIEDBYNAME,\n       REGARDINGOBJECTID,\n       REGARDINGOBJECTIDNAME,\n       ASC_REFERENCE,\n       PRIORITYCODE,\n       SCHEDULEDSTART,\n       SCHEDULEDEND,\n       ASC_ADVISORIDNAME,\n       ASC_TRANSFERVALUE,\n       ASC_CASETYPE,\n       ASC_AMOUNTOFCERTIFICATESRECEIVED,\n       ASC_AMOUNTOFCERTIFICATESLODGED,\n       ASC_COURIERED,\n       ASC_RETURNEDTOADVISOR,\n       ASC_DAYSHELD,\n       ASC_UNBLOCK,\n       ASC_DATERECEIVED,\n       ASC_DATECOURIERED,\n       ASC_DATERETURNEDTOADVISOR,\n       ASC_WRAPPERUNBLOCKED,\n       ASC_CEDINGCOMPANYNAME,\n       ASC_DATERECEIVEDBACKROMCREST,\n       ASC_DAYSREHELD,\n       ASC_DATECLOSED,\n       ACTUALDURATIONMINUTES\n  from DBO.ASC_DEMATACTIVITY",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ASC_DATECOURIERED",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "ASC_DATECOURIERED",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_DATERETURNEDTOADVISOR",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "ASC_DATERETURNEDTOADVISOR",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_WRAPPERUNBLOCKED",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "ASC_WRAPPERUNBLOCKED",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CEDINGCOMPANYNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_CEDINGCOMPANYNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_DATERECEIVEDBACKROMCREST",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "ASC_DATERECEIVEDBACKROMCREST",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_DAYSREHELD",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ASC_DAYSREHELD",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_DATECLOSED",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "ASC_DATECLOSED",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ACTUALDURATIONMINUTES",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ACTUALDURATIONMINUTES",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ACTIVITYID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "ACTIVITYID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ACTIVITYTYPECODE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ACTIVITYTYPECODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CLIENTMASTERID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "ASC_CLIENTMASTERID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CLIENTMASTERIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_CLIENTMASTERIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OWNERID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "OWNERID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OWNERIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "OWNERIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "STATUSCODE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "STATUSCODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "STATECODE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "STATECODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "SUBJECT",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "SUBJECT",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "DESCRIPTION",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "DESCRIPTION",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CEDINGCOMPETITOR",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "ASC_CEDINGCOMPETITOR",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CEDINGCOMPETITORNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_CEDINGCOMPETITORNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ACTUALSTART",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "ACTUALSTART",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ACTUALEND",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "ACTUALEND",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "CREATEDON",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "CREATEDON",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "CREATEDBY",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "CREATEDBY",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "CREATEDBYNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "CREATEDBYNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "MODIFIEDON",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "MODIFIEDON",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "MODIFIEDBY",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "MODIFIEDBY",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "MODIFIEDBYNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "MODIFIEDBYNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "REGARDINGOBJECTID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "REGARDINGOBJECTID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "REGARDINGOBJECTIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "REGARDINGOBJECTIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_REFERENCE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_REFERENCE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRIORITYCODE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "PRIORITYCODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "SCHEDULEDSTART",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "SCHEDULEDSTART",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "SCHEDULEDEND",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "SCHEDULEDEND",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_ADVISORIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_ADVISORIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_TRANSFERVALUE",
+									"type": "Decimal",
+									"physicalType": "money",
+									"scale": 4,
+									"precision": 19
+								},
+								"sink": {
+									"name": "ASC_TRANSFERVALUE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 4,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CASETYPE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ASC_CASETYPE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_AMOUNTOFCERTIFICATESRECEIVED",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ASC_AMOUNTOFCERTIFICATESRECEIVED",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_AMOUNTOFCERTIFICATESLODGED",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ASC_AMOUNTOFCERTIFICATESLODGED",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_COURIERED",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "ASC_COURIERED",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_RETURNEDTOADVISOR",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "ASC_RETURNEDTOADVISOR",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_DAYSHELD",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ASC_DAYSHELD",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_UNBLOCK",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "ASC_UNBLOCK",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_DATERECEIVED",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "ASC_DATERECEIVED",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": true
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_MS_DYNAMICS",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "dbo",
+							"TABLE_NAME": "Asc_Dematactivty",
+							"MS_DYNAMICS_HOST": "@pipeline().globalParameters.MS_DYNAMICS_HOST",
+							"MS_DYNAMICS_PORT": "@pipeline().globalParameters.MS_DYNAMICS_PORT",
+							"MS_DYNAMICS_DATABASE": "@pipeline().globalParameters.MS_DYNAMICS_DATABASE",
+							"MS_DYNAMICS_USERNAME": "@pipeline().globalParameters.MS_DYNAMICS_USERNAME",
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_ASQLDB_WOKING_SHIR",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "CRM_PLAT_DYN_DEMATACTIVITY_STG",
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+						}
+					}
+				]
+			},
+			{
+				"name": "sp-TRUNCATE-CRM_PLAT_DYN_DEMATACTIVITY_STG",
+				"description": "Truncate target table CRM_PLAT_DYN_DEMATACTIVITY_STG",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_TRUNCATE_NAMED_TABLE]",
+					"storedProcedureParameters": {
+						"p_table_name": {
+							"value": {
+								"value": "CRM_PLAT_DYN_DEMATACTIVITY_STG",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-CRM_PLAT_DYN_DEMATACTIVITY_STG",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-CRM_PLAT_DYN_DEMATACTIVITY_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_DEMATACTIVITY_STG').output.billingReference.billableDuration[0].duration\n",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_DEMATACTIVITY_STG').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_DEMATACTIVITY_STG').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_DEMATACTIVITY_STG').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_DEMATACTIVITY_STG').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_DEMATACTIVITY_STG').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": {
+								"value": "CRM_PLAT_DYN_DEMATACTIVITY_STG",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "MSDynamics Migration"
+		},
+		"annotations": []
+	}
+}
