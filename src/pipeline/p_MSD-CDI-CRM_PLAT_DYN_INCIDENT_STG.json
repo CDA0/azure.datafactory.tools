@@ -64,7 +64,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlServerSource",
-						"sqlReaderQuery": "select INCIDENTID,\n       TICKETNUMBER,\n       CASETYPECODE,\n       SUBJECTIDNAME,\n       OWNERIDNAME,\n       CASEORIGINCODE,\n       NEW_CASESTATUS,\n       TITLE,\n       DESCRIPTION,\n       CREATEDON,\n       ASC_DATECLOSED,\n       ASC_DATESETONHOLD,\n       CREATEDBYNAME,\n       MODIFIEDON,\n       MODIFIEDBYNAME,\n       ASC_BROKERID,\n       ASC_BROKERIDNAME,\n       ASC_CANNOTBESTARTEDSETDATE,\n       ASC_CASETYPE,\n       ASC_CHARITY,\n       ASC_CLEANAPPLICATION,\n       ASC_COMPLAINTID,\n       ASC_COMPLAINTIDNAME,\n       ASC_CORPORATE,\n       ASC_DATAPROTECTIONCHECK,\n       ASC_DATERECEIVED,\n       ASC_DATEWORKSTARTEDONCASE,\n       ASC_DAYSONHOLD,\n       ASC_DAYSONHOLDCURRENT,\n       ASC_ENHANCEDDATACHECKS,\n       ASC_GIA,\n       ASC_ISA,\n       ASC_ISCASERESOLVED,\n       ASC_ITHELPDESKRAISED,\n       ASC_JISA,\n       ASC_NUMBEROFCLIENTS,\n       ASC_ONEANDDONE,\n       ASC_ONETOUCH,\n       ASC_ONHOLD,\n       ASC_OTHER,\n       ASC_PENDINGREASON,\n       ASC_REASONAPPLICATIONUNCLEAN,\n       ASC_REASONDPACHECKNOTAPPLICABLE,\n       ASC_RECEIVEDAFTER3PM,\n       ASC_ROOTCAUSE,\n       ASC_SETONHOLDBYID,\n       ASC_SETONHOLDBYIDNAME,\n       ASC_SLADATE,\n       ASC_SUBJECT,\n       ASC_TAKENOFFFROMHOLD,\n       ASC_TEAMSLADATE,\n       ASC_TRUST,\n       ASC_WORKINGDAYS,\n       CREATEDBY,\n       CUSTOMERID,\n       CUSTOMERIDNAME,\n       MODIFIEDBY,\n       NEW_ADVISER,\n       NEW_ADVISERNAME,\n       NEW_BDM,\n       NEW_BDMNAME,\n       NEW_DATEACKNOWLEDGED,\n       NEW_EMAILTOCASEQUEUE,\n       NEW_REFERENCEACCEXECTEAMID,\n       NEW_REFERENCEACCEXECTEAMIDNAME,\n       NEW_REFERENCEASCENTRICCRMSERVERID,\n       NEW_REFERENCEASCENTRICCRMSERVERIDNAME,\n       OWNERID,\n       SUBJECTID\n  from DBO.INCIDENT\n where CASETYPECODE in ( 1, 3, 200004, 100000001, 100000000, \n                         100000005, 100000006, 200001 )\n   and CASETYPECODE is not null",
+						"sqlReaderQuery": "select INCIDENTID,\n       TICKETNUMBER,\n       CASETYPECODE,\n       SUBJECTIDNAME,\n       OWNERIDNAME,\n       CASEORIGINCODE,\n       NEW_CASESTATUS,\n       TITLE,\n       DESCRIPTION,\n       CREATEDON,\n       ASC_DATECLOSED,\n       ASC_DATESETONHOLD,\n       CREATEDBYNAME,\n       MODIFIEDON,\n       MODIFIEDBYNAME,\n       ASC_BROKERID,\n       ASC_BROKERIDNAME,\n       ASC_CANNOTBESTARTEDSETDATE,\n       ASC_CASETYPE,\n       ASC_CHARITY,\n       ASC_CLEANAPPLICATION,\n       ASC_COMPLAINTID,\n       ASC_COMPLAINTIDNAME,\n       ASC_CORPORATE,\n       ASC_DATAPROTECTIONCHECK,\n       ASC_DATERECEIVED,\n       ASC_DATEWORKSTARTEDONCASE,\n       ASC_DAYSONHOLD,\n       ASC_DAYSONHOLDCURRENT,\n       ASC_ENHANCEDDATACHECKS,\n       ASC_GIA,\n       ASC_ISA,\n       ASC_ISCASERESOLVED,\n       ASC_ITHELPDESKRAISED,\n       ASC_JISA,\n       ASC_NUMBEROFCLIENTS,\n       ASC_ONEANDDONE,\n       ASC_ONETOUCH,\n       ASC_ONHOLD,\n       ASC_OTHER,\n       ASC_PENDINGREASON,\n       ASC_REASONAPPLICATIONUNCLEAN,\n       ASC_REASONDPACHECKNOTAPPLICABLE,\n       ASC_RECEIVEDAFTER3PM,\n       ASC_ROOTCAUSE,\n       ASC_SETONHOLDBYID,\n       ASC_SETONHOLDBYIDNAME,\n       ASC_SLADATE,\n       ASC_SUBJECT,\n       ASC_TAKENOFFFROMHOLD,\n       ASC_TEAMSLADATE,\n       ASC_TRUST,\n       ASC_WORKINGDAYS,\n       CREATEDBY,\n       CUSTOMERID,\n       CUSTOMERIDNAME,\n       MODIFIEDBY,\n       NEW_ADVISER,\n       NEW_ADVISERNAME,\n       NEW_BDM,\n       NEW_BDMNAME,\n       NEW_DATEACKNOWLEDGED,\n       NEW_EMAILTOCASEQUEUE,\n       NEW_REFERENCEACCEXECTEAMID,\n       NEW_REFERENCEACCEXECTEAMIDNAME,\n       NEW_REFERENCEASCENTRICCRMSERVERID,\n       NEW_REFERENCEASCENTRICCRMSERVERIDNAME,\n       OWNERID,\n       SUBJECTID,\n       ASC_SIPP,\n       ASC_THIRDPARTY,\n       STATUSCODE,\n       STATECODE\n  from DBO.INCIDENT\n where CASETYPECODE in ( 1, 3, 200004, 100000001, 100000000, \n                         100000005, 100000006, 200001 )\n   and CASETYPECODE is not null",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -958,6 +958,62 @@
 									"type": "String",
 									"physicalType": "varchar"
 								}
+							},
+							{
+								"source": {
+									"name": "ASC_SIPP",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "asc_SIPP",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_THIRDPARTY",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "asc_thirdparty",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "STATUSCODE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "statuscode",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "STATECODE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "statecode",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
 							}
 						],
 						"typeConversion": true,
@@ -977,7 +1033,10 @@
 							"MS_DYNAMICS_HOST": "@pipeline().globalParameters.MS_DYNAMICS_HOST",
 							"MS_DYNAMICS_PORT": "@pipeline().globalParameters.MS_DYNAMICS_PORT",
 							"MS_DYNAMICS_DATABASE": "@pipeline().globalParameters.MS_DYNAMICS_DATABASE",
-							"MS_DYNAMICS_USERNAME": "@pipeline().globalParameters.MS_DYNAMICS_USERNAME"
+							"MS_DYNAMICS_USERNAME": "@pipeline().globalParameters.MS_DYNAMICS_USERNAME",
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
 						}
 					}
 				],
@@ -1151,7 +1210,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "select TCPDIS.S_INCIDENT_KEY,\n       TCPDIS.S_CREATE_DATETIME,\n       TCPDIS.S_UPDATE_DATETIME,\n       TCPDIS.INCIDENTID,\n       TCPDIS.TICKETNUMBER,\n       TCPDIS.CASETYPECODE,\n       TCPDIS.SUBJECTIDNAME,\n       TCPDIS.OWNERIDNAME,\n       TCPDIS.CASEORIGINCODE,\n       TCPDIS.NEW_CASESTATUS,\n       TCPDIS.TITLE,\n       TCPDIS.DESCRIPTION,\n       TCPDIS.CREATEDON,\n       TCPDIS.ASC_DATECLOSED,\n       TCPDIS.ASC_DATESETONHOLD,\n       TCPDIS.CREATEDBYNAME,\n       TCPDIS.MODIFIEDON,\n       TCPDIS.MODIFIEDBYNAME,\n       TCPDIS.ASC_BROKERID,\n       TCPDIS.ASC_BROKERIDNAME,\n       TCPDIS.ASC_CANNOTBESTARTEDSETDATE,\n       TCPDIS.ASC_CASETYPE,\n       TCPDIS.ASC_CHARITY,\n       TCPDIS.ASC_CLEANAPPLICATION,\n       TCPDIS.ASC_COMPLAINTID,\n       TCPDIS.ASC_COMPLAINTIDNAME,\n       TCPDIS.ASC_CORPORATE,\n       TCPDIS.ASC_DATAPROTECTIONCHECK,\n       TCPDIS.ASC_DATERECEIVED,\n       TCPDIS.ASC_DATEWORKSTARTEDONCASE,\n       TCPDIS.ASC_DAYSONHOLD,\n       TCPDIS.ASC_DAYSONHOLDCURRENT,\n       TCPDIS.ASC_ENHANCEDDATACHECKS,\n       TCPDIS.ASC_GIA,\n       TCPDIS.ASC_ISA,\n       TCPDIS.ASC_ISCASERESOLVED,\n       TCPDIS.ASC_ITHELPDESKRAISED,\n       TCPDIS.ASC_JISA,\n       TCPDIS.ASC_NUMBEROFCLIENTS,\n       TCPDIS.ASC_ONEANDDONE,\n       TCPDIS.ASC_ONETOUCH,\n       TCPDIS.ASC_ONHOLD,\n       TCPDIS.ASC_OTHER,\n       TCPDIS.ASC_PENDINGREASON,\n       TCPDIS.ASC_REASONAPPLICATIONUNCLEAN,\n       TCPDIS.ASC_REASONDPACHECKNOTAPPLICABLE,\n       TCPDIS.ASC_RECEIVEDAFTER3PM,\n       TCPDIS.ASC_ROOTCAUSE,\n       TCPDIS.ASC_SETONHOLDBYID,\n       TCPDIS.ASC_SETONHOLDBYIDNAME,\n       TCPDIS.ASC_SLADATE,\n       TCPDIS.ASC_SUBJECT,\n       TCPDIS.ASC_TAKENOFFFROMHOLD,\n       TCPDIS.ASC_TEAMSLADATE,\n       TCPDIS.ASC_TRUST,\n       TCPDIS.ASC_WORKINGDAYS,\n       TCPDIS.CREATEDBY,\n       TCPDIS.CUSTOMERID,\n       TCPDIS.CUSTOMERIDNAME,\n       TCPDIS.MODIFIEDBY,\n       TCPDIS.NEW_ADVISER,\n       TCPDIS.NEW_ADVISERNAME,\n       TCPDIS.NEW_BDM,\n       TCPDIS.NEW_BDMNAME,\n       TCPDIS.NEW_DATEACKNOWLEDGED,\n       TCPDIS.NEW_EMAILTOCASEBODYRAW,\n       TCPDIS.NEW_EMAILTOCASEBODYTEXT,\n       TCPDIS.NEW_EMAILTOCASEQUEUE,\n       TCPDIS.NEW_REFERENCEACCEXECTEAMID,\n       TCPDIS.NEW_REFERENCEACCEXECTEAMIDNAME,\n       TCPDIS.NEW_REFERENCEASCENTRICCRMSERVERID,\n       TCPDIS.NEW_REFERENCEASCENTRICCRMSERVERIDNAME,\n       TCPDIS.OWNERID,\n       TCPDIS.SUBJECTID\n  from STAGE_LOAD.TD_CRM_PLAT_DYN_INCIDENT_STG TCPDIS\n inner join STAGE_CDI.CRM_PLAT_DYN_CODE_TYPE CPDCT \n    on (TCPDIS.CASETYPECODE = CPDCT.CODE_NUMBER)\n where CPDCT.CODE_NUMBER is not null\n   and CPDCT.CRM_TABLE_NAME = 'INCIDENT'\n   and CPDCT.CODE_TYPE = 'CaseTypeCode'",
+						"sqlReaderQuery": "select TCPDIS.S_INCIDENT_KEY,\n       TCPDIS.S_CREATE_DATETIME,\n       TCPDIS.S_UPDATE_DATETIME,\n       TCPDIS.INCIDENTID,\n       TCPDIS.TICKETNUMBER,\n       TCPDIS.CASETYPECODE,\n       TCPDIS.SUBJECTIDNAME,\n       TCPDIS.OWNERIDNAME,\n       TCPDIS.CASEORIGINCODE,\n       TCPDIS.NEW_CASESTATUS,\n       TCPDIS.TITLE,\n       TCPDIS.DESCRIPTION,\n       TCPDIS.CREATEDON,\n       TCPDIS.ASC_DATECLOSED,\n       TCPDIS.ASC_DATESETONHOLD,\n       TCPDIS.CREATEDBYNAME,\n       TCPDIS.MODIFIEDON,\n       TCPDIS.MODIFIEDBYNAME,\n       TCPDIS.ASC_BROKERID,\n       TCPDIS.ASC_BROKERIDNAME,\n       TCPDIS.ASC_CANNOTBESTARTEDSETDATE,\n       TCPDIS.ASC_CASETYPE,\n       TCPDIS.ASC_CHARITY,\n       TCPDIS.ASC_CLEANAPPLICATION,\n       TCPDIS.ASC_COMPLAINTID,\n       TCPDIS.ASC_COMPLAINTIDNAME,\n       TCPDIS.ASC_CORPORATE,\n       TCPDIS.ASC_DATAPROTECTIONCHECK,\n       TCPDIS.ASC_DATERECEIVED,\n       TCPDIS.ASC_DATEWORKSTARTEDONCASE,\n       TCPDIS.ASC_DAYSONHOLD,\n       TCPDIS.ASC_DAYSONHOLDCURRENT,\n       TCPDIS.ASC_ENHANCEDDATACHECKS,\n       TCPDIS.ASC_GIA,\n       TCPDIS.ASC_ISA,\n       TCPDIS.ASC_ISCASERESOLVED,\n       TCPDIS.ASC_ITHELPDESKRAISED,\n       TCPDIS.ASC_JISA,\n       TCPDIS.ASC_NUMBEROFCLIENTS,\n       TCPDIS.ASC_ONEANDDONE,\n       TCPDIS.ASC_ONETOUCH,\n       TCPDIS.ASC_ONHOLD,\n       TCPDIS.ASC_OTHER,\n       TCPDIS.ASC_PENDINGREASON,\n       TCPDIS.ASC_REASONAPPLICATIONUNCLEAN,\n       TCPDIS.ASC_REASONDPACHECKNOTAPPLICABLE,\n       TCPDIS.ASC_RECEIVEDAFTER3PM,\n       TCPDIS.ASC_ROOTCAUSE,\n       TCPDIS.ASC_SETONHOLDBYID,\n       TCPDIS.ASC_SETONHOLDBYIDNAME,\n       TCPDIS.ASC_SLADATE,\n       TCPDIS.ASC_SUBJECT,\n       TCPDIS.ASC_TAKENOFFFROMHOLD,\n       TCPDIS.ASC_TEAMSLADATE,\n       TCPDIS.ASC_TRUST,\n       TCPDIS.ASC_WORKINGDAYS,\n       TCPDIS.CREATEDBY,\n       TCPDIS.CUSTOMERID,\n       TCPDIS.CUSTOMERIDNAME,\n       TCPDIS.MODIFIEDBY,\n       TCPDIS.NEW_ADVISER,\n       TCPDIS.NEW_ADVISERNAME,\n       TCPDIS.NEW_BDM,\n       TCPDIS.NEW_BDMNAME,\n       TCPDIS.NEW_DATEACKNOWLEDGED,\n       TCPDIS.NEW_EMAILTOCASEBODYRAW,\n       TCPDIS.NEW_EMAILTOCASEBODYTEXT,\n       TCPDIS.NEW_EMAILTOCASEQUEUE,\n       TCPDIS.NEW_REFERENCEACCEXECTEAMID,\n       TCPDIS.NEW_REFERENCEACCEXECTEAMIDNAME,\n       TCPDIS.NEW_REFERENCEASCENTRICCRMSERVERID,\n       TCPDIS.NEW_REFERENCEASCENTRICCRMSERVERIDNAME,\n       TCPDIS.OWNERID,\n       TCPDIS.SUBJECTID,\n       TCPDIS.ASC_SIPP,\n       TCPDIS.ASC_THIRDPARTY,\n       TCPDIS.STATUSCODE,\n       TCPDIS.STATECODE\n  from STAGE_LOAD.TD_CRM_PLAT_DYN_INCIDENT_STG TCPDIS\n inner join STAGE_CDI.CRM_PLAT_DYN_CODE_TYPE CPDCT \n    on (TCPDIS.CASETYPECODE = CPDCT.CODE_NUMBER)\n where CPDCT.CODE_NUMBER is not null\n   and CPDCT.CRM_TABLE_NAME = 'INCIDENT'\n   and CPDCT.CODE_TYPE = 'CaseTypeCode'",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -1166,22 +1225,6 @@
 						"mappings": [
 							{
 								"source": {
-									"name": "S_INCIDENT_KEY",
-									"type": "Decimal",
-									"physicalType": "decimal",
-									"scale": 0,
-									"precision": 38
-								},
-								"sink": {
-									"name": "S_INCIDENT_KEY",
-									"type": "Decimal",
-									"physicalType": "decimal",
-									"scale": 0,
-									"precision": 38
-								}
-							},
-							{
-								"source": {
 									"name": "S_CREATE_DATETIME",
 									"type": "DateTime",
 									"physicalType": "datetime2"
@@ -2162,6 +2205,84 @@
 									"name": "SUBJECTID",
 									"type": "String",
 									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "S_INCIDENT_KEY",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 38
+								},
+								"sink": {
+									"name": "S_INCIDENT_KEY",
+									"type": "Int64",
+									"physicalType": "bigint"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_SIPP",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								},
+								"sink": {
+									"name": "asc_SIPP",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_THIRDPARTY",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								},
+								"sink": {
+									"name": "asc_thirdparty",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "STATUSCODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								},
+								"sink": {
+									"name": "statuscode",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "STATECODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								},
+								"sink": {
+									"name": "statecode",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
 								}
 							}
 						],
