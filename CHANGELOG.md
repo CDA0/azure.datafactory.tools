@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.6.0
+* Use AAD auth when connecting to SQL.
+
 ## 1.5.0
 * Add retry for serverless SQL instances.
 

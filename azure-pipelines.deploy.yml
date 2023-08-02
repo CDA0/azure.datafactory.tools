@@ -25,6 +25,13 @@ steps:
     parameters:
       location: ${{ parameters.location }}
 
+  - template: steps/set-vmss-instance-identity.yml@templates
+    parameters:
+      environment: ${{ parameters.environment }}
+      identityName: id-ct-${{ parameters.environment }}-$(shortLocation)-gupcom
+      resourceGroupName: rg-ct-${{ parameters.environment }}-$(shortLocation)-gupcom
+      shortLocation: $(shortLocation)
+
   - ${{ if eq(parameters.deploySql, true) }}:
       - task: AzureCLI@2
         inputs:
@@ -36,9 +43,7 @@ steps:
 
             az account set -s sub-customer-${{ parameters.environment }}-t1-01
 
-            keyVault="kv-ct-${{ parameters.environment }}-$(shortLocation)-gupcom"
-            sqlServerFqdn=$(az keyvault secret show -n sql-server-fqdn --vault-name $keyVault --query value -o tsv)
-            sqlServerPassword=$(az keyvault secret show -n sql-server-password --vault-name $keyVault --query value -o tsv)
+            sqlServerFqdn=sql-ct-${{ parameters.environment }}-$(shortLocation)-gupcom.database.windows.net
             sqlDatabaseName=sdb-ct-${{ parameters.environment }}-$(shortLocation)-${{ parameters.logicalEnvironment }}gup
 
             for filePath in $(System.DefaultWorkingDirectory)/scripts/sql/*; do
@@ -46,7 +51,7 @@ steps:
               if grep -Fxq "$file_name" $(System.DefaultWorkingDirectory)/.config/sql.txt; then
                 echo "$filePath"
                 cat "$filePath"
-                pwsh -c $(System.DefaultWorkingDirectory)/scripts/run-sql.ps1 "$sqlServerFqdn" "sqladmin" "$sqlServerPassword" "$sqlDatabaseName" "$filePath"
+                pwsh -c $(System.DefaultWorkingDirectory)/scripts/run-sql.ps1 "$sqlServerFqdn" "$sqlDatabaseName" $(principalId) "$filePath"
               fi
             done
         displayName: Run SQL commands

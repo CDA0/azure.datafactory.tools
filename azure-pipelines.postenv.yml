@@ -1,0 +1,45 @@
+---
+parameters:
+  - name: dependsOn
+    type: object
+    default: []
+  - name: environment
+    type: string
+    values:
+      - fat
+      - prd
+      - prf
+      - sit
+      - uat
+  - name: location
+    type: string
+    default: westeurope
+  - name: runIfNotMainOrMaster
+    type: boolean
+    default: false
+
+stages:
+  - stage: CleanUp_${{ parameters.environment }}
+    displayName: Clean up ${{ parameters.environment }}
+    dependsOn: ${{ parameters.dependsOn }}
+    condition: |
+      or(
+        eq(variables['build.sourceBranch'], 'refs/heads/main'),
+        eq(variables['build.sourceBranch'], 'refs/heads/master'),
+        ${{ parameters.runIfNotMainOrMaster }}
+      )
+    jobs:
+      - job: CleanUp
+        displayName: Clean up
+        steps:
+          - template: steps/get-short-location.yml@templates
+            parameters:
+              location: ${{ parameters.location }}
+
+          - template: steps/remove-vmss-instance-identity.yml@templates
+            parameters:
+              environment: ${{ parameters.environment }}
+              identityName: id-ct-${{ parameters.environment }}-$(shortLocation)-gupcom
+              resourceGroupName: rg-ct-${{ parameters.environment }}-$(shortLocation)-gupcom
+              shortLocation: $shortLocation
+

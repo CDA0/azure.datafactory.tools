@@ -18,7 +18,7 @@ resources:
     - repository: templates
       type: git
       name: DevOps/azp-templates
-      ref: refs/tags/5.1.7
+      ref: refs/tags/5.4.1
 
 extends:
   template: pipelines/compound.yml@templates
@@ -85,6 +85,16 @@ extends:
               environment: fat
               logicalEnvironment: dev
               runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
+          - template: ./azure-pipelines.postenv.yml
+            parameters:
+              dependsOn:
+                - deploy_fat_dev
+                - deploy_fat_ci1
+                - deploy_fat_fat1
+                - deploy_fat_fat2
+                - deploy_fat_fat3
+              environment: fat
+              runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
       - template: stages/deploy.yml@templates
         parameters:
           dependsOn: deploy_fat_fat1
@@ -118,6 +128,14 @@ extends:
                 deploySql: ${{ parameters.deploySql }}
           environment: sit
           logicalEnvironment: sit3
+      - ${{ if eq(parameters.deploySql, true) }}:
+        - template: ./azure-pipelines.postenv.yml
+          parameters:
+            dependsOn:
+              - deploy_sit_sit1
+              - deploy_sit_sit2
+              - deploy_sit_sit3
+            environment: sit
       - template: stages/deploy.yml@templates
         parameters:
           dependsOn: deploy_sit_sit1
@@ -162,6 +180,15 @@ extends:
                 deploySql: ${{ parameters.deploySql }}
           environment: uat
           logicalEnvironment: uat3
+      - ${{ if eq(parameters.deploySql, true) }}:
+        - template: ./azure-pipelines.postenv.yml
+          parameters:
+            dependsOn:
+              - deploy_uat_uat1
+              - deploy_uat_uat2
+              - deploy_uat_uat3
+              - deploy_uat_uat4
+            environment: uat
       - template: stages/deploy.yml@templates
         parameters:
           dependsOn: deploy_uat_uat1
@@ -184,6 +211,13 @@ extends:
                 deploySql: ${{ parameters.deploySql }}
           environment: prd
           logicalEnvironment: prd
+      - ${{ if eq(parameters.deploySql, true) }}:
+        - template: ./azure-pipelines.postenv.yml
+          parameters:
+            dependsOn:
+              - deploy_prd_pre
+              - deploy_prd_prd
+            environment: prd
     testSteps:
       - task: PowerShell@2
         displayName: Test
