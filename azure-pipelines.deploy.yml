@@ -25,14 +25,14 @@ steps:
     parameters:
       location: ${{ parameters.location }}
 
-  - template: steps/set-vmss-instance-identity.yml@templates
-    parameters:
-      environment: ${{ parameters.environment }}
-      identityName: id-ct-${{ parameters.environment }}-$(shortLocation)-gupcom
-      resourceGroupName: rg-ct-${{ parameters.environment }}-$(shortLocation)-gupcom
-      shortLocation: $(shortLocation)
-
   - ${{ if eq(parameters.deploySql, true) }}:
+      - template: steps/set-vmss-instance-identity.yml@templates
+        parameters:
+          environment: ${{ parameters.environment }}
+          identityName: id-ct-${{ parameters.environment }}-$(shortLocation)-gupcom
+          resourceGroupName: rg-ct-${{ parameters.environment }}-$(shortLocation)-gupcom
+          shortLocation: $(shortLocation)
+
       - task: AzureCLI@2
         inputs:
           azureSubscription: sub-customer-${{ parameters.environment }}-t1-01-deploy
