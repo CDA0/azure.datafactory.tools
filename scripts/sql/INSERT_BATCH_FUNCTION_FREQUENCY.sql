@@ -1,0 +1,194 @@
+TRUNCATE TABLE STAGE_CDI.BATCH_FUNCTION_FREQUENCY;
+
+insert 
+  into STAGE_CDI.BATCH_FUNCTION_FREQUENCY
+(  
+  FUNCTION_AREA,
+  FREQUENCY,
+  FREQUENCY_UNIT,
+  BATCH,
+  START_TIME,
+  END_TIME,
+  RUN_DAYS,
+  START_DAY,
+  END_DAY,
+  RUN_MONTHS
+)
+values 
+(
+  'DATA SYNC - ADVISER',
+  15,
+  'MINUTE',
+  'INTRA_DAILY',
+  '00:00:00',
+  '23:59:59', 
+  '1,2,3,4,5,6,7',
+  1,
+  31,
+  '1,2,3,4,5,6,7,8,9,10,11,12'
+);
+
+insert 
+  into STAGE_CDI.BATCH_FUNCTION_FREQUENCY
+(  
+  FUNCTION_AREA,
+  FREQUENCY,
+  FREQUENCY_UNIT,
+  BATCH,
+  START_TIME,
+  END_TIME,
+  RUN_DAYS,
+  START_DAY,
+  END_DAY,
+  RUN_MONTHS
+)
+values 
+(
+  'EXTRACT - INTELLIFLO',
+  1, 
+  'DAY', 
+  'DAILY', 
+  '01:30:00', 
+  '17:30:00', 
+  '2,3,4,5,6', 
+  1, 
+  31, 
+  '1,2,3,4,5,6,7,8,9,10,11,12'
+);
+
+insert 
+  into STAGE_CDI.BATCH_FUNCTION_FREQUENCY
+(  
+  FUNCTION_AREA, 
+  FREQUENCY,
+  FREQUENCY_UNIT,
+  BATCH,
+  START_TIME,
+  END_TIME,
+  RUN_DAYS,
+  START_DAY,
+  END_DAY,
+  RUN_MONTHS
+)
+values 
+(
+  'EXTRACT - VOA', 
+  1, 
+  'DAY',
+  'DAILY',
+  '03:00:00',
+  '23:59:59',
+  '1,2,3,4,5,6,7',
+  1, 31,
+  '1,2,3,4,5,6,7,8,9,10,11,12'
+);
+
+insert 
+  into STAGE_CDI.BATCH_FUNCTION_FREQUENCY
+(  
+  FUNCTION_AREA, 
+  FREQUENCY,
+  FREQUENCY_UNIT,
+  BATCH,
+  START_TIME,
+  END_TIME,
+  RUN_DAYS,
+  START_DAY,
+  END_DAY,
+  RUN_MONTHS
+)
+values 
+(
+  'DATA SYNC - SONATA BOND',
+  1,
+  'DAY',
+  'DAILY',
+  '05:00:00',
+  '23:59:59',
+  '1,2,3,4,5,6,7',
+  1, 
+  31, 
+  '1,2,3,4,5,6,7,8,9,10,11,12'
+);
+
+insert 
+  into STAGE_CDI.BATCH_FUNCTION_FREQUENCY
+(  
+  FUNCTION_AREA, 
+  FREQUENCY,
+  FREQUENCY_UNIT,
+  BATCH,
+  START_TIME,
+  END_TIME,
+  RUN_DAYS,
+  START_DAY,
+  END_DAY,
+  RUN_MONTHS
+)
+values 
+(
+  'DATA SYNC - CUSTOMER', 
+  2,
+  'HOUR',
+  'INTRA_DAILY',
+  '00:00:00',
+  '23:59:59',
+  '1,2,3,4,5,6,7',
+  1,
+  31,
+  '1,2,3,4,5,6,7,8,9,10,11,12'
+);
+
+insert 
+  into STAGE_CDI.BATCH_FUNCTION_FREQUENCY
+(  
+  FUNCTION_AREA, 
+  FREQUENCY,
+  FREQUENCY_UNIT,
+  BATCH,
+  START_TIME,
+  END_TIME,
+  RUN_DAYS,
+  START_DAY,
+  END_DAY,
+  RUN_MONTHS
+)
+values 
+(
+  'DATA SYNC - CUSTOMER INTRADAILY',
+  5,
+  'MINUTE',
+  'INTRA_DAILY',
+  '00:00:00',
+  '23:59:59',
+  '1,2,3,4,5,6,7',
+  1,
+  31, 
+  '1,2,3,4,5,6,7,8,9,10,11,12'
+);
+
+insert 
+  into STAGE_CDI.BATCH_FUNCTION_FREQUENCY
+(  
+  FUNCTION_AREA,
+  FREQUENCY,
+  FREQUENCY_UNIT,
+  BATCH,
+  START_TIME,
+  END_TIME,
+  RUN_DAYS,
+  START_DAY,
+  RUN_MONTHS
+)
+values 
+(
+  'EXTRACT - PSD',
+  3,
+  'MONTH',
+  'QUARTERLY',
+  '05:00:00',
+  '23:59:59',
+  '1,2,3,4,5,6,7',
+  13,
+  '1,4,7,10'
+);
