@@ -1,6 +1,5 @@
 {
 	"name": "ls_SFDC_MSDynamics",
-	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"parameters": {
 			"SFDC_MS_DYNAMICS_USER": {
@@ -11,6 +10,15 @@
 			},
 			"SFDC_MS_DYNAMICS_API_VERSION": {
 				"type": "string"
+			},
+			"ENVIRONMENT": {
+				"type": "string"
+			},
+			"SHORT_LOCATION": {
+				"type": "string"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string"
 			}
 		},
 		"annotations": [],
@@ -18,12 +26,33 @@
 		"typeProperties": {
 			"environmentUrl": "@{linkedService().SFDC_MS_DYNAMICS_URL}",
 			"username": "@{linkedService().SFDC_MS_DYNAMICS_USER}",
-			"apiVersion": "@{linkedService().SFDC_MS_DYNAMICS_API_VERSION}",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIyMzhlODc0Zi0wZjg4LTRhMzAtODA5OS00NTRiZmIzNjIwN2MiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_KeyVaultCom",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@linkedService().ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@linkedService().SHORT_LOCATION",
+							"type": "Expression"
+						}
+					}
+				},
+				"secretName": {
+					"value": "@if(empty(substring('@{linkedService().SFDC_MS_DYNAMICS_USER}', 34, 2)), concat('@{linkedService().LOGICAL_ENVIRONMENT}', '-SFDC-msdmigration'), concat('@{linkedService().LOGICAL_ENVIRONMENT}', '-SFDC-msdmigration-', substring('@{linkedService().SFDC_MS_DYNAMICS_USER}', 34, 7)))",
+					"type": "Expression"
+				}
+			},
+			"apiVersion": "@{linkedService().SFDC_MS_DYNAMICS_API_VERSION}"
 		},
 		"connectVia": {
 			"referenceName": "Woking",
 			"type": "IntegrationRuntimeReference"
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
 }

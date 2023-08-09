@@ -1,6 +1,5 @@
 {
 	"name": "ls_MS_DYNAMICS",
-	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"description": "Linked service for MS Dynamics",
 		"parameters": {
@@ -29,13 +28,34 @@
 		"annotations": [],
 		"type": "SqlServer",
 		"typeProperties": {
-			"connectionString": "integrated security=True;data source=\"@{linkedService().MS_DYNAMICS_HOST}, @{linkedService().MS_DYNAMICS_PORT}\";initial catalog=@{linkedService().MS_DYNAMICS_DATABASE}",
+			"connectionString": "Integrated Security=True;Data Source=\"@{linkedService().MS_DYNAMICS_HOST}, @{linkedService().MS_DYNAMICS_PORT}\";Initial Catalog=@{linkedService().MS_DYNAMICS_DATABASE}",
 			"userName": "@{linkedService().MS_DYNAMICS_USERNAME}",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJiNzYyNTkwZS00NjA2LTQxNjctYjc1ZC1hNTk0ZTg0YmM3NTQiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_KeyVaultCom",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@linkedService().ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@linkedService().SHORT_LOCATION",
+							"type": "Expression"
+						}
+					}
+				},
+				"secretName": {
+					"value": "@concat('@{linkedService().LOGICAL_ENVIRONMENT}', '-MSDYNAMICS-', replace('@{linkedService().MS_DYNAMICS_DATABASE}', '_' , '-'))",
+					"type": "Expression"
+				}
+			}
 		},
 		"connectVia": {
 			"referenceName": "Woking",
 			"type": "IntegrationRuntimeReference"
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
 }

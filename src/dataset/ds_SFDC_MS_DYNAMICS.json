@@ -34,6 +34,18 @@
 			"SFDC_MS_DYNAMICS_API_VERSION": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.SFDC_MS_DYNAMICS_API_VERSION"
+			},
+			"ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+			},
+			"SHORT_LOCATION": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
 			}
 		},
 		"annotations": [],
