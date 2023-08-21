@@ -4,7 +4,7 @@
 		"description": "Name - Nikita Varnwal\nDate - June 2023\nProject - CRM Migration, implemented under CHG######\nDescription - This pipeline will pull all the data from the required fields of Asc_Divorceclaim table on a truncate and reload strategy from CRM and load it into CRM_PLAT_DYN_DIVORCECLAIM_STG table in MsDynamics STAGE_CDI. ",
 		"activities": [
 			{
-				"name": "sp-trauncate-CRM_PLAT_DYN_DIVORCECLAIM_STG",
+				"name": "sp-truncate-CRM_PLAT_DYN_DIVORCECLAIM_STG",
 				"description": "Name - Nikita Varnwal\nDate - June 2023\nProject - CRM Mirgation, implemented under CHG#####\nDescription - As a part of truncate and reload strategy ,this stored procedure will truncate the table CRM_PLAT_DYN_DIVORCECLAIM_STG before loading any data into it .",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [],
@@ -53,7 +53,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "sp-trauncate-CRM_PLAT_DYN_DIVORCECLAIM_STG",
+						"activity": "sp-truncate-CRM_PLAT_DYN_DIVORCECLAIM_STG",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -70,7 +70,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlServerSource",
-						"sqlReaderQuery": "SELECT \r\nACTIVITYID\r\n,PRIORITYCODE\r\n,SCHEDULEDEND\r\n,STATECODE\r\n,OWNERID\r\n,OWNERIDNAME\r\n,SUBJECT\r\n,REGARDINGOBJECTID\r\n,ASC_CASETYPE\r\n,ASC_IFAFIRM\r\n,ASC_REGISTEREDIFA\r\n,ASC_BROKER\r\n,ASC_CLIENTMASTER\r\n,ACTUALSTART\r\n,MODIFIEDON\r\n,ASC_DURATION\r\n,CREATEDBY\r\n,CREATEDBYNAME\r\n,ASC_COMPLETEDBY_DRNAME\r\n,ASC_COMPLETEDBY_SETTLEMENTNAME\r\n,ASC_CHECKEDBYNAME\r\n,ASC_COMPLETEDBYNAME\r\n,ASC_CHECKEDBY\r\n,ASC_COMPLETEDBY\r\n,ASC_COMPLETEDBY_DR\r\n,ASC_COMPLETEDBY_SETTLEMENT\r\n,ASC_ADVISERREQUESTEDTOPLACESALES\r\n,ASC_AMOUNTDUE\r\n,ASC_DATECOMPLETED\r\n,ASC_DATENOTIFIED\r\n,ASC_DATEPROCESSED\r\n,ASC_DATEPROCESSED_DR\r\n,ASC_DATEPROCESSED_SETTLEMENT\r\n,ASC_DATERECEIVED\r\n,ASC_DATEUSEDFORPSO\r\n,ASC_DECREEABSOLUTERECEIVED\r\n,ASC_EXTERNALPAYMENTRAISED\r\n,ASC_FEESDEDUCTED\r\n,ASC_INTERNALBALANCETRANSFERRED\r\n,ASC_PENSIONENQUIRYFORMRECEIVED\r\n,ASC_PENSIONSHARINGANNEX\r\n,ASC_PENSIONSHARINGORDERRECEIVED\r\n,ASC_PERCENTAGEOFACCOUNT\r\n,ASC_RECEIVINGSCHEME\r\n,ASC_RELEVANTDOCUMENTSRECEIVED\r\n,ASC_REQUIREMENTLETTEREMAILISSUED\r\n,ASC_WHONOTIFIEDUS\r\nFROM ASC_DIVORCECLAIM\r\n",
+						"sqlReaderQuery": "SELECT \r\nACTIVITYID\r\n,PRIORITYCODE\r\n,SCHEDULEDEND\r\n,STATECODE\r\n,OWNERID\r\n,OWNERIDNAME\r\n,SUBJECT\r\n,REGARDINGOBJECTID\r\n,ASC_CASETYPE\r\n,ASC_IFAFIRM\r\n,ASC_REGISTEREDIFA\r\n,ASC_BROKER\r\n,ASC_CLIENTMASTER\r\n,ACTUALSTART\r\n,MODIFIEDON\r\n,ASC_DURATION\r\n,CREATEDBY\r\n,CREATEDBYNAME\r\n,ASC_COMPLETEDBY_DRNAME\r\n,ASC_COMPLETEDBY_SETTLEMENTNAME\r\n,ASC_CHECKEDBYNAME\r\n,ASC_COMPLETEDBYNAME\r\n,ASC_CHECKEDBY\r\n,ASC_COMPLETEDBY\r\n,ASC_COMPLETEDBY_DR\r\n,ASC_COMPLETEDBY_SETTLEMENT\r\n,ASC_ADVISERREQUESTEDTOPLACESALES\r\n,ASC_AMOUNTDUE\r\n,ASC_DATECOMPLETED\r\n,ASC_DATENOTIFIED\r\n,ASC_DATEPROCESSED\r\n,ASC_DATEPROCESSED_DR\r\n,ASC_DATEPROCESSED_SETTLEMENT\r\n,ASC_DATERECEIVED\r\n,ASC_DATEUSEDFORPSO\r\n,ASC_DECREEABSOLUTERECEIVED\r\n,ASC_EXTERNALPAYMENTRAISED\r\n,ASC_FEESDEDUCTED\r\n,ASC_INTERNALBALANCETRANSFERRED\r\n,ASC_PENSIONENQUIRYFORMRECEIVED\r\n,ASC_PENSIONSHARINGANNEX\r\n,ASC_PENSIONSHARINGORDERRECEIVED\r\n,ASC_PERCENTAGEOFACCOUNT\r\n,ASC_RECEIVINGSCHEME\r\n,ASC_RELEVANTDOCUMENTSRECEIVED\r\n,ASC_REQUIREMENTLETTEREMAILISSUED\r\n,ASC_WHONOTIFIEDUS\r\n,ASC_REFERENCE\r\n,ASC_CLIENTMASTERNAME\r\n,REGARDINGOBJECTIDNAME\r\nFROM ASC_DIVORCECLAIM\r\n",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -678,6 +678,42 @@
 									"type": "String",
 									"physicalType": "varchar"
 								}
+							},
+							{
+								"source": {
+									"name": "ASC_REFERENCE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_REFERENCE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CLIENTMASTERNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_CLIENTMASTERNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "REGARDINGOBJECTIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "REGARDINGOBJECTIDNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
 							}
 						],
 						"typeConversion": true,
@@ -697,7 +733,10 @@
 							"MS_DYNAMICS_HOST": "@pipeline().globalParameters.MS_DYNAMICS_HOST",
 							"MS_DYNAMICS_PORT": "@pipeline().globalParameters.MS_DYNAMICS_PORT",
 							"MS_DYNAMICS_DATABASE": "@pipeline().globalParameters.MS_DYNAMICS_DATABASE",
-							"MS_DYNAMICS_USERNAME": "@pipeline().globalParameters.MS_DYNAMICS_USERNAME"
+							"MS_DYNAMICS_USERNAME": "@pipeline().globalParameters.MS_DYNAMICS_USERNAME",
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
 						}
 					}
 				],

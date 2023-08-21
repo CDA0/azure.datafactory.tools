@@ -47,7 +47,7 @@
 					}
 				},
 				"secretName": {
-					"value": "@concat('@{linkedService().LOGICAL_ENVIRONMENT}', '-MSDYNAMICS-', replace('@{linkedService().MS_DYNAMICS_DATABASE}', '_' , '-'))",
+					"value": "dev-MSDYNAMICS-dvfcrm-mscrm",
 					"type": "Expression"
 				}
 			}
