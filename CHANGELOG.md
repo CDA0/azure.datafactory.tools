@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.7.0
+* Update template ref for CX One.
+
 ## 1.6.0
 * Use AAD auth when connecting to SQL.
 
