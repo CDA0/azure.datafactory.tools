@@ -101,6 +101,10 @@
 			"OSDB_USERNAME": {
 				"type": "string",
 				"value": "OUTPUTSERVICE_ST_RO"
+			},
+			"SFDC_MS_DYNAMICS_ORG": {
+				"type": "string",
+				"value": "ascdfat"
 			}
 		}
 	},

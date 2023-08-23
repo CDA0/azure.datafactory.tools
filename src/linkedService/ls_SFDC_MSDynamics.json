@@ -11,6 +11,9 @@
 			"SFDC_MS_DYNAMICS_API_VERSION": {
 				"type": "string"
 			},
+			"SFDC_MS_DYNAMICS_ORG": {
+				"type": "string"
+			},
 			"ENVIRONMENT": {
 				"type": "string"
 			},
@@ -40,7 +43,7 @@
 					}
 				},
 				"secretName": {
-					"value": "@if(empty(substring('@{linkedService().SFDC_MS_DYNAMICS_USER}', 34, 2)), concat('@{linkedService().LOGICAL_ENVIRONMENT}', '-SFDC-msdmigration'), concat('@{linkedService().LOGICAL_ENVIRONMENT}', '-SFDC-msdmigration-', substring('@{linkedService().SFDC_MS_DYNAMICS_USER}', 34, 7)))",
+					"value": "SFDC-msdmigration-@{linkedService().SFDC_MS_DYNAMICS_ORG}",
 					"type": "Expression"
 				}
 			},
