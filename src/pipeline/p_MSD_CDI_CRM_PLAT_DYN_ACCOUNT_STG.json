@@ -1,5 +1,5 @@
 {
-	"name": "p_MSD_STG_CRM_PLAT_DYN_ACCOUNT_STG",
+	"name": "p_MSD_CDI_CRM_PLAT_DYN_ACCOUNT_STG",
 	"properties": {
 		"description": "Name - Nikita Varnwal\nDate - August 2023\nProject - CRM Migration, implemented under CHG######\nDescription - This pipeline will pull all the data from the required fields of ACCOUNT table on a truncate and reload strategy from CRM and load it into CRM_PLAT_DYN_ACCOUNT_STG table in MsDynamics STAGE_CDI. ",
 		"activities": [
