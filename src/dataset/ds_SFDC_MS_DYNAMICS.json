@@ -16,12 +16,29 @@
 				"SFDC_MS_DYNAMICS_API_VERSION": {
 					"value": "@dataset().SFDC_MS_DYNAMICS_API_VERSION",
 					"type": "Expression"
+				},
+				"SFDC_MS_DYNAMICS_ORG": {
+					"value": "@dataset().SFDC_MS_DYNAMICS_ORG",
+					"type": "Expression"
+				},
+				"ENVIRONMENT": {
+					"value": "@dataset().ENVIRONMENT",
+					"type": "Expression"
+				},
+				"SHORT_LOCATION": {
+					"value": "@dataset().SHORT_LOCATION",
+					"type": "Expression"
 				}
 			}
 		},
 		"parameters": {
-			"OBJECT_NAME": {
-				"type": "string"
+			"ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
+			},
+			"SHORT_LOCATION": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
 			},
 			"SFDC_MS_DYNAMICS_USER": {
 				"type": "string",
@@ -35,17 +52,12 @@
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.SFDC_MS_DYNAMICS_API_VERSION"
 			},
-			"ENVIRONMENT": {
+			"SFDC_MS_DYNAMICS_ORG": {
 				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
+				"defaultValue": "@pipeline().globalParameters.SFDC_MS_DYNAMICS_ORG"
 			},
-			"LOGICAL_ENVIRONMENT": {
-				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
-			},
-			"SHORT_LOCATION": {
-				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
+			"OBJECT_NAME": {
+				"type": "string"
 			}
 		},
 		"annotations": [],
