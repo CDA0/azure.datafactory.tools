@@ -26,7 +26,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "OracleSource",
-						"oracleReaderQuery": "with ADVISER_OFFICE\nas\n(select PR.PARTY_ROLE_ID,\n        PR.PARTY_ROLE_TYPE_ID,\n        OPR.STATUS,\n        OPR.PARTY_ROLE_NAME\n   from PARTY P\n  inner join PARTY_ROLE PR\n     on (PR.PARTY_ID = P.PARTY_ID)\n  inner join ORGANISATION_PARTY_ROLE OPR\n     on (OPR.PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n  where PR.PARTY_ROLE_TYPE_ID in ( 'adv_off', 'head_off', 'par_off','par_hoff', 'os_off', 'os_hoff', 'sp_off', 'sp_hoff' )\n    and OPR.party_role_id in\n          (select distinct \n                  CA.PARTY_ROLE_ID\n             from COMMISSION_ACCOUNT CA\n            inner join LEGACY_ACCOUNT_DETAIL LAD\n               on (LAD.COMMISSION_ACCOUNT_ID = CA.COMMISSION_ACCOUNT_ID)\n          )\n),\nADDRESS\nas\n(select ADDRESS.PARTY_ROLE_ID,\n        ADDRESS.UPDATED_DATE,\n        ADDRESS.ADDRESS_LINE_1,\n        ADDRESS.ADDRESS_LINE_2,\n        ADDRESS.ADDRESS_LINE_3,\n        ADDRESS.ADDRESS_LINE_4,\n        ADDRESS.POSTCODE\n  from (select CPR.PARTY_ROLE_ID       as PARTY_ROLE_ID,\n               CPR.UPDATED_DATE        as UPDATED_DATE,\n               trim(PA.ADDRESS_LINE_1) as ADDRESS_LINE_1,\n               trim(PA.ADDRESS_LINE_2) as ADDRESS_LINE_2,\n               trim(PA.ADDRESS_LINE_3) as ADDRESS_LINE_3,\n               trim(PA.ADDRESS_LINE_4) as ADDRESS_LINE_4,\n               trim(PA.POSTCODE) as POSTCODE,\n               row_number() over (partition by CPR.PARTY_ROLE_ID\n                                      order by CPR.UPDATED_DATE desc) RN\n          from CONTACT_POINT_ROLE CPR\n\t\t inner join CONTACT_POINT CP\n            on (CPR.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\n\t\t inner join POSTAL_ADDRESS PA\n            on (CP.CONTACT_POINT_ID = PA.CONTACT_POINT_ID)\n         where CPR.END_DATE IS NULL\n           and CP.CONTACT_POINT_TYPE_ID = 'cp_addr'\n           and nvl(CPR.CONTACT_POINT_ROLE_TYPE_ID, 'A') <> 'cpr_rig'\n        ) ADDRESS\n  where ADDRESS.RN = 1\n),\nEMAIL\nas\n(select EMAIL.PARTY_ROLE_ID,\n        EMAIL.EMAIL_URL_ADDRESS\n   from (select CPR.PARTY_ROLE_ID,\n                trim(EUA.EMAIL_URL_ADDRESS) as EMAIL_URL_ADDRESS,\n                row_number() over (partition by CPR.PARTY_ROLE_ID\n                                       order by CPR.UPDATED_DATE desc) RN\n           from CONTACT_POINT_ROLE CPR\n          inner join CONTACT_POINT CP\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\n          inner join EMAIL_URL_ADDRESS EUA\n             on (EUA.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\n          where CPR.END_DATE is null\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_email'\n        ) EMAIL\n  where EMAIL.RN = 1\n),\nPHONE\nas\n(select PHONE.PARTY_ROLE_ID,\n        PHONE.PHONE_FAX_NUMBER\n   from (select CPR.PARTY_ROLE_ID,\n                PFN.PHONE_FAX_NUMBER,\n                row_number() over (partition by CPR.PARTY_ROLE_ID\n                                       order by CPR.UPDATED_DATE desc) RN\n           from CONTACT_POINT_ROLE CPR\n          inner join CONTACT_POINT CP\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\n          inner join PHONE_FAX_NUMBER PFN\n             on (PFN.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\n          where CPR.END_DATE is null\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_phone'\n        ) PHONE\n where PHONE.RN = 1\n),\nRELATED_PARTY\nas\n(select RELATED_PARTY_ROLE_ID,\n        PARTY_ROLE_ID\n   from PARTY_ROLE_RELATIONSHIP\n  where relationship_type_id='rel_afoff'\n    and end_date is null\n)\nselect AO.PARTY_ROLE_ID,\n       AO.PARTY_ROLE_TYPE_ID,\n       AO.STATUS,\n       AO.PARTY_ROLE_NAME,\n       AD.UPDATED_DATE,\n       AD.ADDRESS_LINE_1,\n       AD.ADDRESS_LINE_2,\n       AD.ADDRESS_LINE_3,\n       AD.ADDRESS_LINE_4,\n       AD.POSTCODE,\n       EM.EMAIL_URL_ADDRESS,\n       PH.PHONE_FAX_NUMBER,\n       RP.PARTY_ROLE_ID as FIRM_PARTY_ROLE_ID\n  from ADVISER_OFFICE AO\n  left join ADDRESS AD\n    on (AO.PARTY_ROLE_ID = AD.PARTY_ROLE_ID)\n  left join EMAIL EM\n    on (AO.PARTY_ROLE_ID = EM.PARTY_ROLE_ID)\n  left join PHONE PH\n    on (AO.PARTY_ROLE_ID = PH.PARTY_ROLE_ID)\n  left join RELATED_PARTY RP\n    on (AO.PARTY_ROLE_ID = RP.RELATED_PARTY_ROLE_ID)",
+						"oracleReaderQuery": "with ADVISER_OFFICE\nas\n(select PR.PARTY_ROLE_ID,\n        PR.PARTY_ROLE_TYPE_ID,\n        OPR.STATUS,\n        OPR.PARTY_ROLE_NAME\n   from PARTY P\n  inner join PARTY_ROLE PR\n     on (PR.PARTY_ID = P.PARTY_ID)\n  inner join ORGANISATION_PARTY_ROLE OPR\n     on (OPR.PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n  where PR.PARTY_ROLE_TYPE_ID in ( 'adv_off', 'head_off', 'par_off','par_hoff', 'os_off', 'os_hoff', 'sp_off', 'sp_hoff' )\n    and OPR.party_role_id in\n          (select distinct \n                  CA.PARTY_ROLE_ID\n             from COMMISSION_ACCOUNT CA\n            inner join LEGACY_ACCOUNT_DETAIL LAD\n               on (LAD.COMMISSION_ACCOUNT_ID = CA.COMMISSION_ACCOUNT_ID)\n          )\n),\nADDRESS\nas\n(select ADDRESS.PARTY_ROLE_ID,\n        ADDRESS.UPDATED_DATE,\n        ADDRESS.ADDRESS_LINE_1,\n        ADDRESS.ADDRESS_LINE_2,\n        ADDRESS.ADDRESS_LINE_3,\n        ADDRESS.ADDRESS_LINE_4,\n        ADDRESS.POSTCODE\n  from (select CPR.PARTY_ROLE_ID       as PARTY_ROLE_ID,\n               CPR.UPDATED_DATE        as UPDATED_DATE,\n               trim(PA.ADDRESS_LINE_1) as ADDRESS_LINE_1,\n               trim(PA.ADDRESS_LINE_2) as ADDRESS_LINE_2,\n               trim(PA.ADDRESS_LINE_3) as ADDRESS_LINE_3,\n               trim(PA.ADDRESS_LINE_4) as ADDRESS_LINE_4,\n               trim(PA.POSTCODE) as POSTCODE,\n               row_number() over (partition by CPR.PARTY_ROLE_ID\n                                      order by CPR.UPDATED_DATE desc) RN\n          from CONTACT_POINT_ROLE CPR\n         inner join CONTACT_POINT CP\n            on (CPR.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\n         inner join POSTAL_ADDRESS PA\n            on (CP.CONTACT_POINT_ID = PA.CONTACT_POINT_ID)\n         where CPR.END_DATE IS NULL\n           and CP.CONTACT_POINT_TYPE_ID = 'cp_addr'\n           and nvl(CPR.CONTACT_POINT_ROLE_TYPE_ID, 'A') <> 'cpr_rig'\n        ) ADDRESS\n  where ADDRESS.RN = 1\n),\nEMAIL\nas\n(select EMAIL.PARTY_ROLE_ID,\n        EMAIL.EMAIL_URL_ADDRESS\n   from (select CPR.PARTY_ROLE_ID,\n                trim(EUA.EMAIL_URL_ADDRESS) as EMAIL_URL_ADDRESS,\n                row_number() over (partition by CPR.PARTY_ROLE_ID\n                                       order by CPR.UPDATED_DATE desc) RN\n           from CONTACT_POINT_ROLE CPR\n          inner join CONTACT_POINT CP\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\n          inner join EMAIL_URL_ADDRESS EUA\n             on (EUA.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\n          where CPR.END_DATE is null\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_email'\n        ) EMAIL\n  where EMAIL.RN = 1\n),\nPHONE\nas\n(select PHONE.PARTY_ROLE_ID,\n        PHONE.PHONE_FAX_NUMBER\n   from (select CPR.PARTY_ROLE_ID,\n                PFN.PHONE_FAX_NUMBER,\n                row_number() over (partition by CPR.PARTY_ROLE_ID\n                                       order by CPR.UPDATED_DATE desc,\n                                             PFN.CONTACT_POINT_ID) RN\n           from CONTACT_POINT_ROLE CPR\n          inner join CONTACT_POINT CP\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\n          inner join PHONE_FAX_NUMBER PFN\n             on (PFN.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\n          where CPR.END_DATE is null\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_phone'\n        ) PHONE\n where PHONE.RN = 1\n),\nRELATED_PARTY\nas\n(select RELATED_PARTY_ROLE_ID,\n        PARTY_ROLE_ID\n   from PARTY_ROLE_RELATIONSHIP\n  where relationship_type_id='rel_afoff'\n    and end_date is null\n)\nselect AO.PARTY_ROLE_ID,\n       AO.PARTY_ROLE_TYPE_ID,\n       AO.STATUS,\n       AO.PARTY_ROLE_NAME,\n       AD.UPDATED_DATE,\n       AD.ADDRESS_LINE_1,\n       AD.ADDRESS_LINE_2,\n       AD.ADDRESS_LINE_3,\n       AD.ADDRESS_LINE_4,\n       AD.POSTCODE,\n       EM.EMAIL_URL_ADDRESS,\n       PH.PHONE_FAX_NUMBER,\n       RP.PARTY_ROLE_ID as FIRM_PARTY_ROLE_ID\n  from ADVISER_OFFICE AO\n  left join ADDRESS AD\n    on (AO.PARTY_ROLE_ID = AD.PARTY_ROLE_ID)\n  left join EMAIL EM\n    on (AO.PARTY_ROLE_ID = EM.PARTY_ROLE_ID)\n  left join PHONE PH\n    on (AO.PARTY_ROLE_ID = PH.PARTY_ROLE_ID)\n  left join RELATED_PARTY RP\n    on (AO.PARTY_ROLE_ID = RP.RELATED_PARTY_ROLE_ID)",
 						"partitionOption": "None",
 						"queryTimeout": "02:00:00"
 					},
@@ -196,24 +196,40 @@
 						"referenceName": "ds_DPDB",
 						"type": "DatasetReference",
 						"parameters": {
-							"SCHEMA": "DPARTNER",
-							"TABLE": "PARTY",
 							"ENVIRONMENT": {
 								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
 								"type": "Expression"
 							},
 							"SHORT_LOCATION": {
 								"value": "@pipeline().globalParameters.SHORT_LOCATION",
 								"type": "Expression"
 							},
-							"DPDB": "@pipeline().globalParameters.DPDB",
-							"DPDB_HOST": "@pipeline().globalParameters.DPDB_HOST",
-							"DPDB_PORT": "@pipeline().globalParameters.DPDB_PORT",
-							"DPDB_USERNAME": "@pipeline().globalParameters.DBDB_USERNAME",
-							"LOGICAL_ENVIRONMENT": {
-								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"DPDB": {
+								"value": "@pipeline().globalParameters.DPDB",
 								"type": "Expression"
-							}
+							},
+							"DPDB_HOST": {
+								"value": "@pipeline().globalParameters.DPDB_HOST",
+								"type": "Expression"
+							},
+							"DPDB_PORT": {
+								"value": "@pipeline().globalParameters.DPDB_PORT",
+								"type": "Expression"
+							},
+							"DPDB_USERNAME": {
+								"value": "@pipeline().globalParameters.DPDB_USERNAME",
+								"type": "Expression"
+							},
+							"DPDB_SECRET_NAME": {
+								"value": "@pipeline().globalParameters.DPDB_SECRET_NAME",
+								"type": "Expression"
+							},
+							"SCHEMA": "DPARTNER",
+							"TABLE": "PARTY"
 						}
 					}
 				],

@@ -10,6 +10,10 @@
 					"value": "@dataset().ENVIRONMENT",
 					"type": "Expression"
 				},
+				"LOGICAL_ENVIRONMENT": {
+					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
+				},
 				"SHORT_LOCATION": {
 					"value": "@dataset().SHORT_LOCATION",
 					"type": "Expression"
@@ -30,22 +34,20 @@
 					"value": "@dataset().DPDB_USERNAME",
 					"type": "Expression"
 				},
-				"LOGICAL_ENVIRONMENT": {
-					"value": "@dataset().LOGICAL_ENVIRONMENT",
+				"DPDB_SECRET_NAME": {
+					"value": "@dataset().DPDB_SECRET_NAME",
 					"type": "Expression"
 				}
 			}
 		},
 		"parameters": {
-			"SCHEMA": {
-				"type": "string"
-			},
-			"TABLE": {
-				"type": "string"
-			},
 			"ENVIRONMENT": {
 				"type": "String",
 				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
 			},
 			"SHORT_LOCATION": {
 				"type": "string",
@@ -65,11 +67,17 @@
 			},
 			"DPDB_USERNAME": {
 				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.DBDB_USERNAME"
+				"defaultValue": "@pipeline().globalParameters.DPDB_USERNAME"
 			},
-			"LOGICAL_ENVIRONMENT": {
+			"DPDB_SECRET_NAME": {
 				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+				"defaultValue": "@pipeline().globalParameters.DPDB_SECRET_NAME"
+			},
+			"SCHEMA": {
+				"type": "string"
+			},
+			"TABLE": {
+				"type": "string"
 			}
 		},
 		"annotations": [],

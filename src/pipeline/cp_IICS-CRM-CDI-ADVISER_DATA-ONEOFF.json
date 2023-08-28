@@ -222,7 +222,10 @@
 								"storedProcedureName": "[Z_IICS_ORACLE].[PRC_TRUNCATE_IICS_ORACLE_TABLE]",
 								"storedProcedureParameters": {
 									"p_table_name": {
-										"value": "@item().TABLE_NAME",
+										"value": {
+											"value": "@item().TABLE_NAME",
+											"type": "Expression"
+										},
 										"type": "String"
 									}
 								}

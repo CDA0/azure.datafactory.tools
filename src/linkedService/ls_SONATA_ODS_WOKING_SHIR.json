@@ -1,0 +1,63 @@
+{
+	"name": "ls_SONATA_ODS_WOKING_SHIR",
+	"properties": {
+		"description": "Connection for Sonata ODS",
+		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string"
+			},
+			"SHORT_LOCATION": {
+				"type": "string"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string"
+			},
+			"SONATA_ODS_DB": {
+				"type": "string"
+			},
+			"SONATA_ODS_DB_HOST": {
+				"type": "string"
+			},
+			"SONATA_ODS_DB_PORT": {
+				"type": "string"
+			},
+			"SONATA_ODS_DB_USERNAME": {
+				"type": "string"
+			},
+			"SONATA_ODS_DB_SECRET_NAME": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Oracle",
+		"typeProperties": {
+			"connectionString": "host=@{linkedService().SONATA_ODS_DB_HOST};port=@{linkedService().SONATA_ODS_DB_PORT};serviceName=@{linkedService().SONATA_ODS_DB};user id=@{linkedService().SONATA_ODS_DB_USERNAME}",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_KeyVaultCom",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@linkedService().ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@linkedService().SHORT_LOCATION",
+							"type": "Expression"
+						}
+					}
+				},
+				"secretName": {
+					"value": "@{linkedService().SONATA_ODS_DB_SECRET_NAME}",
+					"type": "Expression"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "Woking",
+			"type": "IntegrationRuntimeReference"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
+}

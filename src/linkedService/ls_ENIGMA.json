@@ -1,0 +1,42 @@
+{
+	"name": "ls_ENIGMA",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string"
+			},
+			"SHORT_LOCATION": {
+				"type": "string"
+			},
+			"ENIGMA_DB": {
+				"type": "string"
+			},
+			"ENIGMA_DB_HOST": {
+				"type": "string"
+			},
+			"ENIGMA_DB_PORT": {
+				"type": "string"
+			},
+			"ENIGMA_DB_USERNAME": {
+				"type": "string"
+			},
+			"ENIGMA_DB_SECRET_NAME": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "integrated security=False;data source=@{linkedService().ENIGMA_DB_HOST};initial catalog=@{linkedService().ENIGMA_DB};user id=@{linkedService().ENIGMA_DB_USERNAME}",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJiYzM3NzRlNS03MWQ2LTRlY2EtODI0ZS00NWE4NjJlMGFkYjgiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "Woking",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

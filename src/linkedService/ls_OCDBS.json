@@ -1,0 +1,63 @@
+{
+	"name": "ls_OCDBS",
+	"properties": {
+		"description": "Connects to OCDBS schema using the OCDBS01P_CDI_ADF account",
+		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string"
+			},
+			"SHORT_LOCATION": {
+				"type": "string"
+			},
+			"OCDBS": {
+				"type": "string"
+			},
+			"OCDBS_HOST": {
+				"type": "string"
+			},
+			"OCDBS_PORT": {
+				"type": "string"
+			},
+			"OCDBS_USERNAME": {
+				"type": "string"
+			},
+			"OCDBS_SECRET_NAME": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Oracle",
+		"typeProperties": {
+			"connectionString": "host=@{linkedService().OCDBS_HOST};port=@{linkedService().OCDBS_PORT};sid=@{linkedService().OCDBS};user id=@{linkedService().OCDBS_USERNAME}",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_KeyVaultCom",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@linkedService().ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@linkedService().SHORT_LOCATION",
+							"type": "Expression"
+						}
+					}
+				},
+				"secretName": {
+					"value": "@{linkedService().OCDBS_SECRET_NAME}",
+					"type": "Expression"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "Lansing",
+			"type": "IntegrationRuntimeReference"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
+}

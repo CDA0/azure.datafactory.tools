@@ -1,20 +1,37 @@
 {
-	"name": "ls_SFDC",
+	"name": "ls_OCDB",
 	"properties": {
-		"description": "Connects to Salesforce (Retirement Account platform)",
+		"description": "Connects to OCDB using the OCDB01P_CDI_ADF account",
 		"parameters": {
 			"ENVIRONMENT": {
 				"type": "string"
 			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string"
+			},
 			"SHORT_LOCATION": {
+				"type": "string"
+			},
+			"OCDB": {
+				"type": "string"
+			},
+			"OCDB_HOST": {
+				"type": "string"
+			},
+			"OCDB_PORT": {
+				"type": "string"
+			},
+			"OCDB_USERNAME": {
+				"type": "string"
+			},
+			"OCDB_SECRET_NAME": {
 				"type": "string"
 			}
 		},
 		"annotations": [],
-		"type": "Salesforce",
+		"type": "Oracle",
 		"typeProperties": {
-			"environmentUrl": "https://test.salesforce.com",
-			"username": "integrationuser@prudential.co.uk.pru.fatr2",
+			"connectionString": "host=@{linkedService().OCDB_HOST};port=@{linkedService().OCDB_PORT};sid=@{linkedService().OCDB};user id=@{linkedService().OCDB_USERNAME}",
 			"password": {
 				"type": "AzureKeyVaultSecret",
 				"store": {
@@ -31,12 +48,14 @@
 						}
 					}
 				},
-				"secretName": "dev-sfdc-integrationuserpassword"
-			},
-			"apiVersion": "54.0"
+				"secretName": {
+					"value": "@{linkedService().OCDB_SECRET_NAME}",
+					"type": "Expression"
+				}
+			}
 		},
 		"connectVia": {
-			"referenceName": "Woking",
+			"referenceName": "Lansing",
 			"type": "IntegrationRuntimeReference"
 		}
 	},

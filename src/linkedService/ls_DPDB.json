@@ -6,6 +6,9 @@
 			"ENVIRONMENT": {
 				"type": "string"
 			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string"
+			},
 			"SHORT_LOCATION": {
 				"type": "string"
 			},
@@ -21,14 +24,14 @@
 			"DPDB_USERNAME": {
 				"type": "string"
 			},
-			"LOGICAL_ENVIRONMENT": {
+			"DPDB_SECRET_NAME": {
 				"type": "string"
 			}
 		},
 		"annotations": [],
 		"type": "Oracle",
 		"typeProperties": {
-			"connectionString": "host=@{linkedService().DPDB_HOST};port=@{linkedService().DPDB_PORT};serviceName=@{linkedService().DPDB};user id=@{linkedService().DPDB_USERNAME}_adf",
+			"connectionString": "host=@{linkedService().DPDB_HOST};port=@{linkedService().DPDB_PORT};serviceName=@{linkedService().DPDB};user id=@{linkedService().DPDB_USERNAME}",
 			"password": {
 				"type": "AzureKeyVaultSecret",
 				"store": {
@@ -46,7 +49,7 @@
 					}
 				},
 				"secretName": {
-					"value": "@{linkedService().LOGICAL_ENVIRONMENT}-@{linkedService().DPDB}-@{linkedService().DPDB_USERNAME}-adf",
+					"value": "@{linkedService().DPDB_SECRET_NAME}",
 					"type": "Expression"
 				}
 			}

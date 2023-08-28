@@ -1,0 +1,356 @@
+{
+	"name": "p_CDI-SFDC-PRU_ACCOUNTTOACCOUNTRELATIONSHIP__C",
+	"properties": {
+		"description": "Name : Nextpathway\nDate : 01/06/2023\nDescription : Pulls data from Azure SQL and Upsert data in SFDC - PRU_ACCOUNTTOACCOUNTRELATIONSHIP__C",
+		"activities": [
+			{
+				"name": "cd-PRU_ACCOUNTTOACCOUNTRELATIONSHIP__C",
+				"description": "Pulls data from Azure SQL and loads to Salesforce",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "with ADVISER_NETWORK\nas\n(select AN.NETWORK_PARTY_ROLE_ID,\n        AN.REL_FIRM_PARTY_ROLE_ID,\n        AO.PARTY_ROLE_ID as OFFICE_PARTY_ROLE_ID,\n        AN.UPDATE_DATE_TIME\n   from STAGE_CDI.DPDB_ADVISER_NETWORK_STG AN\n  inner join STAGE_CDI.DPDB_ADVISER_FIRM_STG AF\n     on (AN.REL_FIRM_PARTY_ROLE_ID = AF.PARTY_ROLE_ID)\n  inner join STAGE_CDI.DPDB_ADVISER_OFFICE_STG AO\n     on (AO.FIRM_PARTY_ROLE_ID = AF.PARTY_ROLE_ID)\n  where AN.UPDATE_DATE_TIME > (select PARAMETER_VALUE_DT\n                                 from STAGE_CDI.BATCH_PARAMETER\n                                where PROCESS_NAME = 'p_CDI-SFDC-PRU_ACCOUNTTOACCOUNTRELATIONSHIP__C'\n                                  and PARAMETER_NAME = 'prm_EXTRACTDT'\n                              )\n),\nHEAD_OFF\nas\n(select PARTY_ROLE_ID,\n        FIRM_PARTY_ROLE_ID\n   from STAGE_CDI.DPDB_ADVISER_OFFICE_STG\n  where PARTY_ROLE_TYPE_ID = 'head_off'\n    and STATUS = 'A'\n),\nADV_OFF\nas\n(select PRU_PARTYROLEID__C,\n        SFDC_ADVISER_ACCOUNT_ID\n   from STAGE_CDI.SFDC_ADVISER_ACCOUNT_STG\n  where recordtype = 'Business Account Office'\n)\nselect AN.NETWORK_PARTY_ROLE_ID,\n       AN.REL_FIRM_PARTY_ROLE_ID,\n       AN.OFFICE_PARTY_ROLE_ID,\n       AN.UPDATE_DATE_TIME,\n       AO_C.SFDC_ADVISER_ACCOUNT_ID as PRU_CHILDACCOUNT__C,\n       AO_P.SFDC_ADVISER_ACCOUNT_ID as PRU_PARENTACCOUNT__C,\n       concat(HO.PARTY_ROLE_ID, '_' ,AN.OFFICE_PARTY_ROLE_ID) as PRU_PARENTCHILDRELID__C,\n       'Network' as PRU_RELATIONSHIPTYPE__C\n  from ADVISER_NETWORK AN\n  left outer join HEAD_OFF HO\n    on (AN.NETWORK_PARTY_ROLE_ID = HO.FIRM_PARTY_ROLE_ID)\n  left outer join ADV_OFF AO_C\n    on (AN.OFFICE_PARTY_ROLE_ID = AO_C.PRU_PARTYROLEID__C)\n  left outer join ADV_OFF AO_P\n    on (HO.PARTY_ROLE_ID = AO_P.PRU_PARTYROLEID__C)\n where AO_C.SFDC_ADVISER_ACCOUNT_ID is not null\n   and AO_P.SFDC_ADVISER_ACCOUNT_ID is not null\n",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SalesforceSink",
+						"writeBatchSize": 5000,
+						"writeBehavior": "upsert",
+						"externalIdFieldName": "PRU_PARENTCHILDRELID__C",
+						"ignoreNullValues": false
+					},
+					"enableStaging": false,
+					"enableSkipIncompatibleRow": true,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "ls_ADLS2",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"ENVIRONMENT": {
+										"value": "@pipeline().globalParameters.ENVIRONMENT",
+										"type": "Expression"
+									},
+									"SHORT_LOCATION": {
+										"value": "@pipeline().globalParameters.SHORT_LOCATION",
+										"type": "Expression"
+									},
+									"LOGICAL_ENVIRONMENT": {
+										"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+										"type": "Expression"
+									}
+								}
+							},
+							"path": "crm/ErrroLogs"
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "PRU_PARENTACCOUNT__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_ParentAccount__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_CHILDACCOUNT__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_ChildAccount__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_PARENTCHILDRELID__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_ParentChildRelId__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_RELATIONSHIPTYPE__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_RelationshipType__c",
+									"type": "String"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": true
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_ASQLDB_WOKING_SHIR",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "DPDB_ADVISER_NETWORK_STG",
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_SFDC_DPDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							},
+							"SFDC_DPDB_URL": {
+								"value": "@pipeline().globalParameters.SFDC_DPDB_URL",
+								"type": "Expression"
+							},
+							"SFDC_DPDB_USERNAME": {
+								"value": "@pipeline().globalParameters.SFDC_DPDB_USERNAME",
+								"type": "Expression"
+							},
+							"OBJECT_NAME": "PRU_AccountToAccountRelationship__c",
+							"SFDC_DPDB_API_VERSION": {
+								"value": "@pipeline().globalParameters.SFDC_DPDB_API_VERSION",
+								"type": "Expression"
+							},
+							"SFDC_DPDB_ORG": {
+								"value": "@pipeline().globalParameters.SFDC_DPDB_ORG",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "sp-UPDATE-BATCH_PARAMETER",
+				"description": "Update BATCH_PARAMETER",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-PRU_ACCOUNTTOACCOUNTRELATIONSHIP__C",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_UPDATE_PARAMETER_VIA_TABLE]",
+					"storedProcedureParameters": {
+						"p_column_name": {
+							"value": "UPDATE_DATE_TIME",
+							"type": "String"
+						},
+						"p_parameter_name": {
+							"value": "prm_EXTRACTDT",
+							"type": "String"
+						},
+						"p_process_name": {
+							"value": "p_CDI-SFDC-PRU_ACCOUNTTOACCOUNTRELATIONSHIP__C",
+							"type": "String"
+						},
+						"p_table_name": {
+							"value": "STAGE_CDI.DPDB_ADVISER_NETWORK_STG",
+							"type": "String"
+						},
+						"p_updated_by": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-PRU_ACCOUNTTOACCOUNTRELATIONSHIP",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-PRU_ACCOUNTTOACCOUNTRELATIONSHIP__C",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-PRU_ACCOUNTTOACCOUNTRELATIONSHIP__C').output.billingReference.billableDuration[0].duration\n",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-PRU_ACCOUNTTOACCOUNTRELATIONSHIP__C').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-PRU_ACCOUNTTOACCOUNTRELATIONSHIP__C').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-PRU_ACCOUNTTOACCOUNTRELATIONSHIP__C').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-PRU_ACCOUNTTOACCOUNTRELATIONSHIP__C').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-PRU_ACCOUNTTOACCOUNTRELATIONSHIP__C').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": "PRU_AccountToAccountRelationship__c",
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "Digital Account/Adviser"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-07-12T13:07:59Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

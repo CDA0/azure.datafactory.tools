@@ -192,15 +192,40 @@
 						"referenceName": "ds_DPDB",
 						"type": "DatasetReference",
 						"parameters": {
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							},
+							"DPDB": {
+								"value": "@pipeline().globalParameters.DPDB",
+								"type": "Expression"
+							},
+							"DPDB_HOST": {
+								"value": "@pipeline().globalParameters.DPDB_HOST",
+								"type": "Expression"
+							},
+							"DPDB_PORT": {
+								"value": "@pipeline().globalParameters.DPDB_PORT",
+								"type": "Expression"
+							},
+							"DPDB_USERNAME": {
+								"value": "@pipeline().globalParameters.DPDB_USERNAME",
+								"type": "Expression"
+							},
+							"DPDB_SECRET_NAME": {
+								"value": "@pipeline().globalParameters.DPDB_SECRET_NAME",
+								"type": "Expression"
+							},
 							"SCHEMA": "DPARTNER",
-							"TABLE": "PARTY",
-							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
-							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
-							"DPDB": "@pipeline().globalParameters.DPDB",
-							"DPDB_HOST": "@pipeline().globalParameters.DPDB_HOST",
-							"DPDB_PORT": "@pipeline().globalParameters.DPDB_PORT",
-							"DPDB_USERNAME": "@pipeline().globalParameters.DBDB_USERNAME",
-							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+							"TABLE": "PARTY"
 						}
 					}
 				],

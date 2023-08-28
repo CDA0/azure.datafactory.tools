@@ -254,7 +254,7 @@
 									"referenceName": "ds_STAGE_CRM",
 									"type": "DatasetReference",
 									"parameters": {
-										"SCHEMA": "STAGE_CRM",
+										"SCHEMA": "STAGE_CRM_POC",
 										"TABLE": "DPDB_ADVISER_LEGACY_AGENCY_STG",
 										"ENVIRONMENT": {
 											"value": "@pipeline().globalParameters.ENVIRONMENT",

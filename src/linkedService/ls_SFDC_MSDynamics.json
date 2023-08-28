@@ -2,22 +2,25 @@
 	"name": "ls_SFDC_MSDynamics",
 	"properties": {
 		"parameters": {
-			"SFDC_MS_DYNAMICS_USER": {
+			"ENVIRONMENT": {
+				"type": "string"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string"
+			},
+			"SHORT_LOCATION": {
 				"type": "string"
 			},
 			"SFDC_MS_DYNAMICS_URL": {
+				"type": "string"
+			},
+			"SFDC_MS_DYNAMICS_USER": {
 				"type": "string"
 			},
 			"SFDC_MS_DYNAMICS_API_VERSION": {
 				"type": "string"
 			},
 			"SFDC_MS_DYNAMICS_ORG": {
-				"type": "string"
-			},
-			"ENVIRONMENT": {
-				"type": "string"
-			},
-			"SHORT_LOCATION": {
 				"type": "string"
 			}
 		},

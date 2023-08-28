@@ -9,23 +9,17 @@
 					"value": "@dataset().ENVIRONMENT",
 					"type": "Expression"
 				},
-				"SHORT_LOCATION": {
-					"value": "@dataset().SHORT_LOCATION",
-					"type": "Expression"
-				},
 				"LOGICAL_ENVIRONMENT": {
 					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
+				},
+				"SHORT_LOCATION": {
+					"value": "@dataset().SHORT_LOCATION",
 					"type": "Expression"
 				}
 			}
 		},
 		"parameters": {
-			"SCHEMA": {
-				"type": "string"
-			},
-			"TABLE_NAME": {
-				"type": "string"
-			},
 			"ENVIRONMENT": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
@@ -37,6 +31,12 @@
 			"SHORT_LOCATION": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
+			},
+			"SCHEMA": {
+				"type": "string"
+			},
+			"TABLE_NAME": {
+				"type": "string"
 			}
 		},
 		"annotations": [],

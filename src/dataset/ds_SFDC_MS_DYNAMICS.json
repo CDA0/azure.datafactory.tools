@@ -5,28 +5,28 @@
 			"referenceName": "ls_SFDC_MSDynamics",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"SFDC_MS_DYNAMICS_USER": {
-					"value": "@dataset().SFDC_MS_DYNAMICS_USER",
+				"ENVIRONMENT": {
+					"value": "@dataset().ENVIRONMENT",
+					"type": "Expression"
+				},
+				"LOGICAL_ENVIRONMENT": {
+					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
+				},
+				"SHORT_LOCATION": {
+					"value": "@dataset().SHORT_LOCATION",
 					"type": "Expression"
 				},
 				"SFDC_MS_DYNAMICS_URL": {
 					"value": "@dataset().SFDC_MS_DYNAMICS_URL",
 					"type": "Expression"
 				},
+				"SFDC_MS_DYNAMICS_USER": {
+					"value": "@dataset().SFDC_MS_DYNAMICS_USER",
+					"type": "Expression"
+				},
 				"SFDC_MS_DYNAMICS_API_VERSION": {
 					"value": "@dataset().SFDC_MS_DYNAMICS_API_VERSION",
-					"type": "Expression"
-				},
-				"SFDC_MS_DYNAMICS_ORG": {
-					"value": "@dataset().SFDC_MS_DYNAMICS_ORG",
-					"type": "Expression"
-				},
-				"ENVIRONMENT": {
-					"value": "@dataset().ENVIRONMENT",
-					"type": "Expression"
-				},
-				"SHORT_LOCATION": {
-					"value": "@dataset().SHORT_LOCATION",
 					"type": "Expression"
 				}
 			}
@@ -36,25 +36,25 @@
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
 			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+			},
 			"SHORT_LOCATION": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
-			},
-			"SFDC_MS_DYNAMICS_USER": {
-				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.SFDC_MS_DYNAMICS_USER"
 			},
 			"SFDC_MS_DYNAMICS_URL": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.SFDC_MS_DYNAMICS_URL"
 			},
+			"SFDC_MS_DYNAMICS_USER": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SFDC_MS_DYNAMICS_USER"
+			},
 			"SFDC_MS_DYNAMICS_API_VERSION": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.SFDC_MS_DYNAMICS_API_VERSION"
-			},
-			"SFDC_MS_DYNAMICS_ORG": {
-				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.SFDC_MS_DYNAMICS_ORG"
 			},
 			"OBJECT_NAME": {
 				"type": "string"

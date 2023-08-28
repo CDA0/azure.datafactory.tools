@@ -1,13 +1,17 @@
 {
 	"name": "ds_STAGE_CDI",
 	"properties": {
-		"description": "Connects to STAGE_CDI (CRM01A)",
+		"description": "Dataset for tables in STAGE_CDI",
 		"linkedServiceName": {
 			"referenceName": "ls_STAGE_CDI",
 			"type": "LinkedServiceReference",
 			"parameters": {
 				"ENVIRONMENT": {
 					"value": "@dataset().ENVIRONMENT",
+					"type": "Expression"
+				},
+				"LOGICAL_ENVIRONMENT": {
+					"value": "@dataset().LOGICAL_ENVIRONMENT",
 					"type": "Expression"
 				},
 				"SHORT_LOCATION": {
@@ -25,23 +29,17 @@
 				"CRM_DB_PORT": {
 					"value": "@dataset().CRM_DB_PORT",
 					"type": "Expression"
-				},
-				"LOGICAL_ENVIRONMENT": {
-					"value": "@dataset().LOGICAL_ENVIRONMENT",
-					"type": "Expression"
 				}
 			}
 		},
 		"parameters": {
-			"SCHEMA": {
-				"type": "string"
-			},
-			"TABLE": {
-				"type": "string"
-			},
 			"ENVIRONMENT": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
 			},
 			"SHORT_LOCATION": {
 				"type": "string",
@@ -59,9 +57,11 @@
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.CRM_DB_PORT"
 			},
-			"LOGICAL_ENVIRONMENT": {
-				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+			"SCHEMA": {
+				"type": "string"
+			},
+			"TABLE": {
+				"type": "string"
 			}
 		},
 		"annotations": [],

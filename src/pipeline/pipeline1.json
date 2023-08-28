@@ -1,0 +1,102 @@
+{
+	"name": "pipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_OCDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"OCDB": {
+								"value": "@pipeline().globalParameters.OCDB",
+								"type": "Expression"
+							},
+							"OCDB_HOST": {
+								"value": "@pipeline().globalParameters.OCDB_HOST",
+								"type": "Expression"
+							},
+							"OCDB_PORT": {
+								"value": "@pipeline().globalParameters.OCDB_PORT",
+								"type": "Expression"
+							},
+							"OCDB_USERNAME": {
+								"value": "@pipeline().globalParameters.OCDB_USERNAME",
+								"type": "Expression"
+							},
+							"SCHEMA": "OCDB01P",
+							"TABLE": "DEPER_CONTROL"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_ADLS",
+						"type": "DatasetReference",
+						"parameters": {
+							"FILE_PATH": "/crm/OutputFiles",
+							"FILE_NAME": "rk_test",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "Sandbox/Rizaul"
+		},
+		"annotations": []
+	}
+}

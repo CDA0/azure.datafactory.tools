@@ -1,0 +1,404 @@
+{
+	"name": "mp_DATASYNC-ADVISER-INC",
+	"properties": {
+		"description": "Name : Nextpathway\nDate : 06/06/2023\nDescription :it will run the all pipelines of Adviser folder having in it.",
+		"activities": [
+			{
+				"name": "p_DPDB-CDI-DPDB_ADVISER_FIRM_STG",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_DPDB-CDI-DPDB_ADVISER_FIRM_STG",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "if-CONDITION-CHECK",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "fe-RECORD-RETURNED",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@variables('v-RUN-PIPELINES')",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "p_CDI-SFDC-ACCOUNT-ADVISER_NETWORK",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "p_CDI-SFDC-ACCOUNT-ADVISER_NETWORK",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "p_CDI-SFDC-ACCOUNT-ADVISER_FIRM",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "p_CDI-SFDC-ACCOUNT-ADVISER_NETWORK",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "p_CDI-SFDC-ACCOUNT-ADVISER_FIRM",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "p_SFDC-CDI-SFDC_ADVISER_ACCOUNT_STG",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "p_CDI-SFDC-ACCOUNT-ADVISER_FIRM",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "p_SFDC-CDI-SFDC_ADVISER_ACCOUNT_STG",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "p_CDI-SFDC-ACCOUNT-ADVISER_OFFICE",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "p_SFDC-CDI-SFDC_ADVISER_ACCOUNT_STG",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "p_CDI-SFDC-ACCOUNT-ADVISER_OFFICE",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "p_SFDC-CDI-SFDC_ADVISER_ACCOUNT_STG1",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "p_CDI-SFDC-ACCOUNT-ADVISER_OFFICE",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "p_SFDC-CDI-SFDC_ADVISER_ACCOUNT_STG",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "p_SFDC-CDI-SFDC_ADVISER_RI_CONTACT_STG",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "p_CDI-SFDC_CONTACT",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "p_SFDC-CDI-SFDC_ADVISER_RI_CONTACT_STG",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "p_CDI-SFDC-PRU_HERITAGEARNASSOCIATION__C",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "p_SFDC-CDI-SFDC_ADVISER_RI_CONTACT_STG",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "p_CDI-SFDC-PRU_HERITAGEARNASSOCIATION__C",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "p_SFDC-CDI-SFDC_ADVISER_HERITAGE_ARN_STG",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "p_CDI-SFDC-PRU_HERITAGEARNASSOCIATION__C",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "p_SFDC-CDI-SFDC_ADVISER_HERITAGE_ARN_STG",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "p_CDI-SFDC-PRU_ACCOUNTTOACCOUNTRELATIONSHIP__C",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "p_SFDC-CDI-SFDC_ADVISER_HERITAGE_ARN_STG",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "p_CDI-SFDC-PRU_ACCOUNTTOACCOUNTRELATIONSHIP__C",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "p_CDI-SFDC_CONTACT",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "p_SFDC-CDI-SFDC_ADVISER_ACCOUNT_STG1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "p_CDI-SFDC_CONTACT",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "spt-RECORDS_PROCESSED",
+				"description": "Returns a value of 1 if a change is detected in DPDB",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "p_DPDB-CDI-DPDB_ADVISER_FIRM_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "p_DPDB-CDI-DPDB_ADVISER_OFFICE_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "p_DPDB-CDI-DPDB_CRM_REGISTERED_INDIVIDUAL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "p_DPDB-CDI-DPDB_ADVISER_LEGACY_AGENCY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "p_DPDB-CDI-DPDB_ADVISER_NETWORK_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+						"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+						"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+					}
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": "select case\n         when sum(RW.RECORDS_WRITTEN) > 0 then\n           1\n        else\n          0\n        end as PROCESS_PIPELINES\n  from (select case\n                when RECORDS_WRITTEN > 0 then\n                    1\n                else\n                    0\n               end as RECORDS_WRITTEN\n          from STAGE_CDI.BATCH_AUDIT\n         where TABLE_NAME = 'DPDB_ADVISER_FIRM_STG'\n           and PIPELINE_NAME = 'p_DPDB-CDI-DPDB_ADVISER_FIRM_STG'\n         union all\n        select case\n                when RECORDS_WRITTEN > 0 then\n                1\n                else\n                0\n               end as RECORDS_WRITTEN\n          from STAGE_CDI.BATCH_AUDIT\n         where TABLE_NAME = 'DPDB_ADVISER_OFFICE_STG'\n           and PIPELINE_NAME = 'p_DPDB-CDI-DPDB_ADVISER_OFFICE_STG'\n         union all\n        select case\n                when RECORDS_WRITTEN > 0 then\n                1\n                else\n                0\n               end as RECORDS_WRITTEN\n          from STAGE_CDI.BATCH_AUDIT\n         where TABLE_NAME = 'DPDB_REGISTERED_INDIVIDUAL_STG'\n           and PIPELINE_NAME = 'p_DPDB-CDI-DPDB_CRM_REGISTERED_INDIVIDUAL_STG'\n         union all\n        select case\n                when RECORDS_WRITTEN > 0 then\n                1\n                else\n                0\n               end as RECORDS_WRITTEN\n          from STAGE_CDI.BATCH_AUDIT\n         where TABLE_NAME = 'DPDB_ADVISER_NETWORK_STG'\n           and PIPELINE_NAME = 'p_DPDB-CDI-DPDB_ADVISER_NETWORK_STG'\n         union all\n        select case\n                when RECORDS_WRITTEN > 0 then\n                1\n                else\n                0\n               end as RECORDS_WRITTEN\n          from STAGE_CDI.BATCH_AUDIT\n         where TABLE_NAME = 'DPDB_ADVISER_LEGACY_AGENCY_STG'\n           and PIPELINE_NAME = 'p_DPDB-CDI-DPDB_ADVISER_LEGACY_AGENCY_STG'\n        ) RW"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "p_DPDB-CDI-DPDB_ADVISER_OFFICE_STG",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_DPDB-CDI-DPDB_ADVISER_OFFICE_STG",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "p_DPDB-CDI-DPDB_CRM_REGISTERED_INDIVIDUAL",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_DPDB-CDI-DPDB_REGISTERED_INDIVIDUAL_STG",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "p_DPDB-CDI-DPDB_ADVISER_LEGACY_AGENCY",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_DPDB-CDI-DPDB_ADVISER_LEGACY_AGENCY_STG",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "p_DPDB-CDI-DPDB_ADVISER_NETWORK_STG",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_DPDB-CDI-DPDB_ADVISER_NETWORK_STG",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "fe-RECORD-RETURNED",
+				"description": "Only 1 record is returned from the script. However, as the script returns in array format, the ForEach activity is required to convert the returned record to boolean (which is then passed to the If condition activity for further processing",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "spt-RECORDS_PROCESSED",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('spt-RECORDS_PROCESSED').output.resultSets[0].rows",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "sv-CONVERT-TO-BOOLEAN",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "v-RUN-PIPELINES",
+								"value": {
+									"value": "@bool(item().PROCESS_PIPELINES)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"rows_written": {
+				"type": "String"
+			},
+			"v-RUN-PIPELINES": {
+				"type": "Boolean"
+			}
+		},
+		"folder": {
+			"name": "Digital Account/Adviser"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-07-11T13:01:44Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

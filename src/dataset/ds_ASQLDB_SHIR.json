@@ -1,7 +1,7 @@
 {
 	"name": "ds_ASQLDB_SHIR",
 	"properties": {
-		"description": "Data set for accessing tables in Azure SQL DB when connecting from / to an on-premise database",
+		"description": "Data set for accessing tables in Azure SQL DB when connecting from / to an on-premise database in Lansing",
 		"linkedServiceName": {
 			"referenceName": "ls_AzureSQLDB_SHIR",
 			"type": "LinkedServiceReference",
@@ -10,23 +10,17 @@
 					"value": "@dataset().ENVIRONMENT",
 					"type": "Expression"
 				},
-				"SHORT_LOCATION": {
-					"value": "@dataset().SHORT_LOCATION",
-					"type": "Expression"
-				},
 				"LOGICAL_ENVIRONMENT": {
 					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
+				},
+				"SHORT_LOCATION": {
+					"value": "@dataset().SHORT_LOCATION",
 					"type": "Expression"
 				}
 			}
 		},
 		"parameters": {
-			"SCHEMA": {
-				"type": "string"
-			},
-			"TABLE_NAME": {
-				"type": "string"
-			},
 			"ENVIRONMENT": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
@@ -38,6 +32,12 @@
 			"SHORT_LOCATION": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
+			},
+			"SCHEMA": {
+				"type": "string"
+			},
+			"TABLE_NAME": {
+				"type": "string"
 			}
 		},
 		"annotations": [],

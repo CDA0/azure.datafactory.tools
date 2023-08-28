@@ -1,0 +1,540 @@
+{
+	"name": "p_CDI-SFDC-ACCOUNT-ADVISER_NETWORK",
+	"properties": {
+		"description": "Name : Nextpathway\nDate : 02/06/2023\nDescription : Pulls data from Azure SQL and Upsert data in SFDC - ACCOUNT",
+		"activities": [
+			{
+				"name": "cd-ACCOUNT",
+				"description": "Pulls data from Azure SQL and loads to Salesforce Account table",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "with ADVISER_NETWORK\nas\n(select distinct\n        NETWORK_PARTY_ROLE_ID,\n        STAGE_CDI.F_INITCAP(ORGANISATION_NAME) as ORGANISATION_NAME,\n        FIRM_REFERENCE_NUMBER,\n        STATUS,\n        REGULATORY_STATUS_ID,\n        PARTY_ROLE_TYPE_ID,\n        PERM_INVESTMENT_ADVICE,\n        PERM_MORTGAGE_ADVICE,\n        PERM_INSURANCE_ADVICE,\n        PERM_PENSION_ADVICE,\n        STAGE_CDI.F_INITCAP(ADDRESS_LINE_1) as ADDRESS_LINE_1,\n        STAGE_CDI.F_INITCAP(ADDRESS_LINE_2) as ADDRESS_LINE_2,\n        STAGE_CDI.F_INITCAP(ADDRESS_LINE_3) as ADDRESS_LINE_3,\n        STAGE_CDI.F_INITCAP(ADDRESS_LINE_4) as ADDRESS_LINE_4,\n        POSTCODE,\n        STAGE_CDI.F_DEPERSONALISE(EMAIL_URL_ADDRESS) as EMAIL_URL_ADDRESS,\n        STAGE_CDI.F_DEPERSONALISE(PHONE_FAX_NUMBER) as PHONE_FAX_NUMBER,\n        max(UPDATE_DATE_TIME) as UPDATE_DATE_TIME\n   from STAGE_CDI.DPDB_ADVISER_NETWORK_STG\n  where UPDATE_DATE_TIME > (select PARAMETER_VALUE_DT\n                              from STAGE_CDI.BATCH_PARAMETER\n                             where PROCESS_NAME = 'p_CDI-SFDC-ACCOUNT-ADVISER_NETWORK'\n                               and PARAMETER_NAME = 'prm_EXTRACTDT'\n                            )\n  group by NETWORK_PARTY_ROLE_ID,\n           ORGANISATION_NAME,\n           FIRM_REFERENCE_NUMBER,\n           STATUS,\n           REGULATORY_STATUS_ID,\n           PARTY_ROLE_TYPE_ID,\n           PERM_INVESTMENT_ADVICE,\n           PERM_MORTGAGE_ADVICE,\n           PERM_INSURANCE_ADVICE,\n           PERM_PENSION_ADVICE,\n           ADDRESS_LINE_1,\n           ADDRESS_LINE_2,\n           ADDRESS_LINE_3,\n           ADDRESS_LINE_4,\n           POSTCODE,\n           EMAIL_URL_ADDRESS,\n           PHONE_FAX_NUMBER\n),\nTRANSLATION\nas\n(select LKP_CODE,\n        RTN_DESC\n   from STAGE_CDI.REF_DPDB_TRANSLATION\n),\nRECORD_TYPE\nas\n(select NAME,\n        SFDC_RECORD_TYPE_STG_ID\n   from STAGE_CDI.SFDC_RECORD_TYPE_STG\n),\nADV_ACC\nas\n(select PRU_PARTYROLEID__C ,\n        SFDC_ADVISER_ACCOUNT_ID\n   from STAGE_CDI.SFDC_ADVISER_ACCOUNT_STG\n  where recordtype = 'Network'\n),\nAN_TRN\nas\n(select AN.NETWORK_PARTY_ROLE_ID,\n        AN.ORGANISATION_NAME,\n        AN.FIRM_REFERENCE_NUMBER,\n        AN.STATUS,\n        AN.REGULATORY_STATUS_ID,\n        AN.PARTY_ROLE_TYPE_ID,\n        AN.PERM_INVESTMENT_ADVICE,\n        AN.PERM_MORTGAGE_ADVICE,\n        AN.PERM_INSURANCE_ADVICE,\n        AN.PERM_PENSION_ADVICE,\n        AN.ADDRESS_LINE_1,\n        AN.ADDRESS_LINE_2,\n        AN.ADDRESS_LINE_3,\n        AN.ADDRESS_LINE_4,\n        AN.POSTCODE,\n        AN.EMAIL_URL_ADDRESS,\n        AN.PHONE_FAX_NUMBER,\n        AN.UPDATE_DATE_TIME,\n        coalesce(TN_ST.RTN_DESC, AN.STATUS) as PRU_STATUS__C,\n        coalesce(TN_RS.RTN_DESC, AN.REGULATORY_STATUS_ID) as PRU_REGULATORYSTATUS__C,\n        coalesce(TN_PR.RTN_DESC, AN.PARTY_ROLE_TYPE_ID) as TYPE,\n        RT.SFDC_RECORD_TYPE_STG_ID as RECORDTYPEID,\n        case\n          when AN.EMAIL_URL_ADDRESS is null\n            or STAGE_CDI.F_VALID_EMAIL_CHECK(AN.EMAIL_URL_ADDRESS) = 1 then\n            0\n          else\n            1\n        end as EMAIL_VAL_IND,\n        concat(AN.ADDRESS_LINE_1,char(10),AN.ADDRESS_LINE_2) as SHIPPINGSTREET,\n        case\n          when AN.ADDRESS_LINE_3 is null then\n            AN.ADDRESS_LINE_4\n          else\n            AN.ADDRESS_LINE_3\n        end as SHIPPINGCITY,\n        case\n          when AN.ADDRESS_LINE_3 is null then\n            null\n          else\n            AN.ADDRESS_LINE_4\n          end as SHIPPINGSTATE,\n        case\n          when trim(AN.ORGANISATION_NAME) is null then\n            1\n          else\n            0\n        end as NAME_VAL_IND,\n        case\n          when AA.SFDC_ADVISER_ACCOUNT_ID is null\n           and AN.STATUS = 'A' then\n            1\n          when AA.SFDC_ADVISER_ACCOUNT_ID is not null then\n            1\n          else\n            0\n        end as UPS_FLAG,\n        'Pru' as O_SOURCE_OF_RECORD\n   from ADVISER_NETWORK AN\n   left outer join TRANSLATION TN_ST\n     on AN.STATUS = TN_ST.LKP_CODE\n   left outer join TRANSLATION TN_RS\n     on AN.REGULATORY_STATUS_ID = TN_RS.LKP_CODE\n   left outer join TRANSLATION TN_PR\n     on AN.PARTY_ROLE_TYPE_ID = TN_PR.LKP_CODE\n   left outer join RECORD_TYPE RT\n     on RT.NAME = 'Network'\n   left outer join ADV_ACC AA\n     on AN.NETWORK_PARTY_ROLE_ID = AA.PRU_PARTYROLEID__C\n)\nselect case\n         when AT.NAME_VAL_IND = 1 then\n           '<Not known>'\n         else\n           AT.ORGANISATION_NAME\n       end as NAME,\n       AT.TYPE as TYPE,\n       AT.RECORDTYPEID as RECORDTYPEID,\n       AT.SHIPPINGSTREET as SHIPPINGSTREET,\n       AT.SHIPPINGCITY as SHIPPINGCITY,\n       AT.SHIPPINGSTATE as SHIPPINGSTATE,\n       AT.POSTCODE as SHIPPINGPOSTALCODE,\n       AT.PHONE_FAX_NUMBER as PHONE,\n       case\n         when AT.EMAIL_VAL_IND = 1 then\n             concat('Invalid email address: ', AT.EMAIL_URL_ADDRESS,char(10))\n         when AT.NAME_VAL_IND = 1 then\n           'Name is unknown'\n         else\n           null\n       end as PRU_DATAQUALITYCOMMENT__C,\n       case\n         when AT.EMAIL_VAL_IND = 1\n           or AT.NAME_VAL_IND = 1 then\n             1\n         else\n           0\n       end as PRU_DATAQUALITYISSUE__C,\n       case\n         when AT.EMAIL_VAL_IND = 1 then\n           null\n         else\n           AT.EMAIL_URL_ADDRESS\n       end as PRU_EMAIL__C,\n       AT.FIRM_REFERENCE_NUMBER as PRU_FIRMREFERENCENUMBER__C,\n       concat('Network_', AT.NETWORK_PARTY_ROLE_ID) as PRU_PARTYROLEID__C,\n       AT.PERM_INSURANCE_ADVICE as PRU_PERMISSIONFORINSURANCEADVICE__C,\n       AT.O_SOURCE_OF_RECORD as PRU_SOURCEOFRECORD__C,\n       AT.PERM_INVESTMENT_ADVICE as PRU_PERMISSIONFORINVESTMENTADVICE__C,\n       AT.PERM_MORTGAGE_ADVICE as PRU_PERMISSIONFORMORTGAGEADVICE__C,\n       AT.PERM_PENSION_ADVICE as PRU_PERMISSIONFORPENSIONXFERADVICE__C,\n       AT.PRU_REGULATORYSTATUS__C as PRU_REGULATORYSTATUS__C,\n       AT.PRU_STATUS__C as PRU_STATUS__C\n  from AN_TRN AT\n where AT.UPS_FLAG = 1\n;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SalesforceSink",
+						"writeBatchSize": 5000,
+						"writeBehavior": "upsert",
+						"externalIdFieldName": "PRU_PARTYROLEID__C",
+						"ignoreNullValues": false
+					},
+					"enableStaging": false,
+					"enableSkipIncompatibleRow": true,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "ls_ADLS2",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"ENVIRONMENT": {
+										"value": "@pipeline().globalParameters.ENVIRONMENT",
+										"type": "Expression"
+									},
+									"SHORT_LOCATION": {
+										"value": "@pipeline().globalParameters.SHORT_LOCATION",
+										"type": "Expression"
+									},
+									"LOGICAL_ENVIRONMENT": {
+										"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+										"type": "Expression"
+									}
+								}
+							},
+							"path": "crm/ErrorLogs"
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "TYPE",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "Type",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "RECORDTYPEID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "RecordTypeId",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SHIPPINGSTREET",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "ShippingStreet",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SHIPPINGCITY",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "ShippingCity",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SHIPPINGSTATE",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "ShippingState",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SHIPPINGPOSTALCODE",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "ShippingPostalCode",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PHONE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "Phone",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_DATAQUALITYCOMMENT__C",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "PRU_DataQualityComment__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_EMAIL__C",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "PRU_Email__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_FIRMREFERENCENUMBER__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_FirmReferenceNumber__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_STATUS__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_Status__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_REGULATORYSTATUS__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_RegulatoryStatus__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_SOURCEOFRECORD__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_SourceOfRecord__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_PARTYROLEID__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_PartyRoleID__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_PERMISSIONFORINSURANCEADVICE__C",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								},
+								"sink": {
+									"name": "PRU_PermissionForInsuranceAdvice__c",
+									"type": "Boolean"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_PERMISSIONFORINVESTMENTADVICE__C",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								},
+								"sink": {
+									"name": "PRU_PermissionForInvestmentAdvice__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_PERMISSIONFORMORTGAGEADVICE__C",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								},
+								"sink": {
+									"name": "PRU_PermissionForMortgageAdvice__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_PERMISSIONFORPENSIONXFERADVICE__C",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								},
+								"sink": {
+									"name": "PRU_PermissionForPensionXferAdvice__c",
+									"type": "Boolean"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_DATAQUALITYISSUE__C",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "PRU_DataQualityIssue__c",
+									"type": "Boolean"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": true
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_ASQLDB_WOKING_SHIR",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "DPDB_ADVISER_NETWORK_STG",
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_SFDC_DPDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							},
+							"SFDC_DPDB_URL": {
+								"value": "@pipeline().globalParameters.SFDC_DPDB_URL",
+								"type": "Expression"
+							},
+							"SFDC_DPDB_USERNAME": {
+								"value": "@pipeline().globalParameters.SFDC_DPDB_USERNAME",
+								"type": "Expression"
+							},
+							"OBJECT_NAME": "ACCOUNT",
+							"SFDC_DPDB_API_VERSION": {
+								"value": "@pipeline().globalParameters.SFDC_DPDB_API_VERSION",
+								"type": "Expression"
+							},
+							"SFDC_DPDB_ORG": {
+								"value": "@pipeline().globalParameters.SFDC_DPDB_ORG",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "sp-UPDATE-BATCH_PARAMETER",
+				"description": "Update BATCH_PARAMETER",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-ACCOUNT",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_UPDATE_PARAMETER_VIA_TABLE]",
+					"storedProcedureParameters": {
+						"p_column_name": {
+							"value": "UPDATE_DATE_TIME",
+							"type": "String"
+						},
+						"p_parameter_name": {
+							"value": "prm_EXTRACTDT",
+							"type": "String"
+						},
+						"p_process_name": {
+							"value": "p_CDI-SFDC-ACCOUNT-ADVISER_NETWORK",
+							"type": "String"
+						},
+						"p_table_name": {
+							"value": "STAGE_CDI.DPDB_ADVISER_NETWORK_STG",
+							"type": "String"
+						},
+						"p_updated_by": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-ACCOUNT",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-ACCOUNT",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-ACCOUNT').output.billingReference.billableDuration[0].duration\n",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-ACCOUNT').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-ACCOUNT').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-ACCOUNT').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-ACCOUNT').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-ACCOUNT').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": "ACCOUNT",
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "Digital Account/Adviser"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-07-13T09:38:12Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

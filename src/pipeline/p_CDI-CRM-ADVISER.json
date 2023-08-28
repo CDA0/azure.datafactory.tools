@@ -27,11 +27,23 @@
 						"referenceName": "ds_ASQLDB",
 						"type": "DatasetReference",
 						"parameters": {
-							"SCHEMA": "STAGE_CDI",
+							"SCHEMA": {
+								"value": "STAGE_CDI",
+								"type": "Expression"
+							},
 							"TABLE_NAME": "BATCH_PARAMETER",
-							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
-							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
-							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							}
 						}
 					},
 					"firstRowOnly": false
@@ -96,14 +108,26 @@
 									"referenceName": "ds_ASQLDB_SHIR",
 									"type": "DatasetReference",
 									"parameters": {
-										"SCHEMA": "STAGE_CDI",
+										"ENVIRONMENT": {
+											"value": "@pipeline().globalParameters.ENVIRONMENT",
+											"type": "Expression"
+										},
+										"LOGICAL_ENVIRONMENT": {
+											"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+											"type": "Expression"
+										},
+										"SHORT_LOCATION": {
+											"value": "@pipeline().globalParameters.SHORT_LOCATION",
+											"type": "Expression"
+										},
+										"SCHEMA": {
+											"value": "STAGE_CDI",
+											"type": "Expression"
+										},
 										"TABLE_NAME": {
 											"value": "@item().TABLE_NAME",
 											"type": "Expression"
-										},
-										"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
-										"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
-										"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+										}
 									}
 								}
 							],
@@ -112,14 +136,35 @@
 									"referenceName": "ds_STAGE_CDI",
 									"type": "DatasetReference",
 									"parameters": {
+										"ENVIRONMENT": {
+											"value": "@pipeline().globalParameters.ENVIRONMENT",
+											"type": "Expression"
+										},
+										"LOGICAL_ENVIRONMENT": {
+											"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+											"type": "Expression"
+										},
+										"SHORT_LOCATION": {
+											"value": "@pipeline().globalParameters.SHORT_LOCATION",
+											"type": "Expression"
+										},
+										"CRM_DB": {
+											"value": "@pipeline().globalParameters.CRM_DB",
+											"type": "Expression"
+										},
+										"CRM_DB_HOST": {
+											"value": "@pipeline().globalParameters.CRM_DB_HOST",
+											"type": "Expression"
+										},
+										"CRM_DB_PORT": {
+											"value": "@pipeline().globalParameters.CRM_DB_PORT",
+											"type": "Expression"
+										},
 										"SCHEMA": "STAGE_CDI",
-										"TABLE": "@item().TABLE_NAME",
-										"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
-										"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
-										"CRM_DB": "@pipeline().globalParameters.CRM_DB",
-										"CRM_DB_HOST": "@pipeline().globalParameters.CRM_DB_HOST",
-										"CRM_DB_PORT": "@pipeline().globalParameters.CRM_DB_PORT",
-										"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+										"TABLE": {
+											"value": "@item().TABLE_NAME",
+											"type": "Expression"
+										}
 									}
 								}
 							]

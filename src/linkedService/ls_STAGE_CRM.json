@@ -7,6 +7,10 @@
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
 			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+			},
 			"SHORT_LOCATION": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
@@ -22,10 +26,6 @@
 			"CRM_DB_PORT": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.CRM_DB_PORT"
-			},
-			"LOGICAL_ENVIRONMENT": {
-				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
 			}
 		},
 		"annotations": [],

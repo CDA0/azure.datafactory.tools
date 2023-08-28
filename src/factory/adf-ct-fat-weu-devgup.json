@@ -26,6 +26,10 @@
 				"type": "string",
 				"value": "1531"
 			},
+			"DPDB": {
+				"type": "string",
+				"value": "DISPR02T"
+			},
 			"DPDB_HOST": {
 				"type": "string",
 				"value": "AXORAUAT04"
@@ -34,29 +38,157 @@
 				"type": "string",
 				"value": "1521"
 			},
-			"DPDB": {
+			"DPDB_USERNAME": {
 				"type": "string",
-				"value": "DISPR02T"
+				"value": "dpdb02t_adf"
 			},
-			"DBDB_USERNAME": {
+			"DPDB_SECRET_NAME": {
 				"type": "string",
-				"value": "dpdb02t"
+				"value": "dev-DISPR02T-dpdb02t-adf"
 			},
-			"MS_DYNAMICS_HOST": {
+			"ENIGMA_DB_HOST": {
 				"type": "string",
-				"value": "CT022WTDBA012.corptest.local"
+				"value": "LGRDCDSQL19.development.pre-release.local"
 			},
-			"MS_DYNAMICS_PORT": {
+			"ENIGMA_DB_PORT": {
 				"type": "string",
-				"value": "1433"
+				"value": "1601"
 			},
-			"MS_DYNAMICS_DATABASE": {
+			"ENIGMA_DB": {
+				"type": "string",
+				"value": "EG_DEVELOPEMENT"
+			},
+			"ENIGMA_DB_USERNAME": {
+				"type": "string",
+				"value": "adf_staging_user"
+			},
+			"ENIGMA_DB_SECRET_NAME": {
+				"type": "string",
+				"value": "dev-ENIGMA-adf-staging-user"
+			},			
+			"MS_DYNAMICS_DB": {
 				"type": "string",
 				"value": "DVFCRM_MSCRM"
 			},
-			"MS_DYNAMICS_USERNAME": {
+			"MS_DYNAMICS_DB_HOST": {
+				"type": "string",
+				"value": "CT022WTDBA012.corptest.local"
+			},
+			"MS_DYNAMICS_DB_PORT": {
+				"type": "string",
+				"value": "1433"
+			},
+			"MS_DYNAMICS_DB_USERNAME": {
 				"type": "string",
 				"value": "pgds.local\\SVCIICSZ01"
+			},
+			"MS_DYNAMICS_DB_SECRET_NAME": {
+				"type": "string",
+				"value": "dev-MSDYNAMICS-dvfcrm-mscrm"
+			},
+			"OCDB": {
+				"type": "string",
+				"value": "OCDB40T"
+			},
+			"OCDB_HOST": {
+				"type": "string",
+				"value": "AXORAUAT20"
+			},
+			"OCDB_PORT": {
+				"type": "string",
+				"value": "1521"
+			},
+			"OCDB_USERNAME": {
+				"type": "string",
+				"value": "OCDB01P_CDI_ADF"
+			},
+			"OCDB_SECRET_NAME": {
+				"type": "string",
+				"value": "dev-OCDB40T-ocdb01p-cdi-adf"
+			},
+			"OCDBS": {
+				"type": "string",
+				"value": "OCDBS40T"
+			},
+			"OCDBS_HOST": {
+				"type": "string",
+				"value": "AXORAUAT20"
+			},
+			"OCDBS_PORT": {
+				"type": "string",
+				"value": "1521"
+			},
+			"OCDBS_USERNAME": {
+				"type": "string",
+				"value": "OCDBS01P_CDI_ADF"
+			},
+			"OCDBS_SECRET_NAME": {
+				"type": "string",
+				"value": "dev-OCDBS40T-ocdbs01p-cdi-adf.yml"
+			},
+			"SFDC_CRM_URL": {
+				"type": "string",
+				"value": "https://pruuk--adf2.sandbox.my.salesforce.com/"
+			},
+			"SFDC_CRM_USERNAME": {
+				"type": "string",
+				"value": "adfintegrationuser@mandg.com.pru.adf2"
+			},
+			"SFDC_CRM_API_VERSION": {
+				"type": "string",
+				"value": "54.0"
+			},
+			"SFDC_CRM_ORG": {
+				"type": "string",
+				"value": "adf2"
+			},
+			"SFDC_DPDB_URL": {
+				"type": "string",
+				"value": "https://pruuk--adf2.sandbox.my.salesforce.com/"
+			},
+			"SFDC_DPDB_USERNAME": {
+				"type": "string",
+				"value": "adfdpdbintegrationuser@prudential.co.uk.adf2"
+			},
+			"SFDC_DPDB_API_VERSION": {
+				"type": "string",
+				"value": "57.0"
+			},
+			"SFDC_DPDB_ORG": {
+				"type": "string",
+				"value": "adf2"
+			},
+			"SFDC_ENIGMA_URL": {
+				"type": "string",
+				"value": "https://pruuk--fatr2.sandbox.my.salesforce.com/"
+			},
+			"SFDC_ENIGMA_USERNAME": {
+				"type": "string",
+				"value": "adfenigmaintegrationuser@prudential.co.uk.pru.fatr2"
+			},
+			"SFDC_ENIGMA_API_VERSION": {
+				"type": "string",
+				"value": "57.0"
+			},
+			"SFDC_ENIGMA_ORG": {
+				"type": "string",
+				"value": "fatr2"
+			},
+			"SFDC_ENIGMA_WEALTH_URL": {
+				"type": "string",
+				"value": "https://pruuk--fatr2.sandbox.my.salesforce.com/"
+			},
+			"SFDC_ENIGMA_WEALTH_USERNAME": {
+				"type": "string",
+				"value": "adfenigmawealthplatformintegrationuser@prudential.co.uk.pru.fatr2"
+			},
+			"SFDC_ENIGMA_WEALTH_API_VERSION": {
+				"type": "string",
+				"value": "57.0"
+			},
+			"SFDC_ENIGMA_WEALTH_ORG": {
+				"type": "string",
+				"value": "fatr2"
 			},
 			"SFDC_MS_DYNAMICS_USER": {
 				"type": "string",
@@ -70,41 +202,57 @@
 				"type": "string",
 				"value": "57.0"
 			},
-			"DOCMAN_HOST": {
-				"type": "string",
-				"value": "AXORAUAT05"
-			},
-			"DOCMAN_PORT": {
-				"type": "string",
-				"value": "1521"
-			},
-			"DOCMAN": {
-				"type": "string",
-				"value": "DMR01T"
-			},
-			"DOCMAN_USERNAME": {
-				"type": "string",
-				"value": "docman_uat2"
-			},
-			"OSDB_HOST": {
-				"type": "string",
-				"value": "AXORADEV01"
-			},
-			"OSDB_PORT": {
-				"type": "string",
-				"value": "1521"
-			},
-			"OSDB": {
-				"type": "string",
-				"value": "OUTPT01A"
-			},
-			"OSDB_USERNAME": {
-				"type": "string",
-				"value": "OUTPUTSERVICE_ST_RO"
-			},
 			"SFDC_MS_DYNAMICS_ORG": {
 				"type": "string",
 				"value": "ascdfat"
+			},
+			"SFDC_ODS_URL": {
+				"type": "string",
+				"value": "https://pruuk--adf2.sandbox.my.salesforce.com/"
+			},
+			"SFDC_ODS_USERNAME": {
+				"type": "string",
+				"value": "adfodsintegrationuser@prudential.co.uk.pru.adf2"
+			},
+			"SFDC_ODS_API_VERSION": {
+				"type": "string",
+				"value": "57.0"
+			},
+			"SFDC_ODS_ORG": {
+				"type": "string",
+				"value": "adf2"
+			},
+			"SONATA_ODS_DB": {
+				"type": "string",
+				"value": "SONA04A"
+			},
+			"SONATA_ODS_DB_USERNAME": {
+				"type": "string",
+				"value": "wsredusersys2_ro"
+			},
+			"SONATA_ODS_DB_HOST": {
+				"type": "string",
+				"value": "AXORADEV10"
+			},
+			"SONATA_ODS_DB_PORT": {
+				"type": "string",
+				"value": "1526"
+			},
+			"SONATA_ODS_DB_SECRET_NAME": {
+				"type": "string",
+				"value": "dev-SONA04A-wsredusersys2-ro"
+			},
+			"STAGE_SONATA_DB": {
+				"type": "string",
+				"value": "STAGE72A"
+			},
+			"STAGE_SONATA_DB_HOST": {
+				"type": "string",
+				"value": "AXORADEV05"
+			},
+			"STAGE_SONATA_DB_PORT": {
+				"type": "string",
+				"value": "1521"
 			}
 		}
 	},

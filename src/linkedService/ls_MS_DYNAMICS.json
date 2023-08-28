@@ -3,18 +3,6 @@
 	"properties": {
 		"description": "Linked service for MS Dynamics",
 		"parameters": {
-			"MS_DYNAMICS_HOST": {
-				"type": "string"
-			},
-			"MS_DYNAMICS_PORT": {
-				"type": "string"
-			},
-			"MS_DYNAMICS_DATABASE": {
-				"type": "string"
-			},
-			"MS_DYNAMICS_USERNAME": {
-				"type": "string"
-			},
 			"ENVIRONMENT": {
 				"type": "string"
 			},
@@ -23,13 +11,28 @@
 			},
 			"SHORT_LOCATION": {
 				"type": "string"
+			},
+			"MS_DYNAMICS_DB": {
+				"type": "string"
+			},
+			"MS_DYNAMICS_DB_HOST": {
+				"type": "string"
+			},
+			"MS_DYNAMICS_DB_PORT": {
+				"type": "string"
+			},
+			"MS_DYNAMICS_DB_USERNAME": {
+				"type": "string"
+			},
+			"MS_DYNAMICS_DB_SECRET_NAME": {
+				"type": "string"
 			}
 		},
 		"annotations": [],
 		"type": "SqlServer",
 		"typeProperties": {
-			"connectionString": "Integrated Security=True;Data Source=\"@{linkedService().MS_DYNAMICS_HOST}, @{linkedService().MS_DYNAMICS_PORT}\";Initial Catalog=@{linkedService().MS_DYNAMICS_DATABASE}",
-			"userName": "@{linkedService().MS_DYNAMICS_USERNAME}",
+			"connectionString": "Integrated Security=True;Data Source=\"@{linkedService().MS_DYNAMICS_DB_HOST}, @{linkedService().MS_DYNAMICS_DB_PORT}\";Initial Catalog=@{linkedService().MS_DYNAMICS_DB}",
+			"userName": "@{linkedService().MS_DYNAMICS_DB_USERNAME}",
 			"password": {
 				"type": "AzureKeyVaultSecret",
 				"store": {
@@ -47,7 +50,7 @@
 					}
 				},
 				"secretName": {
-					"value": "@{linkedService().LOGICAL_ENVIRONMENT}-MSDYNAMICS",
+					"value": "@{linkedService().MS_DYNAMICS_DB_SECRET_NAME}",
 					"type": "Expression"
 				}
 			}

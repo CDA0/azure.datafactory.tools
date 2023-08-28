@@ -429,7 +429,7 @@
 									"referenceName": "ds_STAGE_CRM",
 									"type": "DatasetReference",
 									"parameters": {
-										"SCHEMA": "STAGE_CRM",
+										"SCHEMA": "STAGE_CRM_POC",
 										"TABLE": "DPDB_REGISTERED_INDIVIDUAL_STG",
 										"ENVIRONMENT": {
 											"value": "@pipeline().globalParameters.ENVIRONMENT",

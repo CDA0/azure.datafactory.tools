@@ -1,0 +1,963 @@
+{
+	"name": "p_DPDB-CDI-DPDB_ADVISER_LEGACY_AGENCY_STG",
+	"properties": {
+		"description": "Name : Nextpathway\nDate : 01/06/2023\nDescription : pulls data from oracle tables and loads into transient table. Compares transient table with staging table to identify new/updated records in the target/staging table and load target table.",
+		"activities": [
+			{
+				"name": "sp-TRUNCATE-TD_DPDB_ADVISER_LEGACY_AGENCY_STG",
+				"description": "This step truncates the transient table, TD_DPDB_ADVISER_LEGACY_AGENCY_STG.",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_LOAD].[PRC_TRUNCATE_TD_TABLE]",
+					"storedProcedureParameters": {
+						"p_table_name": {
+							"value": "TD_DPDB_ADVISER_LEGACY_AGENCY_STG",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "cd-TD_DPDB_ADVISER_LEGACY_AGENCY_STG",
+				"description": "pulls data from oracle tables, loads into transient table.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "sp-TRUNCATE-TD_DPDB_ADVISER_LEGACY_AGENCY_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"oracleReaderQuery": "with LEGACY_AGENCY\nas\n(select replace(LAD.ACCOUNT_NUMBER, '/', '') as ACCOUNT_NUMBER,\n        PR.PARTY_ROLE_ID as OFFICE_PARTY_ROLE_ID,\n        LAD.ACCOUNT_STATUS,\n        OPR.STATUS as OFFICE_STATUS,\n        PR.PARTY_ROLE_TYPE_ID,\n        CA.INDIVIDUAL_PARTY_ROLE_ID,\n        LAD.ACCOUNT_TYPE_ID,\n        LAD.LEGACY_SYSTEM_ID\n   from PARTY P\n  inner join PARTY_ROLE PR\n     on (PR.PARTY_ID = P.PARTY_ID)\n  inner join ORGANISATION_PARTY_ROLE OPR\n     on (OPR.PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n  inner join COMMISSION_ACCOUNT CA\n     on (CA.PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n  inner join LEGACY_ACCOUNT_DETAIL LAD\n     on (LAD.COMMISSION_ACCOUNT_ID = CA.COMMISSION_ACCOUNT_ID)\n  where LAD.ACCOUNT_TYPE_ID != 'at_commto_sonata'\n),\nRELATED_PARTY\nas\n(select PRR.PARTY_ROLE_ID,\n        PRR.RELATED_PARTY_ROLE_ID\n   from PARTY_ROLE_RELATIONSHIP PRR\n  where relationship_type_id='rel_afoff' \n    and end_date is null\n)\nselect LA.ACCOUNT_NUMBER,\n       LA.OFFICE_PARTY_ROLE_ID,\n       RP.PARTY_ROLE_ID as FIRM_PARTY_ROLE_ID,\n       LA.ACCOUNT_STATUS,\n       LA.OFFICE_STATUS,\n       LA.PARTY_ROLE_TYPE_ID,\n       LA.INDIVIDUAL_PARTY_ROLE_ID,\n       LA.ACCOUNT_TYPE_ID,\n       LA.LEGACY_SYSTEM_ID\n  from LEGACY_AGENCY LA\n  left join RELATED_PARTY RP \n    on (LA.OFFICE_PARTY_ROLE_ID = RP.RELATED_PARTY_ROLE_ID)",
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ACCOUNT_NUMBER",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ACCOUNT_NUMBER",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OFFICE_PARTY_ROLE_ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OFFICE_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "FIRM_PARTY_ROLE_ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FIRM_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ACCOUNT_STATUS",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ACCOUNT_STATUS",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OFFICE_STATUS",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OFFICE_STATUS",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PARTY_ROLE_TYPE_ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PARTY_ROLE_TYPE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "INDIVIDUAL_PARTY_ROLE_ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "INDIVIDUAL_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ACCOUNT_TYPE_ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ACCOUNT_TYPE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "LEGACY_SYSTEM_ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "LEGACY_SYSTEM_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_DPDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							},
+							"DPDB": {
+								"value": "@pipeline().globalParameters.DPDB",
+								"type": "Expression"
+							},
+							"DPDB_HOST": {
+								"value": "@pipeline().globalParameters.DPDB_HOST",
+								"type": "Expression"
+							},
+							"DPDB_PORT": {
+								"value": "@pipeline().globalParameters.DPDB_PORT",
+								"type": "Expression"
+							},
+							"DPDB_USERNAME": {
+								"value": "@pipeline().globalParameters.DPDB_USERNAME",
+								"type": "Expression"
+							},
+							"DPDB_SECRET_NAME": {
+								"value": "@pipeline().globalParameters.DPDB_SECRET_NAME",
+								"type": "Expression"
+							},
+							"SCHEMA": "DPARTNER",
+							"TABLE": "PARTY"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_ASQLDB_SHIR",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_LOAD",
+							"TABLE_NAME": "TD_DPDB_ADVISER_LEGACY_AGENCY_STG",
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Upsert",
+				"description": "compares transient table with staging table to identify new/updated records in the target/staging table.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "cd-TD_DPDB_ADVISER_LEGACY_AGENCY_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"additionalColumns": [
+							{
+								"name": "CREATE_USER_ID",
+								"value": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								}
+							}
+						],
+						"sqlReaderQuery": "select TDALAS.ACCOUNT_NUMBER,\n       TDALAS.OFFICE_PARTY_ROLE_ID,\n       TDALAS.FIRM_PARTY_ROLE_ID,\n       TDALAS.ACCOUNT_STATUS,\n       TDALAS.OFFICE_STATUS,\n       TDALAS.PARTY_ROLE_TYPE_ID,\n       TDALAS.INDIVIDUAL_PARTY_ROLE_ID,\n       TDALAS.ACCOUNT_TYPE_ID,\n       TDALAS.LEGACY_SYSTEM_ID,\n       TDALAS.RECORD_UPDATE_IND,\n       cast(0 as bit) as RECORD_DELETE_IND,\n       cast(sysdatetimeoffset() at time zone 'GMT Standard Time' as datetime) as UPDATE_DATE_TIME\n  from (select ACCOUNT_NUMBER,\n               OFFICE_PARTY_ROLE_ID,\n               FIRM_PARTY_ROLE_ID,\n               ACCOUNT_STATUS,\n               OFFICE_STATUS,\n               PARTY_ROLE_TYPE_ID,\n               INDIVIDUAL_PARTY_ROLE_ID,\n               ACCOUNT_TYPE_ID,\n               LEGACY_SYSTEM_ID,\n               convert(nvarchar(32), HashBytes('SHA2_256', concat(ACCOUNT_NUMBER,\n                                                                  OFFICE_PARTY_ROLE_ID,\n                                                                  FIRM_PARTY_ROLE_ID,\n                                                                  ACCOUNT_STATUS,\n                                                                  OFFICE_STATUS,\n                                                                  INDIVIDUAL_PARTY_ROLE_ID)), 2) as RECORD_UPDATE_IND\n          from STAGE_LOAD.TD_DPDB_ADVISER_LEGACY_AGENCY_STG\n       ) TDALAS\n  left outer join STAGE_CDI.DPDB_ADVISER_LEGACY_AGENCY_STG DALAS\n    on (    DALAS.RECORD_DELETE_IND = 0\n        and TDALAS.ACCOUNT_NUMBER = DALAS.ACCOUNT_NUMBER\n        and TDALAS.RECORD_UPDATE_IND = DALAS.RECORD_UPDATE_IND)\n where DALAS.ACCOUNT_NUMBER is null",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "upsert",
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"ACCOUNT_NUMBER"
+							]
+						},
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ACCOUNT_NUMBER",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "ACCOUNT_NUMBER",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OFFICE_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "OFFICE_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "FIRM_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "FIRM_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ACCOUNT_STATUS",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "ACCOUNT_STATUS",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OFFICE_STATUS",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "OFFICE_STATUS",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PARTY_ROLE_TYPE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PARTY_ROLE_TYPE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "INDIVIDUAL_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "INDIVIDUAL_PARTY_ROLE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ACCOUNT_TYPE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "ACCOUNT_TYPE_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "LEGACY_SYSTEM_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "LEGACY_SYSTEM_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "RECORD_UPDATE_IND",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "RECORD_UPDATE_IND",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "RECORD_DELETE_IND",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "RECORD_DELETE_IND",
+									"type": "Boolean",
+									"physicalType": "bit"
+								}
+							},
+							{
+								"source": {
+									"name": "CREATE_USER_ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CREATE_USER_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "UPDATE_DATE_TIME",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "UPDATE_DATE_TIME",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_ASQLDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_LOAD",
+							"TABLE_NAME": "TD_DPDB_ADVISER_LEGACY_AGENCY_STG",
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_ASQLDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "DPDB_ADVISER_LEGACY_AGENCY_STG",
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Del",
+				"description": "compares transient table with staging table to identify deleted records in the target/staging table.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Upsert",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select DALAS.ACCOUNT_NUMBER,\r\n       cast(1 as bit) as RECORD_DELETE_IND,\r\n       cast(sysdatetimeoffset() at time zone 'GMT Standard Time' as datetime) as UPDATE_DATE_TIME\r\n  from STAGE_CDI.DPDB_ADVISER_LEGACY_AGENCY_STG DALAS\r\n  left outer join STAGE_LOAD.TD_DPDB_ADVISER_LEGACY_AGENCY_STG TDALAS\r\n    on (TDALAS.ACCOUNT_NUMBER = DALAS.ACCOUNT_NUMBER)\r\n where DALAS.RECORD_DELETE_IND = 0\r\n   and TDALAS.ACCOUNT_NUMBER is null;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "upsert",
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"ACCOUNT_NUMBER"
+							]
+						},
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ACCOUNT_NUMBER",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "ACCOUNT_NUMBER",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "RECORD_DELETE_IND",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "RECORD_DELETE_IND",
+									"type": "Boolean",
+									"physicalType": "bit"
+								}
+							},
+							{
+								"source": {
+									"name": "UPDATE_DATE_TIME",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "UPDATE_DATE_TIME",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_ASQLDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_LOAD",
+							"TABLE_NAME": "TD_DPDB_ADVISER_LEGACY_AGENCY_STG",
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_ASQLDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "DPDB_ADVISER_LEGACY_AGENCY_STG",
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-TD_DPDB_ADVISER_LEGACY_AGENCY_STG",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-TD_DPDB_ADVISER_LEGACY_AGENCY_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-TD_DPDB_ADVISER_LEGACY_AGENCY_STG').output.billingReference.billableDuration[0].duration\n",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-TD_DPDB_ADVISER_LEGACY_AGENCY_STG').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-TD_DPDB_ADVISER_LEGACY_AGENCY_STG').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-TD_DPDB_ADVISER_LEGACY_AGENCY_STG').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-TD_DPDB_ADVISER_LEGACY_AGENCY_STG').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-TD_DPDB_ADVISER_LEGACY_AGENCY_STG').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": "TD_DPDB_ADVISER_LEGACY_AGENCY_STG",
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-DPDB_ADVISER_LEGACY_AGENCY_STG",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Upsert",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Upsert').output.billingReference.billableDuration[0].duration\n",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Upsert').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Upsert').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Upsert').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Upsert').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Upsert').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": "DPDB_ADVISER_LEGACY_AGENCY_STG",
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-DPDB_ADVISER_LEGACY_AGENCY_STG_D",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Del",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Del').output.billingReference.billableDuration[0].duration\n",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Del').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Del').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Del').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Del').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_LEGACY_AGENCY_STG_Del').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": "DPDB_ADVISER_LEGACY_AGENCY_STG-Del",
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "Digital Account/Adviser"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-06-20T06:20:28Z"
+	}
+}
