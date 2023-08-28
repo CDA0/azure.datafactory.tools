@@ -1,5 +1,5 @@
 {
-	"name": "p_MSD_STG_CRM_PLAT_DYN_TRANSFEROUT_STG",
+	"name": "p_MSD_CDI_CRM_PLAT_DYN_TRANSFEROUT_STG",
 	"properties": {
 		"description": "Author: Sahana Ganguly\nDate - August 2023\nProject - CRM Migration, implemented under CHG######\nDescription - This pipeline will pull all the data from the required fields from ASC_TRANSFEROUT table from CRM and load it into CRM_PLAT_DYN_TRANSFEROUT_STG table in STAGE_CDI.",
 		"activities": [
