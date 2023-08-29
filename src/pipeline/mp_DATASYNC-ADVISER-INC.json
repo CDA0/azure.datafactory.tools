@@ -254,7 +254,7 @@
 						]
 					},
 					{
-						"activity": "p_DPDB-CDI-DPDB_ADVISER_LEGACY_AGENCY",
+						"activity": "p_DPDB-CDI-DPDB_ADVISER_LEGACY_AGENCY_STG",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -320,7 +320,7 @@
 				}
 			},
 			{
-				"name": "p_DPDB-CDI-DPDB_ADVISER_LEGACY_AGENCY",
+				"name": "p_DPDB-CDI-DPDB_ADVISER_LEGACY_AGENCY_STG",
 				"type": "ExecutePipeline",
 				"dependsOn": [],
 				"userProperties": [],

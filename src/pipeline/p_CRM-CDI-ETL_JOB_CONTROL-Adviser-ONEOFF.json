@@ -1,0 +1,163 @@
+{
+	"name": "p_CRM-CDI-ETL_JOB_CONTROL-Adviser-ONEOFF",
+	"properties": {
+		"description": "Name: Rizaul Kamal\nDate: 28/08/203\nDescription: Copies data from ETL_JOB_CONTROL to set up initial parameter value for batch run (prm_EXTRACTDT)",
+		"activities": [
+			{
+				"name": "cd-ETL_JOB_CONTROL",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "upsert",
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"ETL_JOB_CONTROL_ID"
+							]
+						},
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ETL_JOB_CONTROL_ID",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "ETL_JOB_CONTROL_ID",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 3
+								}
+							},
+							{
+								"source": {
+									"name": "LAYER_NAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "LAYER_NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "MAPPING_NAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "MAPPING_NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PARAMETER_NAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PARAMETER_NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PARAMETER_VALUE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PARAMETER_VALUE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "FLAG",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FLAG",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "DESCRIPTION",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DESCRIPTION",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_STAGE_CRM",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CRM_POC",
+							"TABLE": "ETL_JOB_CONTROL",
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+							"CRM_DB": "@pipeline().globalParameters.CRM_DB",
+							"CRM_DB_HOST": "@pipeline().globalParameters.CRM_DB_HOST",
+							"CRM_DB_PORT": "@pipeline().globalParameters.CRM_DB_PORT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_ASQLDB_SHIR",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "ETL_JOB_CONTROL",
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "Digital Account/Adviser - OneOff"
+		},
+		"annotations": []
+	}
+}
