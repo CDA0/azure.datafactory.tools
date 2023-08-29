@@ -40,15 +40,16 @@ steps:
           scriptLocation: inlineScript
           inlineScript: |
             set -euo pipefail
+            shopt -s globstar
 
             az account set -s sub-customer-${{ parameters.environment }}-t1-01
 
             sqlServerFqdn=sql-ct-${{ parameters.environment }}-$(shortLocation)-gupcom.database.windows.net
             sqlDatabaseName=sdb-ct-${{ parameters.environment }}-$(shortLocation)-${{ parameters.logicalEnvironment }}gup
 
-            for filePath in $(System.DefaultWorkingDirectory)/scripts/sql/*; do
-              file_name=$(basename "$filePath")
-              if grep -Fxq "$file_name" $(System.DefaultWorkingDirectory)/.config/sql.txt; then
+            for filePath in $(System.DefaultWorkingDirectory)/scripts/sql/**/*.sql; do
+              relative_path_name=${filePath#$(System.DefaultWorkingDirectory)/scripts/sql/}
+              if grep -Fxq "$relative_path_name" $(System.DefaultWorkingDirectory)/.config/sql.txt; then
                 echo "$filePath"
                 cat "$filePath"
                 pwsh -c $(System.DefaultWorkingDirectory)/scripts/run-sql.ps1 "$sqlServerFqdn" "$sqlDatabaseName" $(principalId) "$filePath"

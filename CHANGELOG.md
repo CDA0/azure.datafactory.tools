@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.8.0
+* Support sql scripts in nested folders.
+
 ## 1.7.0
 * Update template ref for CX One.
 
