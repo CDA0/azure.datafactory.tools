@@ -46,26 +46,18 @@
 				"type": "string",
 				"value": "dev-DISPR02T-dpdb02t-adf"
 			},
-			"ENIGMA_DB_HOST": {
+			"ENIGMA_STAGING_HOST": {
 				"type": "string",
 				"value": "LGRDCDSQL19.development.pre-release.local"
 			},
-			"ENIGMA_DB_PORT": {
+			"ENIGMA_STAGING_PORT": {
 				"type": "string",
-				"value": "1601"
+				"value": "1433"
 			},
-			"ENIGMA_DB": {
+			"ENIGMA_STAGING_DATABASE": {
 				"type": "string",
 				"value": "EG_DEVELOPEMENT"
 			},
-			"ENIGMA_DB_USERNAME": {
-				"type": "string",
-				"value": "adf_staging_user"
-			},
-			"ENIGMA_DB_SECRET_NAME": {
-				"type": "string",
-				"value": "dev-ENIGMA-adf-staging-user"
-			},			
 			"MS_DYNAMICS_DB": {
 				"type": "string",
 				"value": "DVFCRM_MSCRM"

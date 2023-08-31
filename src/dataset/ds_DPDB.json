@@ -67,11 +67,11 @@
 			},
 			"DPDB_USERNAME": {
 				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.DPDB_USERNAME"
+				"defaultValue": "@pipeline().globalParameters.DBDB_USERNAME"
 			},
 			"DPDB_SECRET_NAME": {
 				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.DPDB_SECRET_NAME"
+				"defaultValue": "@pipeline().globalParameters.DBDB_SECRET_NAME"
 			},
 			"SCHEMA": {
 				"type": "string"

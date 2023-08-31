@@ -47,7 +47,7 @@
 			},
 			"LOGICAL_ENVIRONMENT": {
 				"type": "string",
-				"defaultValue": "@pipeline().globalParameters..LOGICAL_ENVIRONMENT"
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
 			},
 			"SHORT_LOCATION": {
 				"type": "string",
