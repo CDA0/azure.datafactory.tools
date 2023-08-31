@@ -52,9 +52,9 @@ begin  -- function
     @v_ignore_prem_num      bit             = 0,
     @v_len_ptwn_name        tinyint         = 0,
     @v_ptwn_name_temp       nvarchar(30)    = null,
-	@v_pos_ptwn_name        tinyint,
+    @v_pos_ptwn_name        tinyint,
     @v_address_value        nvarchar(200),
-	@v_address_line_1       nvarchar(100),
+    @v_address_line_1       nvarchar(100),
     @v_address_line_2       nvarchar(100),
     @v_address_line_3       nvarchar(100),
     @v_address_line_4       nvarchar(100),
@@ -108,16 +108,16 @@ begin  -- function
     -- Address line 2: this is normally a concatenation of SUB_BUILDING and
     -- BUILDING. However, if this results in a single alphabetic character, 
     -- it should later be concatenated with line 3
-	--
-	if @v_sub_building is not null
-	  set @v_work_line_1 = STAGE_CDI.F_INITCAP(@v_sub_building)
-	
+    --
+    if @v_sub_building is not null
+      set @v_work_line_1 = STAGE_CDI.F_INITCAP(@v_sub_building)
+    
     if @v_building is not null
     begin
       if @v_sub_building is not null
         set @v_work_line_1 = @v_work_line_1 + ' ' +  STAGE_CDI.F_INITCAP(@v_building)
-	  else
-	    set @v_work_line_1 = STAGE_CDI.F_INITCAP(@v_building)
+      else
+        set @v_work_line_1 = STAGE_CDI.F_INITCAP(@v_building)
     end  -- @v_building is not null
 
     --
@@ -253,7 +253,7 @@ begin  -- function
     -- Address line 5: If address line 4 is currently blank, then address line 4 = PTWN_NAME
     -- and therefore address line 5 = CNTY_NAME if CNTY_NAME is not the same as PTWN_NAME,
     -- otherwise it is left blank. If address line 4 was already populated, 
-	-- address line 5 is a concatenation of
+    -- address line 5 is a concatenation of
     -- PTWN_NAME and CNTY_NAME, omitting CNTY_NAME if it is the same as PTWN_NAME.
     --
 
@@ -381,13 +381,13 @@ begin  -- function
       end
       else
         set @v_work_line_2 = @v_non_paf_address_line_2
-	end
+    end
     else -- premise number was not populated
     begin
       set @v_work_line_1 = @v_non_paf_address_line_1
       set @v_work_line_2 = @v_non_paf_address_line_2
     end  -- @v_ignore_prem_num = 0
-	
+    
     --
     -- Convert the values into mixed case
     --
@@ -441,7 +441,7 @@ begin  -- function
       set @v_id = @v_id + 1
       set @v_non_paf_address_line_4 = STAGE_CDI.F_INITCAP(@v_non_paf_address_line_4)
 
-	  insert 
+      insert 
         into @AddressTable (ID, ADDRESS_VALUE)
       values (@v_id, @v_non_paf_address_line_5)
     end  -- @v_non_paf_address_line_5 is not null
@@ -579,27 +579,27 @@ begin  -- function
   while @@FETCH_STATUS = 0
   begin
     if @v_id = 1
-	  set @v_address_line_1 = @v_address_value
-	else
-	  if @v_id = 2 
-	    set @v_address_line_2 = @v_address_value
-	  else
-	    if @v_id = 3
-	      set @v_address_line_3 = @v_address_value
-		else
-	     if @v_id = 4
-	      set @v_address_line_4 = @v_address_value
-	     else
-		   if @v_id = 5
-	         set @v_address_line_5 = @v_address_value
-	
-	fetch next from address_cursor into @v_id, @v_address_value
+      set @v_address_line_1 = @v_address_value
+    else
+      if @v_id = 2 
+        set @v_address_line_2 = @v_address_value
+      else
+        if @v_id = 3
+          set @v_address_line_3 = @v_address_value
+        else
+         if @v_id = 4
+          set @v_address_line_4 = @v_address_value
+         else
+           if @v_id = 5
+             set @v_address_line_5 = @v_address_value
+    
+    fetch next from address_cursor into @v_id, @v_address_value
    end  -- @@FETCH_STATUS = 0
    
    close address_cursor
 
    DEALLOCATE address_cursor
-	
+    
   --
   --  Merge the individual lines into a single line
   --  
@@ -630,7 +630,7 @@ begin  -- function
     set @v_return_address = @v_return_address + '|' + substring(replace(@v_address_line_5, '|', '/'), 1, 78)
   else
     set @v_return_address = @v_return_address + '|'
-	    
+        
   if @v_postcode is not null 
     set @v_return_address = @v_return_address + '|' + replace(@v_postcode, '|', '/')
   else
