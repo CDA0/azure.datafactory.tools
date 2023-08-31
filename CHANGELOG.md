@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.9.0
+* Fix SQL deploy order, remove Windows line breaks from sql.txt config.
+
 ## 1.8.0
 * Support sql scripts in nested folders.
 
