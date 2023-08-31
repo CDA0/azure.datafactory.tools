@@ -177,7 +177,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlServerSource",
-						"sqlReaderQuery": "SELECT\n    activityid,\n    asc_reference,\n    subject,\n    regardingobjectid,\n    regardingobjectidname,\n    asc_cashtransfer,\n    ownerid,\n    owneridname,\n    asc_transfertype,\n    asc_clientmaster,\n    asc_clientmastername,\n    asc_subprocess,\n    asc_title,\n    asc_numberoftransfers,\n    asc_raisedby,\n    asc_parenttransfer,\n    asc_broker,\n    prioritycode,\n    scheduledend,\n    statecode,\n    statuscode,\n    modifiedon,\n    asc_dateacceptancereceived,\n    asc_datepaymentstagecomplete,\n    asc_duration,\n    asc_isa30daysla,\n    asc_endtoend,\n    asc_dateclosed,\n    asc_pluginerrorfield,\n    asc_cancelleddate,\n    asc_dateinformationrequestreceived,\n    asc_dateinformationrequestworkstarted,\n    asc_totalwrapperamount,\n    asc_wrapper,\n    asc_inforequestsent,\n    asc_dateinforequestsent,\n    asc_competitor,\n    asc_fundmanager,\n    asc_informationrequeststagecomplete,\n    asc_thirdpartyreference,\n    asc_dateinformationrequeststagecomplete,\n    asc_datecashtransferreceived,\n    asc_datecashtransferworkstarted,\n    asc_checkforcorporateactions,\n    asc_checkunexecutedorders_cashtransfer,\n    asc_directdebitremoved,\n    asc_modelremoved,\n    asc_holdingssold,\n    asc_dateholdingssold,\n    asc_cashtransferstagecomplete,\n    asc_datecashtransferstagecomplete,\n    asc_checkeddatecashtransfer,\n    asc_toaprocessstage,\n    asc_cashtransferchecked,\n    asc_cashtransfecheckedby,\n    asc_cashtransfecheckedbyname,\n    asc_dateacceptanceworkstarted,\n    asc_checkforcorporateactions_acceptance,\n    asc_checkunexecutedorders_acceptance,\n    asc_directdebitremoved_acceptance,\n    asc_modelremoved_acceptance,\n    asc_stfsgenerated,\n    asc_datestfsgenerated,\n    asc_datestfssent,\n    asc_acceptancecheckedby,\n    asc_acceptancecheckedbyname,\n    asc_acceptancestagecomplete,\n    asc_dateacceptancestagecomplete,\n    asc_datepaymentworkstarted,\n    asc_advisorchargestakenoff,\n    asc_referredtofeesandcharges,\n    asc_datereferredtofeescharges,\n    asc_runtransferwizard,\n    asc_amountpaid,\n    asc_methodofpayment,\n    asc_checkedpayment,\n    asc_checkeddatepayment,\n    asc_paymentcheckedby,\n    asc_paymentcheckedbyname,\n    asc_transferconfirmationsent,\n    asc_transferconfirmationsentdate,\n    asc_paymentstagecomplete\nFROM\n    DBO.asc_transferout",
+						"sqlReaderQuery": "select ACTIVITYID,\n       ASC_REFERENCE,\n       SUBJECT,\n       REGARDINGOBJECTID,\n       REGARDINGOBJECTIDNAME,\n       ASC_CASHTRANSFER,\n       OWNERID,\n       OWNERIDNAME,\n       ASC_TRANSFERTYPE,\n       ASC_CLIENTMASTER,\n       ASC_CLIENTMASTERNAME,\n       ASC_SUBPROCESS,\n       ASC_TITLE,\n       ASC_NUMBEROFTRANSFERS,\n       ASC_RAISEDBY,\n       ASC_PARENTTRANSFER,\n       ASC_BROKER,\n       PRIORITYCODE,\n       SCHEDULEDEND,\n       STATECODE,\n       STATUSCODE,\n       MODIFIEDON,\n       ASC_DATEACCEPTANCERECEIVED,\n       ASC_DATEPAYMENTSTAGECOMPLETE,\n       ASC_DURATION,\n       ASC_ISA30DAYSLA,\n       ASC_ENDTOEND,\n       ASC_DATECLOSED,\n       ASC_PLUGINERRORFIELD,\n       ASC_CANCELLEDDATE,\n       ASC_DATEINFORMATIONREQUESTRECEIVED,\n       ASC_DATEINFORMATIONREQUESTWORKSTARTED,\n       ASC_TOTALWRAPPERAMOUNT,\n       ASC_WRAPPER,\n       ASC_INFOREQUESTSENT,\n       ASC_DATEINFOREQUESTSENT,\n       ASC_COMPETITOR,\n       ASC_FUNDMANAGER,\n       ASC_INFORMATIONREQUESTSTAGECOMPLETE,\n       ASC_THIRDPARTYREFERENCE,\n       ASC_DATEINFORMATIONREQUESTSTAGECOMPLETE,\n       ASC_DATECASHTRANSFERRECEIVED,\n       ASC_DATECASHTRANSFERWORKSTARTED,\n       ASC_CHECKFORCORPORATEACTIONS,\n       ASC_CHECKUNEXECUTEDORDERS_CASHTRANSFER,\n       ASC_DIRECTDEBITREMOVED,\n       ASC_MODELREMOVED,\n       ASC_HOLDINGSSOLD,\n       ASC_DATEHOLDINGSSOLD,\n       ASC_CASHTRANSFERSTAGECOMPLETE,\n       ASC_DATECASHTRANSFERSTAGECOMPLETE,\n       ASC_CHECKEDDATECASHTRANSFER,\n       ASC_TOAPROCESSSTAGE,\n       ASC_CASHTRANSFERCHECKED,\n       ASC_CASHTRANSFECHECKEDBY,\n       ASC_CASHTRANSFECHECKEDBYNAME,\n       ASC_DATEACCEPTANCEWORKSTARTED,\n       ASC_CHECKFORCORPORATEACTIONS_ACCEPTANCE,\n       ASC_CHECKUNEXECUTEDORDERS_ACCEPTANCE,\n       ASC_DIRECTDEBITREMOVED_ACCEPTANCE,\n       ASC_MODELREMOVED_ACCEPTANCE,\n       ASC_STFSGENERATED,\n       ASC_DATESTFSGENERATED,\n       ASC_DATESTFSSENT,\n       ASC_ACCEPTANCECHECKEDBY,\n       ASC_ACCEPTANCECHECKEDBYNAME,\n       ASC_ACCEPTANCESTAGECOMPLETE,\n       ASC_DATEACCEPTANCESTAGECOMPLETE,\n       ASC_DATEPAYMENTWORKSTARTED,\n       ASC_ADVISORCHARGESTAKENOFF,\n       ASC_REFERREDTOFEESANDCHARGES,\n       ASC_DATEREFERREDTOFEESCHARGES,\n       ASC_RUNTRANSFERWIZARD,\n       ASC_AMOUNTPAID,\n       ASC_METHODOFPAYMENT,\n       ASC_CHECKEDPAYMENT,\n       ASC_CHECKEDDATEPAYMENT,\n       ASC_PAYMENTCHECKEDBY,\n       ASC_PAYMENTCHECKEDBYNAME,\n       ASC_TRANSFERCONFIRMATIONSENT,\n       ASC_TRANSFERCONFIRMATIONSENTDATE,\n       ASC_PAYMENTSTAGECOMPLETE\nfrom   DBO.ASC_TRANSFEROUT",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -192,7 +192,7 @@
 						"mappings": [
 							{
 								"source": {
-									"name": "activityid",
+									"name": "ACTIVITYID",
 									"type": "Guid",
 									"physicalType": "uniqueidentifier"
 								},
@@ -204,7 +204,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_reference",
+									"name": "ASC_REFERENCE",
 									"type": "String",
 									"physicalType": "nvarchar"
 								},
@@ -216,7 +216,7 @@
 							},
 							{
 								"source": {
-									"name": "subject",
+									"name": "SUBJECT",
 									"type": "String",
 									"physicalType": "nvarchar"
 								},
@@ -228,7 +228,7 @@
 							},
 							{
 								"source": {
-									"name": "regardingobjectid",
+									"name": "REGARDINGOBJECTID",
 									"type": "Guid",
 									"physicalType": "uniqueidentifier"
 								},
@@ -240,7 +240,7 @@
 							},
 							{
 								"source": {
-									"name": "regardingobjectidname",
+									"name": "REGARDINGOBJECTIDNAME",
 									"type": "String",
 									"physicalType": "nvarchar"
 								},
@@ -252,7 +252,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_cashtransfer",
+									"name": "ASC_CASHTRANSFER",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -266,7 +266,7 @@
 							},
 							{
 								"source": {
-									"name": "ownerid",
+									"name": "OWNERID",
 									"type": "Guid",
 									"physicalType": "uniqueidentifier"
 								},
@@ -278,7 +278,7 @@
 							},
 							{
 								"source": {
-									"name": "owneridname",
+									"name": "OWNERIDNAME",
 									"type": "String",
 									"physicalType": "nvarchar"
 								},
@@ -290,7 +290,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_transfertype",
+									"name": "ASC_TRANSFERTYPE",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -304,7 +304,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_clientmaster",
+									"name": "ASC_CLIENTMASTER",
 									"type": "Guid",
 									"physicalType": "uniqueidentifier"
 								},
@@ -316,7 +316,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_clientmastername",
+									"name": "ASC_CLIENTMASTERNAME",
 									"type": "String",
 									"physicalType": "nvarchar"
 								},
@@ -328,7 +328,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_subprocess",
+									"name": "ASC_SUBPROCESS",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -342,7 +342,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_title",
+									"name": "ASC_TITLE",
 									"type": "String",
 									"physicalType": "nvarchar"
 								},
@@ -354,7 +354,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_numberoftransfers",
+									"name": "ASC_NUMBEROFTRANSFERS",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -368,7 +368,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_raisedby",
+									"name": "ASC_RAISEDBY",
 									"type": "Guid",
 									"physicalType": "uniqueidentifier"
 								},
@@ -380,7 +380,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_parenttransfer",
+									"name": "ASC_PARENTTRANSFER",
 									"type": "Guid",
 									"physicalType": "uniqueidentifier"
 								},
@@ -392,7 +392,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_broker",
+									"name": "ASC_BROKER",
 									"type": "Guid",
 									"physicalType": "uniqueidentifier"
 								},
@@ -404,7 +404,7 @@
 							},
 							{
 								"source": {
-									"name": "prioritycode",
+									"name": "PRIORITYCODE",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -418,7 +418,7 @@
 							},
 							{
 								"source": {
-									"name": "scheduledend",
+									"name": "SCHEDULEDEND",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -430,7 +430,7 @@
 							},
 							{
 								"source": {
-									"name": "statecode",
+									"name": "STATECODE",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -444,7 +444,7 @@
 							},
 							{
 								"source": {
-									"name": "statuscode",
+									"name": "STATUSCODE",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -458,7 +458,7 @@
 							},
 							{
 								"source": {
-									"name": "modifiedon",
+									"name": "MODIFIEDON",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -470,7 +470,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_dateacceptancereceived",
+									"name": "ASC_DATEACCEPTANCERECEIVED",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -482,7 +482,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_datepaymentstagecomplete",
+									"name": "ASC_DATEPAYMENTSTAGECOMPLETE",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -494,7 +494,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_duration",
+									"name": "ASC_DURATION",
 									"type": "String",
 									"physicalType": "nvarchar"
 								},
@@ -506,7 +506,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_isa30daysla",
+									"name": "ASC_ISA30DAYSLA",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -518,7 +518,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_endtoend",
+									"name": "ASC_ENDTOEND",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -532,7 +532,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_dateclosed",
+									"name": "ASC_DATECLOSED",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -544,7 +544,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_pluginerrorfield",
+									"name": "ASC_PLUGINERRORFIELD",
 									"type": "String",
 									"physicalType": "nvarchar"
 								},
@@ -556,7 +556,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_cancelleddate",
+									"name": "ASC_CANCELLEDDATE",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -568,7 +568,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_dateinformationrequestreceived",
+									"name": "ASC_DATEINFORMATIONREQUESTRECEIVED",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -580,7 +580,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_dateinformationrequestworkstarted",
+									"name": "ASC_DATEINFORMATIONREQUESTWORKSTARTED",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -592,7 +592,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_totalwrapperamount",
+									"name": "ASC_TOTALWRAPPERAMOUNT",
 									"type": "Decimal",
 									"physicalType": "money",
 									"scale": 4,
@@ -608,7 +608,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_wrapper",
+									"name": "ASC_WRAPPER",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -622,7 +622,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_inforequestsent",
+									"name": "ASC_INFOREQUESTSENT",
 									"type": "Boolean",
 									"physicalType": "bit"
 								},
@@ -636,7 +636,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_dateinforequestsent",
+									"name": "ASC_DATEINFOREQUESTSENT",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -648,7 +648,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_competitor",
+									"name": "ASC_COMPETITOR",
 									"type": "Guid",
 									"physicalType": "uniqueidentifier"
 								},
@@ -660,7 +660,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_fundmanager",
+									"name": "ASC_FUNDMANAGER",
 									"type": "Guid",
 									"physicalType": "uniqueidentifier"
 								},
@@ -672,7 +672,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_informationrequeststagecomplete",
+									"name": "ASC_INFORMATIONREQUESTSTAGECOMPLETE",
 									"type": "Boolean",
 									"physicalType": "bit"
 								},
@@ -686,7 +686,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_thirdpartyreference",
+									"name": "ASC_THIRDPARTYREFERENCE",
 									"type": "String",
 									"physicalType": "nvarchar"
 								},
@@ -698,7 +698,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_dateinformationrequeststagecomplete",
+									"name": "ASC_DATEINFORMATIONREQUESTSTAGECOMPLETE",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -710,7 +710,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_datecashtransferreceived",
+									"name": "ASC_DATECASHTRANSFERRECEIVED",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -722,7 +722,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_datecashtransferworkstarted",
+									"name": "ASC_DATECASHTRANSFERWORKSTARTED",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -734,7 +734,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_checkforcorporateactions",
+									"name": "ASC_CHECKFORCORPORATEACTIONS",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -748,7 +748,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_checkunexecutedorders_cashtransfer",
+									"name": "ASC_CHECKUNEXECUTEDORDERS_CASHTRANSFER",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -762,7 +762,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_directdebitremoved",
+									"name": "ASC_DIRECTDEBITREMOVED",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -776,7 +776,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_modelremoved",
+									"name": "ASC_MODELREMOVED",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -790,7 +790,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_holdingssold",
+									"name": "ASC_HOLDINGSSOLD",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -804,7 +804,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_dateholdingssold",
+									"name": "ASC_DATEHOLDINGSSOLD",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -816,7 +816,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_cashtransferstagecomplete",
+									"name": "ASC_CASHTRANSFERSTAGECOMPLETE",
 									"type": "Boolean",
 									"physicalType": "bit"
 								},
@@ -830,7 +830,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_datecashtransferstagecomplete",
+									"name": "ASC_DATECASHTRANSFERSTAGECOMPLETE",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -842,7 +842,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_checkeddatecashtransfer",
+									"name": "ASC_CHECKEDDATECASHTRANSFER",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -854,7 +854,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_toaprocessstage",
+									"name": "ASC_TOAPROCESSSTAGE",
 									"type": "String",
 									"physicalType": "nvarchar"
 								},
@@ -866,7 +866,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_cashtransferchecked",
+									"name": "ASC_CASHTRANSFERCHECKED",
 									"type": "Boolean",
 									"physicalType": "bit"
 								},
@@ -880,7 +880,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_cashtransfecheckedby",
+									"name": "ASC_CASHTRANSFECHECKEDBY",
 									"type": "Guid",
 									"physicalType": "uniqueidentifier"
 								},
@@ -892,7 +892,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_cashtransfecheckedbyname",
+									"name": "ASC_CASHTRANSFECHECKEDBYNAME",
 									"type": "String",
 									"physicalType": "nvarchar"
 								},
@@ -904,7 +904,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_dateacceptanceworkstarted",
+									"name": "ASC_DATEACCEPTANCEWORKSTARTED",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -916,7 +916,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_checkforcorporateactions_acceptance",
+									"name": "ASC_CHECKFORCORPORATEACTIONS_ACCEPTANCE",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -930,7 +930,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_checkunexecutedorders_acceptance",
+									"name": "ASC_CHECKUNEXECUTEDORDERS_ACCEPTANCE",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -944,7 +944,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_directdebitremoved_acceptance",
+									"name": "ASC_DIRECTDEBITREMOVED_ACCEPTANCE",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -958,7 +958,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_modelremoved_acceptance",
+									"name": "ASC_MODELREMOVED_ACCEPTANCE",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -972,7 +972,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_stfsgenerated",
+									"name": "ASC_STFSGENERATED",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -986,7 +986,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_datestfsgenerated",
+									"name": "ASC_DATESTFSGENERATED",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -998,7 +998,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_datestfssent",
+									"name": "ASC_DATESTFSSENT",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -1010,7 +1010,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_acceptancecheckedby",
+									"name": "ASC_ACCEPTANCECHECKEDBY",
 									"type": "Guid",
 									"physicalType": "uniqueidentifier"
 								},
@@ -1022,7 +1022,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_acceptancecheckedbyname",
+									"name": "ASC_ACCEPTANCECHECKEDBYNAME",
 									"type": "String",
 									"physicalType": "nvarchar"
 								},
@@ -1034,7 +1034,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_acceptancestagecomplete",
+									"name": "ASC_ACCEPTANCESTAGECOMPLETE",
 									"type": "Boolean",
 									"physicalType": "bit"
 								},
@@ -1048,7 +1048,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_dateacceptancestagecomplete",
+									"name": "ASC_DATEACCEPTANCESTAGECOMPLETE",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -1060,7 +1060,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_datepaymentworkstarted",
+									"name": "ASC_DATEPAYMENTWORKSTARTED",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -1072,7 +1072,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_advisorchargestakenoff",
+									"name": "ASC_ADVISORCHARGESTAKENOFF",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -1086,7 +1086,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_referredtofeesandcharges",
+									"name": "ASC_REFERREDTOFEESANDCHARGES",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -1100,7 +1100,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_datereferredtofeescharges",
+									"name": "ASC_DATEREFERREDTOFEESCHARGES",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -1112,7 +1112,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_runtransferwizard",
+									"name": "ASC_RUNTRANSFERWIZARD",
 									"type": "Boolean",
 									"physicalType": "bit"
 								},
@@ -1126,7 +1126,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_amountpaid",
+									"name": "ASC_AMOUNTPAID",
 									"type": "Decimal",
 									"physicalType": "money",
 									"scale": 4,
@@ -1142,7 +1142,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_methodofpayment",
+									"name": "ASC_METHODOFPAYMENT",
 									"type": "Int32",
 									"physicalType": "int"
 								},
@@ -1156,7 +1156,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_checkedpayment",
+									"name": "ASC_CHECKEDPAYMENT",
 									"type": "Boolean",
 									"physicalType": "bit"
 								},
@@ -1170,7 +1170,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_checkeddatepayment",
+									"name": "ASC_CHECKEDDATEPAYMENT",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -1182,7 +1182,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_paymentcheckedby",
+									"name": "ASC_PAYMENTCHECKEDBY",
 									"type": "Guid",
 									"physicalType": "uniqueidentifier"
 								},
@@ -1194,7 +1194,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_paymentcheckedbyname",
+									"name": "ASC_PAYMENTCHECKEDBYNAME",
 									"type": "String",
 									"physicalType": "nvarchar"
 								},
@@ -1206,7 +1206,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_transferconfirmationsent",
+									"name": "ASC_TRANSFERCONFIRMATIONSENT",
 									"type": "Boolean",
 									"physicalType": "bit"
 								},
@@ -1220,7 +1220,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_transferconfirmationsentdate",
+									"name": "ASC_TRANSFERCONFIRMATIONSENTDATE",
 									"type": "DateTime",
 									"physicalType": "datetime"
 								},
@@ -1232,7 +1232,7 @@
 							},
 							{
 								"source": {
-									"name": "asc_paymentstagecomplete",
+									"name": "ASC_PAYMENTSTAGECOMPLETE",
 									"type": "Boolean",
 									"physicalType": "bit"
 								},
