@@ -1,7 +1,3 @@
-if object_id('STAGE_CDI.PRC_CRM_CDI_DPDB_ADVISER_FIRM_STG') is not null 
-  drop procedure STAGE_CDI.PRC_CRM_CDI_DPDB_ADVISER_FIRM_STG
-go
-
 create procedure STAGE_CDI.PRC_CRM_CDI_DPDB_ADVISER_FIRM_STG (@DPDB_ADVISER_FIRM_STG STAGE_CDI.DPDB_ADVISER_FIRM_STG_TYPE readonly)
 /*
 Author     : Rizaul Kamal
@@ -82,5 +78,4 @@ begin  -- proc
          INSERT_DATE_TIME,
          UPDATE_DATE_TIME 
     from @DPDB_ADVISER_FIRM_STG
-end  -- proc
-       
+end;  -- proc
