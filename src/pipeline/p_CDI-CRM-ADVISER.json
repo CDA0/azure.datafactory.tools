@@ -161,7 +161,7 @@
 											"type": "Expression"
 										},
 										"SCHEMA": "STAGE_CDI",
-										"TABLE": {
+										"TABLE_NAME": {
 											"value": "@item().TABLE_NAME",
 											"type": "Expression"
 										}

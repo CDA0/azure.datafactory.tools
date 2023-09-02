@@ -97,13 +97,12 @@
 									"referenceName": "ds_STAGE_CRM",
 									"type": "DatasetReference",
 									"parameters": {
-										"SCHEMA": "STAGE_CRM_POC",
-										"TABLE": {
-											"value": "@item().TABLE_NAME",
-											"type": "Expression"
-										},
 										"ENVIRONMENT": {
 											"value": "@pipeline().globalParameters.ENVIRONMENT",
+											"type": "Expression"
+										},
+										"LOGICAL_ENVIRONMENT": {
+											"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
 											"type": "Expression"
 										},
 										"SHORT_LOCATION": {
@@ -122,8 +121,9 @@
 											"value": "@pipeline().globalParameters.CRM_DB_PORT",
 											"type": "Expression"
 										},
-										"LOGICAL_ENVIRONMENT": {
-											"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+										"SCHEMA": "STAGE_CRM",
+										"TABLE_NAME": {
+											"value": "@item().TABLE_NAME",
 											"type": "Expression"
 										}
 									}

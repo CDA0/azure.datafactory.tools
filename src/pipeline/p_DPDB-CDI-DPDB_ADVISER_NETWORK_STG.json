@@ -347,7 +347,7 @@
 								"type": "Expression"
 							},
 							"SCHEMA": "DPARTNER",
-							"TABLE": "PARTY"
+							"TABLE_NAME": "PARTY"
 						}
 					}
 				],

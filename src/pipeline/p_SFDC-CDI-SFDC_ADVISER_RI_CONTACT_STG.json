@@ -338,6 +338,7 @@
 								"value": "@pipeline().globalParameters.ENVIRONMENT",
 								"type": "Expression"
 							},
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
 							"SHORT_LOCATION": {
 								"value": "@pipeline().globalParameters.SHORT_LOCATION",
 								"type": "Expression"
@@ -350,11 +351,12 @@
 								"value": "@pipeline().globalParameters.SFDC_DPDB_USERNAME",
 								"type": "Expression"
 							},
-							"OBJECT_NAME": "CONTACT",
 							"SFDC_DPDB_API_VERSION": {
 								"value": "@pipeline().globalParameters.SFDC_DPDB_API_VERSION",
 								"type": "Expression"
-							}
+							},
+							"SFDC_DPDB_ORG": "@pipeline().globalParameters.SFDC_DPDB_ORG",
+							"OBJECT_NAME": "CONTACT"
 						}
 					}
 				],

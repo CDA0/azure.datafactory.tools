@@ -105,14 +105,16 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+										"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
 										"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
 										"SFDC_DPDB_URL": "@pipeline().globalParameters.SFDC_DPDB_URL",
 										"SFDC_DPDB_USERNAME": "@pipeline().globalParameters.SFDC_DPDB_USERNAME",
+										"SFDC_DPDB_API_VERSION": "@pipeline().globalParameters.SFDC_DPDB_API_VERSION",
+										"SFDC_DPDB_ORG": "@pipeline().globalParameters.SFDC_DPDB_ORG",
 										"OBJECT_NAME": {
 											"value": "@item().TABLE_NAME",
 											"type": "Expression"
-										},
-										"SFDC_DPDB_API_VERSION": "@pipeline().globalParameters.SFDC_DPDB_API_VERSION"
+										}
 									}
 								}
 							],

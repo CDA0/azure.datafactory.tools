@@ -98,7 +98,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"SCHEMA": "STAGE_CRM",
-										"TABLE": {
+										"TABLE_NAME": {
 											"value": "@item().TABLE_NAME",
 											"type": "Expression"
 										},

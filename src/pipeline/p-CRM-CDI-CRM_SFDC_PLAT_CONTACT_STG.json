@@ -166,7 +166,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"SCHEMA": "STAGE_CRM",
-							"TABLE": "SFDC_PLAT_CONTACT_STG",
+							"TABLE_NAME": "SFDC_PLAT_CONTACT_STG",
 							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
 							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
 							"CRM_DB": "@pipeline().globalParameters.CRM_DB",

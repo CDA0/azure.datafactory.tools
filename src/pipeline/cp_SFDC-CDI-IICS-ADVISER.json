@@ -89,8 +89,30 @@
 									"tableOption": "autoCreate",
 									"disableMetricsCollection": false
 								},
-								"enableStaging": false
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
 							},
+							"inputs": [
+								{
+									"referenceName": "ds_SFDC_DPDB_ADF3",
+									"type": "DatasetReference",
+									"parameters": {
+										"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+										"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+										"OBJECT_NAME": {
+											"value": "@item().TABLE_NAME",
+											"type": "Expression"
+										}
+									}
+								}
+							],
 							"outputs": [
 								{
 									"referenceName": "ds_ASQLDB_WOKING_SHIR",
