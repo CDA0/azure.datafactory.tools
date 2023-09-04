@@ -18,7 +18,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "select PARAMETER_NAME as TABLE_NAME\n  from STAGE_CDI.BATCH_PARAMETER\n where PROCESS_NAME = 'ORA_STAGE_CRM_TO_SQLDB_STAGE_CDI_ADVISER' \n   and PARAMETER_NAME in ('ETL_JOB_CONTROL',\n                          'REF_DPDB_TRANSLATION', \n                          'SFDC_ADVISER_ACCOUNT_STG', \n                          'SFDC_ADVISER_HERITAGE_ARN_STG',\n                          'SFDC_ADVISER_RI_CONTACT_STG',\n                          'SFDC_RECORD_TYPE_STG')\n   and PARAMETER_VALUE_CHAR = 'P'",
+						"sqlReaderQuery": "select PARAMETER_NAME as TABLE_NAME\n  from STAGE_CDI.BATCH_PARAMETER\n where PROCESS_NAME = 'ORA_STAGE_CRM_TO_SQLDB_STAGE_CDI_ADVISER' \n   and PARAMETER_NAME in ('REF_DPDB_TRANSLATION', \n                          'SFDC_ADVISER_ACCOUNT_STG', \n                          'SFDC_ADVISER_HERITAGE_ARN_STG',\n                          'SFDC_ADVISER_RI_CONTACT_STG')\n   and PARAMETER_VALUE_CHAR = 'P'",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},

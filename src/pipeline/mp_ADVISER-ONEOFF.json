@@ -126,11 +126,31 @@
 			{
 				"name": "p_CRM-CDI-ETL_JOB_CONTROL-Adviser-ONEOFF",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "p_CRM-CDI-SFDC_RECORD_TYPE_STG-Adviser-ONEOFF",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
 						"referenceName": "p_CRM-CDI-ETL_JOB_CONTROL-Adviser-ONEOFF",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "p_CRM-CDI-SFDC_RECORD_TYPE_STG-Adviser-ONEOFF",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_CRM-CDI-SFDC_RECORD_TYPE_STG-Adviser-ONEOFF",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
