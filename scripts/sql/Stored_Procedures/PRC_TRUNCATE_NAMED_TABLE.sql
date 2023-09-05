@@ -4,7 +4,7 @@ create procedure STAGE_CDI.PRC_TRUNCATE_NAMED_TABLE
 Author       : Rizaul Kamal
 Date         : 27/04/2022
 Updated By   : Nikita Varnwal
-Last Updated : 04/09/2023
+Last Updated : 30/08/2023
 
 Description: Truncate table in the STAGE_CDI schema (only tables listed can be truncated)
 
@@ -44,7 +44,7 @@ Version   Date        Description of change
 0.4       21/08/2023  Amend table name CRM_PLAT_DYN_TRANSFEROUT_STG
 0.5       23/08/2023  Amend table name CRM_PLAT_DYN_ACCOUNT_STG
 0.6       30/08/2023  Amend table name CRM_PLAT_DYN_ACTIVITYPARTY_STG
-0.7       04/09/2023  Amend table name CRM_PLAT_DYN_CONTACT_STG
+0.7       05/09/2023  Amend table name CRM_PLAT_DYN_CONTACT_STG
 
 */
 with encryption, execute as 'CDI_ADF_TRUNCATE_USER'
