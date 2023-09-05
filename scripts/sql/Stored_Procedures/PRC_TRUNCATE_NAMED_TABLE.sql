@@ -4,7 +4,7 @@ create procedure STAGE_CDI.PRC_TRUNCATE_NAMED_TABLE
 Author       : Rizaul Kamal
 Date         : 27/04/2022
 Updated By   : Nikita Varnwal
-Last Updated : 30/08/2023
+Last Updated : 05/09/2023
 
 Description: Truncate table in the STAGE_CDI schema (only tables listed can be truncated)
 
