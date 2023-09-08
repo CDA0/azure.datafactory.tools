@@ -49,7 +49,7 @@ steps:
             # Remove Windows line breaks if they exist
             sed -i 's/\r//' $(System.DefaultWorkingDirectory)/.config/sql.txt
 
-            while IFS= read -r relative_path_name; do
+            while IFS= read -r relative_path_name || [[ -n "$relative_path_name" ]]; do
               filePath="$(System.DefaultWorkingDirectory)/scripts/sql/$relative_path_name"
 
               if [[ -f "$filePath" ]]; then
