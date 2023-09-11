@@ -63,3 +63,5 @@ $null = Publish-AdfV2FromJson `
     -Stage "$StageConfigFile" `
     -Option $options `
     -Method "$PublishMethod"
+
+Get-Command Get-AdfFromService
