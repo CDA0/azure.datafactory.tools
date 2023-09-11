@@ -40,7 +40,7 @@ $options.StopStartTriggers = $StopStartTriggers
 
 $filterText = Get-Content $FilterTextFile -Raw -Encoding 'UTF8'
 $filterArray = $filterText.Replace(',', "`n").Replace("`r`n", "`n").Split("`n");
-$included = @()
+$included = [System.Collections.ArrayList]@()
 
 $filterArray | Where-Object { ($_.Trim().Length -gt 0 -or $_.Trim().StartsWith('+')) -and (!$_.Trim().StartsWith('-')) } | ForEach-Object {
     $i = $_.Trim().Replace('+', '')
