@@ -1,0 +1,165 @@
+{
+	"name": "mp_ADVISER-ONEOFF",
+	"properties": {
+		"description": "Name: Rizaul Kamal\nDate: 08/06/2023\nDescription: Master pipeline that calls all the other pipelines to copy data from Oracle (STAGE_CRM) to STAGE_CDI for Adviser related tables.\n\nNote: This is designed to be run only once in any environment on purpose. This is to stop accidental run. Please refer to Confluence page, https://confluence-mandg.valiantys.net/display/ABE/Refresh+Data+from+Oracle+to+Azure+SQL+DB, for details on how to rerun",
+		"activities": [
+			{
+				"name": "cp_CRM-CDI-ADVISER_DATA-ONEOFF",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "p_CRM-CDI-ETL_JOB_CONTROL-Adviser-ONEOFF",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_CRM-CDI-ADVISER_DATA-ONEOFF",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "p_CRM-CDI-DPDB_ADVISER_FIRM_STG-ONEOFF",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "cp_CRM-CDI-ADVISER_DATA-ONEOFF",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_CRM-CDI-DPDB_ADVISER_FIRM_STG-ONEOFF",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "p_CRM-CDI-DPDB_ADVISER_LEGACY_AGENCY_STG-ONEOFF",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "cp_CRM-CDI-ADVISER_DATA-ONEOFF",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_CRM-CDI-DPDB_ADVISER_LEGACY_AGENCY_STG-ONEOFF",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "p_CRM-CDI-DPDB_ADVISER_NETWORK_STG-ONEOFF",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "cp_CRM-CDI-ADVISER_DATA-ONEOFF",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_CRM-CDI-DPDB_ADVISER_NETWORK_STG-ONEOFF",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "p_CRM-CDI-DPDB_ADVISER_OFFICE_STG-ONEOFF",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "cp_CRM-CDI-ADVISER_DATA-ONEOFF",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_CRM-CDI-DPDB_ADVISER_OFFICE_STG-ONEOFF",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "p_CRM-CDI-DPDB_REGISTERED_INDIVIDUAL_STG-ONEOFF",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "cp_CRM-CDI-ADVISER_DATA-ONEOFF",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_CRM-CDI-DPDB_REGISTERED_INDIVIDUAL_STG-ONEOFF",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "p_CRM-CDI-ETL_JOB_CONTROL-Adviser-ONEOFF",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "p_CRM-CDI-SFDC_RECORD_TYPE_STG-Adviser-ONEOFF",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_CRM-CDI-ETL_JOB_CONTROL-Adviser-ONEOFF",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "p_CRM-CDI-SFDC_RECORD_TYPE_STG-Adviser-ONEOFF",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "p_CRM-CDI-SFDC_RECORD_TYPE_STG-Adviser-ONEOFF",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "Digital Account/Adviser - OneOff"
+		},
+		"annotations": []
+	}
+}

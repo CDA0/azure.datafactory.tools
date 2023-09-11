@@ -1,5 +1,7 @@
 ---
 parameters:
+  - name: deploySql
+    type: boolean
   - name: environment
     type: string
     values:
@@ -23,21 +25,60 @@ steps:
     parameters:
       location: ${{ parameters.location }}
 
-  - task: AzurePowerShell@5
-    displayName: Publish
-    inputs:
-      azureSubscription: sub-customer-${{ parameters.environment }}-t1-01-deploy
-      pwsh: true
-      azurePowerShellVersion: LatestVersion
-      ScriptType: FilePath
-      ScriptPath: $(System.DefaultWorkingDirectory)/scripts/publish.ps1
-      ScriptArguments: |
-        -DataFactoryCodePath $(System.DefaultWorkingDirectory)/src `
-        -ResourceGroupName "rg-ct-${{ parameters.environment }}-$(shortLocation)-${{ parameters.logicalEnvironment }}gup" `
-        -DataFactoryName "adf-ct-${{ parameters.environment }}-$(shortLocation)-${{ parameters.logicalEnvironment }}gup" `
-        -Location "${{ parameters.location }}" `
-        -CreateNewInstance $false `
-        -DeleteNotInSource $true `
-        -DoNotDeleteExcludedObjects $false `
-        -StageConfigFile "$(System.DefaultWorkingDirectory)/.config/config.csv" `
-        -FilterTextFile "$(System.DefaultWorkingDirectory)/.config/filter.txt"
+  - ${{ if eq(parameters.deploySql, true) }}:
+      - template: steps/set-vmss-instance-identity.yml@templates
+        parameters:
+          environment: ${{ parameters.environment }}
+          identityName: id-ct-${{ parameters.environment }}-$(shortLocation)-gupcom
+          resourceGroupName: rg-ct-${{ parameters.environment }}-$(shortLocation)-gupcom
+          shortLocation: $(shortLocation)
+
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: sub-customer-${{ parameters.environment }}-t1-01-deploy
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: |
+            set -euo pipefail
+
+            az account set -s sub-customer-${{ parameters.environment }}-t1-01
+
+            sqlServerFqdn=sql-ct-${{ parameters.environment }}-$(shortLocation)-gupcom.database.windows.net
+            sqlDatabaseName=sdb-ct-${{ parameters.environment }}-$(shortLocation)-${{ parameters.logicalEnvironment }}gup
+
+            # Remove Windows line breaks if they exist
+            sed -i 's/\r//' $(System.DefaultWorkingDirectory)/.config/sql.txt
+
+            while IFS= read -r relative_path_name || [[ -n "$relative_path_name" ]]; do
+              filePath="$(System.DefaultWorkingDirectory)/scripts/sql/$relative_path_name"
+
+              if [[ -f "$filePath" ]]; then
+                echo "$filePath"
+                cat "$filePath"
+                pwsh -c $(System.DefaultWorkingDirectory)/scripts/run-sql.ps1 "$sqlServerFqdn" "$sqlDatabaseName" $(principalId) "$filePath"
+              else
+                echo "SQL file $filePath not found."
+              fi
+            done < $(System.DefaultWorkingDirectory)/.config/sql.txt
+
+        displayName: Run SQL commands
+
+  - ${{ if ne(parameters.logicalEnvironment, 'dev') }}:
+      - task: AzurePowerShell@5
+        displayName: Publish
+        inputs:
+          azureSubscription: sub-customer-${{ parameters.environment }}-t1-01-deploy
+          pwsh: true
+          azurePowerShellVersion: LatestVersion
+          ScriptType: FilePath
+          ScriptPath: $(System.DefaultWorkingDirectory)/scripts/publish.ps1
+          ScriptArguments: |
+            -DataFactoryCodePath $(System.DefaultWorkingDirectory)/src `
+            -ResourceGroupName "rg-ct-${{ parameters.environment }}-$(shortLocation)-${{ parameters.logicalEnvironment }}gup" `
+            -DataFactoryName "adf-ct-${{ parameters.environment }}-$(shortLocation)-${{ parameters.logicalEnvironment }}gup" `
+            -Location "${{ parameters.location }}" `
+            -CreateNewInstance $false `
+            -DeleteNotInSource $true `
+            -DoNotDeleteExcludedObjects $false `
+            -StageConfigFile "$(System.DefaultWorkingDirectory)/.config/config.csv" `
+            -FilterTextFile "$(System.DefaultWorkingDirectory)/.config/filter.txt"

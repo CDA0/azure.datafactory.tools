@@ -1,0 +1,395 @@
+{
+	"name": "p_SFDC-CDI-SFDC_PLAT_DYN_ACTIVITY_POINTER_STG",
+	"properties": {
+		"description": "Author: Jilly Webster\nDate: 10/07/2023\nDescription: ASCD-20271 - this pipeline is loading data data from Task object of Salesforce to SFDC_PLAT_DYN_ACTIVITY_POINTER_STG table in Stage CDI.",
+		"activities": [
+			{
+				"name": "cd-SFDC_PLAT_DYN_ACTIVITY_POINTER_STG",
+				"description": "pulls data from Salesforce ActivityPointer object and copies to the STAGE_CDI table SFDC_PLAT_DYN_ACTIVITY_POINTER_STG using SQL query",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "sp-TRUNCATE-SFDC_PLAT_DYN_ACTIVITY_POINTER_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SalesforceSource",
+						"additionalColumns": [
+							{
+								"name": "ORIGIN",
+								"value": {
+									"value": "'MSDynamics_Migration'",
+									"type": "Expression"
+								}
+							}
+						],
+						"query": "select ID,\n       PRU_EXTERNALID__C,\n       CREATEDBYID,\n       CREATEDDATE,\n       OWNERID,\n       COMPLETEDDATETIME,\n       TYPE,\n       STATUS,\n       ACTIVITYDATE,\n       PRIORITY,\n       WHATID,\n       SUBJECT,\n       RECORDTYPEID\n  from TASK\n where PRU_EXTERNALID__C like 'MSCRM_MIGRATION_TASK_%'",
+						"readBehavior": "query"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "Id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRU_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_ExternalId__c",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRU_EXTERNALID__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "CreatedById",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CREATEDBYID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "CreatedDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "CREATEDDATE",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "OwnerId",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OWNERID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "CompletedDateTime",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "COMPLETEDDATETIME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Type",
+									"type": "String"
+								},
+								"sink": {
+									"name": "TYPE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Status",
+									"type": "String"
+								},
+								"sink": {
+									"name": "STATUS",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ActivityDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "ACTIVITYDATE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Priority",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRIORITY",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "WhatId",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WHATID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Subject",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SUBJECT",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "RecordTypeId",
+									"type": "String"
+								},
+								"sink": {
+									"name": "RECORDTYPEID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ORIGIN",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ORIGIN",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_SFDC_MS_DYNAMICS",
+						"type": "DatasetReference",
+						"parameters": {
+							"OBJECT_NAME": "TASK",
+							"SFDC_MS_DYNAMICS_USER": "@pipeline().globalParameters.SFDC_MS_DYNAMICS_USER",
+							"SFDC_MS_DYNAMICS_URL": "@pipeline().globalParameters.SFDC_MS_DYNAMICS_URL",
+							"SFDC_MS_DYNAMICS_API_VERSION": "@pipeline().globalParameters.SFDC_MS_DYNAMICS_API_VERSION"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_ASQLDB_WOKING_SHIR",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "SFDC_PLAT_DYN_ACTIVITY_POINTER_STG",
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+						}
+					}
+				]
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-SFDC_PLAT_DYN_ACTVITY_POINTER_STG",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-SFDC_PLAT_DYN_ACTIVITY_POINTER_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-SFDC_PLAT_DYN_ACTIVITY_POINTER_STG').output.billingReference.billableDuration[0].duration\n",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-SFDC_PLAT_DYN_ACTIVITY_POINTER_STG').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-SFDC_PLAT_DYN_ACTIVITY_POINTER_STG').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-SFDC_PLAT_DYN_ACTIVITY_POINTER_STG').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-SFDC_PLAT_DYN_ACTIVITY_POINTER_STG').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-SFDC_PLAT_DYN_ACTIVITY_POINTER_STG').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": {
+								"value": "SFDC_PLAT_DYN_ACTIVITY_POINTER_STG",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "sp-TRUNCATE-SFDC_PLAT_DYN_ACTIVITY_POINTER_STG",
+				"description": "Truncate target table DYN_ACTIVITY_POINTER_STG",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_TRUNCATE_NAMED_TABLE]",
+					"storedProcedureParameters": {
+						"p_table_name": {
+							"value": {
+								"value": "SFDC_PLAT_DYN_ACTIVITY_POINTER_STG",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "MSDynamics Migration"
+		},
+		"annotations": []
+	}
+}

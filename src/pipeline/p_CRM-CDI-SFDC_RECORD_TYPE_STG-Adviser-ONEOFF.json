@@ -1,0 +1,117 @@
+{
+	"name": "p_CRM-CDI-SFDC_RECORD_TYPE_STG-Adviser-ONEOFF",
+	"properties": {
+		"description": "Name: Rizaul Kamal\nDate: 04/09/2023\nDescription: Copies SFDC_RECORD_TYPE_STG data from STAGE_CRM (Oracle) to STAGE_CDI (Azure SQL DB). The process will upsert - so can be run many times without any issues",
+		"activities": [
+			{
+				"name": "cd-SFDC_RECORD_TYPE_STG",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "OracleSource",
+						"partitionOption": "None",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "upsert",
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"SFDC_RECORD_TYPE_STG_ID"
+							]
+						},
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "SFDC_RECORD_TYPE_STG_ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SFDC_RECORD_TYPE_STG_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "INSERT_DATE_TIME",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "INSERT_DATE_TIME",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_STAGE_CRM",
+						"type": "DatasetReference",
+						"parameters": {
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+							"CRM_DB": "@pipeline().globalParameters.CRM_DB",
+							"CRM_DB_HOST": "@pipeline().globalParameters.CRM_DB_HOST",
+							"CRM_DB_PORT": "@pipeline().globalParameters.CRM_DB_PORT",
+							"SCHEMA": "STAGE_CRM",
+							"TABLE_NAME": "SFDC_RECORD_TYPE_STG"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_ASQLDB_SHIR",
+						"type": "DatasetReference",
+						"parameters": {
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "SFDC_RECORD_TYPE_STG"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "Digital Account/Adviser - OneOff"
+		},
+		"annotations": []
+	}
+}

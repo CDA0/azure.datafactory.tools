@@ -1,6 +1,7 @@
 {
-	"name": "ls_STAGE_CRM_ORACLE",
+	"name": "ls_OCDB",
 	"properties": {
+		"description": "Connects to OCDB using the OCDB01P_CDI_ADF account",
 		"parameters": {
 			"ENVIRONMENT": {
 				"type": "string"
@@ -10,12 +11,27 @@
 			},
 			"SHORT_LOCATION": {
 				"type": "string"
+			},
+			"OCDB": {
+				"type": "string"
+			},
+			"OCDB_HOST": {
+				"type": "string"
+			},
+			"OCDB_PORT": {
+				"type": "string"
+			},
+			"OCDB_USERNAME": {
+				"type": "string"
+			},
+			"OCDB_SECRET_NAME": {
+				"type": "string"
 			}
 		},
 		"annotations": [],
 		"type": "Oracle",
 		"typeProperties": {
-			"connectionString": "host=AXORADEV11;port=1531;sid=CRM01A;user id=stage_crm_ro",
+			"connectionString": "host=@{linkedService().OCDB_HOST};port=@{linkedService().OCDB_PORT};sid=@{linkedService().OCDB};user id=@{linkedService().OCDB_USERNAME}",
 			"password": {
 				"type": "AzureKeyVaultSecret",
 				"store": {
@@ -33,7 +49,7 @@
 					}
 				},
 				"secretName": {
-					"value": "@{linkedService().LOGICAL_ENVIRONMENT}-stagecrm-password",
+					"value": "@{linkedService().OCDB_SECRET_NAME}",
 					"type": "Expression"
 				}
 			}
@@ -42,5 +58,6 @@
 			"referenceName": "Lansing",
 			"type": "IntegrationRuntimeReference"
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
 }

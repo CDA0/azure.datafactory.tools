@@ -1,0 +1,871 @@
+{
+	"name": "p_MSD-CDI-CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+	"properties": {
+		"description": "Author: Jilly Webster\nDate: 28/07/2023\nDescription: ASCD-20271 - this pipeline will load data from MS Dynamics (SQL server) Asc_nonadvisedworkitem table to STAGE_CDI (Oracle) CRM_PLAT_DYN_NONADVSWRKITEM_STG table. ",
+		"activities": [
+			{
+				"name": "sp-TRUNCATE-CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+				"description": "Truncate target table CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_TRUNCATE_NAMED_TABLE]",
+					"storedProcedureParameters": {
+						"p_table_name": {
+							"value": "CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+						"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+						"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+					}
+				}
+			},
+			{
+				"name": "cd-TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+				"description": "pulls data from MS Dynamic Asc_nonadvisedworkitem table and copies to the STAGE_LOAD table TD_CRM_PLAT_DYN_INCIDENT_STG using SQL query",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "sp-TRUNCATE-CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "sp-TRUNCATE-TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "select ASC_NONADVISEDWORKITEMID,\n       ASC_REFERENCE,\n       ASC_PROCESS,\n       ASC_CLIENTMASTERID,\n       ASC_CLIENTMASTERIDNAME,\n       OWNERID,\n       OWNERIDNAME,\n       STATUSCODE,\n       ASC_DUETOCOMMENCE,\n       ASC_NAME,\n       ASC_DATECLOSED,\n       ASC_DATESETPENDING,\n       CREATEDBY,\n       CREATEDON,\n       MODIFIEDBY,\n       MODIFIEDON\n  from DBO.ASC_NONADVISEDWORKITEM",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ASC_NONADVISEDWORKITEMID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "ASC_NONADVISEDWORKITEMID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_REFERENCE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_REFERENCE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_PROCESS",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ASC_PROCESS",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CLIENTMASTERID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "ASC_CLIENTMASTERID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CLIENTMASTERIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_CLIENTMASTERIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OWNERID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "OWNERID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OWNERIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "OWNERIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "STATUSCODE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "STATUSCODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_DUETOCOMMENCE",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "ASC_DUETOCOMMENCE",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_NAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_NAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_DATECLOSED",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "ASC_DATECLOSED",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_DATESETPENDING",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "ASC_DATESETPENDING",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "CREATEDBY",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "CREATEDBY",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "CREATEDON",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "CREATEDON",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "MODIFIEDBY",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "MODIFIEDBY",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "MODIFIEDON",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "MODIFIEDON",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": true
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_MS_DYNAMICS",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "dbo",
+							"TABLE_NAME": "Asc_nonadvisedworkitem",
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_ASQLDB_WOKING_SHIR",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_LOAD",
+							"TABLE_NAME": "TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+						}
+					}
+				]
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+				"description": "Writing audit data for the Copy Data activity that has just run",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": {
+						"value": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+						"type": "Expression"
+					},
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_NONADVSWRKITEM_STG').output.billingReference.billableDuration[0].duration",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_NONADVSWRKITEM_STG').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_NONADVSWRKITEM_STG').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_NONADVSWRKITEM_STG').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_NONADVSWRKITEM_STG').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_NONADVSWRKITEM_STG').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": {
+								"value": "CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+						"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+						"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+					}
+				}
+			},
+			{
+				"name": "sp-TRUNCATE-TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+				"description": "Truncate target table TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_LOAD].[PRC_TRUNCATE_TD_TABLE]",
+					"storedProcedureParameters": {
+						"p_table_name": {
+							"value": "TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+						"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+						"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+					}
+				}
+			},
+			{
+				"name": "cd-CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+				"description": "pulls data from STAGE_LOAD table TD_ CRM_PLAT_DYN_NONADVSWRKITEM_STG and copies to the STAGE_CDI table CRM_PLAT_DYN_NONADVSWRKITEM_STG using SQL query",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "cd-TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select TCPDNS.S_CASECLIENTMASTER_KEY,\n       TCPDNS.S_CREATE_DATETIME,\n       TCPDNS.S_UPDATE_DATETIME,\n       TCPDNS.ASC_NONADVISEDWORKITEMID,\n       TCPDNS.ASC_REFERENCE,\n       TCPDNS.ASC_PROCESS,\n       TCPDNS.ASC_CLIENTMASTERID,\n       TCPDNS.ASC_CLIENTMASTERIDNAME,\n       TCPDNS.OWNERID,\n       TCPDNS.OWNERIDNAME,\n       TCPDNS.STATUSCODE,\n       TCPDNS.ASC_DUETOCOMMENCE,\n       TCPDNS.ASC_NAME,\n       TCPDNS.ASC_DATECLOSED,\n       TCPDNS.ASC_DATESETPENDING,\n       TCPDNS.CREATEDBY,\n       TCPDNS.CREATEDON,\n       TCPDNS.MODIFIEDBY,\n       TCPDNS.MODIFIEDON\n  from STAGE_LOAD.TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG TCPDNS",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "S_CASECLIENTMASTER_KEY",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 38
+								},
+								"sink": {
+									"name": "S_CASECLIENTMASTER_KEY",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 38
+								}
+							},
+							{
+								"source": {
+									"name": "S_CREATE_DATETIME",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								},
+								"sink": {
+									"name": "S_CREATE_DATETIME",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "S_UPDATE_DATETIME",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								},
+								"sink": {
+									"name": "S_UPDATE_DATETIME",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_NONADVISEDWORKITEMID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "ASC_NONADVISEDWORKITEMID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_REFERENCE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_REFERENCE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_PROCESS",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								},
+								"sink": {
+									"name": "ASC_PROCESS",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CLIENTMASTERID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "ASC_CLIENTMASTERID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CLIENTMASTERIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_CLIENTMASTERIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OWNERID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "OWNERID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OWNERIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "OWNERIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "STATUSCODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								},
+								"sink": {
+									"name": "STATUSCODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_DUETOCOMMENCE",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								},
+								"sink": {
+									"name": "ASC_DUETOCOMMENCE",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_NAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_NAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_DATECLOSED",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								},
+								"sink": {
+									"name": "ASC_DATECLOSED",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_DATESETPENDING",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								},
+								"sink": {
+									"name": "ASC_DATESETPENDING",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "CREATEDBY",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "CREATEDBY",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "CREATEDON",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								},
+								"sink": {
+									"name": "CREATEDON",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "MODIFIEDBY",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "MODIFIEDBY",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "MODIFIEDON",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								},
+								"sink": {
+									"name": "MODIFIEDON",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": true
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_ASQLDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_LOAD",
+							"TABLE_NAME": "TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_ASQLDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+						}
+					}
+				]
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-TD_CRM_PLAT_DYN_NONADVWRKITEM_STG",
+				"description": "Writing audit data for the Copy Data activity that has just run",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": {
+						"value": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+						"type": "Expression"
+					},
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG').output.billingReference.billableDuration[0].duration",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": {
+								"value": "TD_CRM_PLAT_DYN_NONADVSWRKITEM_STG",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "MSDynamics Migration"
+		},
+		"annotations": []
+	}
+}

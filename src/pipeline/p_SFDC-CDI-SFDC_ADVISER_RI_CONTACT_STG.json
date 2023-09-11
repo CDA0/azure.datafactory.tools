@@ -1,0 +1,1065 @@
+{
+	"name": "p_SFDC-CDI-SFDC_ADVISER_RI_CONTACT_STG",
+	"properties": {
+		"description": "Name : Nextpathway\nDate : 02/06/2023\nDescription : pulls data from Salesforce object and  loads into transient table. Compares transient table with staging table to identify new/updated records in the target/staging table and load target table.",
+		"activities": [
+			{
+				"name": "lkp-BATCH_PARAMETER",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "sp-TRUNCATE-TD_SFDC_ADVISER_RI_CONTACT_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select PARAMETER_VALUE_DT as PRM_EXTRACTDT\n  from STAGE_CDI.BATCH_PARAMETER \n where PROCESS_NAME = 'p_SFDC-CDI-SFDC_ADVISER_RI_CONTACT_STG'\n   and PARAMETER_NAME = 'prm_EXTRACTDT'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_ASQLDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "BATCH_PARAMETER",
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "cd-TD_SFDC_ADVISER_RI_CONTACT_STG",
+				"description": "pulls data from Salesforce table, loads into transient table TD_SFDC_ADVISER_RI_CONTACT_STG",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "lkp-BATCH_PARAMETER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SalesforceSource",
+						"query": {
+							"value": "select ID,\n       PRU_PARTYROLEID__C,\n       ACCOUNTID,\n       SALUTATION,\n       FIRSTNAME,\n       LASTNAME,\n       PRU_INDIVIDUALREFERENCENUMBER__C,\n       PRU_INDIVIDUALREFERENCENUMBERALT__C,\n       PRU_STATUS__C,\n       OTHERSTREET,\n       OTHERCITY,\n       OTHERSTATE,\n       OTHERPOSTALCODE,\n       PRU_REGISTEREDINDIVIDUALREFERENCE__C,\n       PRU_AGENCYNUMBER__C,\n       PRU_AGENCYNUMBERSTATUS__C,\n       PRU_TYPE__C,\n       PRU_DATAQUALITYISSUE__C,\n       PRU_DATAQUALITYCOMMENT__C,\n       PRU_RECORDREMOVED__C,\n       LASTMODIFIEDDATE\n  from CONTACT \n where PRU_AGENCYNUMBER__C != null \n   and PRU_SONATAPLATFORMOUTLETCLIENTID__C = NULL\n   and LASTMODIFIEDDATE > @{formatDateTime(activity('lkp-BATCH_PARAMETER').output.firstrow.prm_EXTRACTDT,'yyyy-MM-ddTHH:mm:ssZ')}",
+							"type": "Expression"
+						},
+						"readBehavior": "query"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "Id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_PartyRoleID__c",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRU_PARTYROLEID__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "AccountId",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ACCOUNTID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "Salutation",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SALUTATION",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "FirstName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FIRSTNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "LastName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "LASTNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_IndividualReferenceNumber__c",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRU_INDIVIDUALREFERENCENUMBER__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_IndividualReferenceNumberAlt__c",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRU_INDIVIDUALREFERENCENUMBERALT__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_Status__c",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRU_STATUS__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_RegisteredIndividualReference__c",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRU_REGISTEREDINDIVIDUALREFERENCE__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_AgencyNumber__c",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRU_AGENCYNUMBER__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_AgencyNumberStatus__c",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRU_AGENCYNUMBERSTATUS__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_Type__c",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRU_TYPE__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OtherStreet",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OTHERSTREET",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OtherCity",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OTHERCITY",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OtherState",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OTHERSTATE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_DataQualityIssue__c",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "PRU_DATAQUALITYISSUE__C",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_DataQualityComment__c",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRU_DATAQUALITYCOMMENT__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OtherPostalCode",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OTHERPOSTALCODE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_RecordRemoved__c",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "PRU_RECORDREMOVED__C",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "LastModifiedDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "LASTMODIFIEDDATE",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": true
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_SFDC_DPDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							},
+							"SFDC_DPDB_URL": {
+								"value": "@pipeline().globalParameters.SFDC_DPDB_URL",
+								"type": "Expression"
+							},
+							"SFDC_DPDB_USERNAME": {
+								"value": "@pipeline().globalParameters.SFDC_DPDB_USERNAME",
+								"type": "Expression"
+							},
+							"SFDC_DPDB_API_VERSION": {
+								"value": "@pipeline().globalParameters.SFDC_DPDB_API_VERSION",
+								"type": "Expression"
+							},
+							"SFDC_DPDB_ORG": "@pipeline().globalParameters.SFDC_DPDB_ORG",
+							"OBJECT_NAME": "CONTACT"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_ASQLDB_WOKING_SHIR",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_LOAD",
+							"TABLE_NAME": "TD_SFDC_ADVISER_RI_CONTACT_STG",
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "spt-UPDATE-BATCH_PARAMETER",
+				"description": "UPDATE-BATCH_PARAMETER",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "cd-SFDC_ADVISER_RI_CONTACT_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": "update STAGE_CDI.BATCH_PARAMETER\n   set PARAMETER_VALUE_DT = case \n                              when (select max(LASTMODIFIEDDATE) \n                                     from STAGE_LOAD.TD_SFDC_ADVISER_RI_CONTACT_STG) is not null then \n                                (select max(LASTMODIFIEDDATE) \n                                   from STAGE_LOAD.TD_SFDC_ADVISER_RI_CONTACT_STG) \n                            else \n                              PARAMETER_VALUE_DT \n                            end,\n       LASTMODIFIEDDT = (select cast(SYSDATETIMEOFFSET() at time zone 'GMT Standard Time' as datetime)),\n       LASTMODIFIEDBY = 'p_SFDC-CDI-SFDC_ADVISER_RI_CONTACT_STG'\n where PROCESS_NAME = 'p_SFDC-CDI-SFDC_ADVISER_RI_CONTACT_STG'\n   and PARAMETER_NAME = 'prm_EXTRACTDT'"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "sp-TRUNCATE-TD_SFDC_ADVISER_RI_CONTACT_STG",
+				"description": "this step truncate the table TD_SFDC_ADVISER_RI_CONTACT_STG",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_LOAD].[PRC_TRUNCATE_TD_TABLE]",
+					"storedProcedureParameters": {
+						"p_table_name": {
+							"value": "TD_SFDC_ADVISER_RI_CONTACT_STG",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "cd-SFDC_ADVISER_RI_CONTACT_STG",
+				"description": "Upsert SFDC_ADVISER_RI_CONTACT_STG",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "cd-TD_SFDC_ADVISER_RI_CONTACT_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"additionalColumns": [
+							{
+								"name": "CREATE_USER_ID",
+								"value": {
+									"value": "@pipeline().Pipeline",
+									"type": "Expression"
+								}
+							}
+						],
+						"sqlReaderQuery": "select ID as SFDC_ADVISER_CONTACT_ID,\r\n       PRU_PARTYROLEID__C,\r\n       ACCOUNTID,\r\n       SALUTATION,\r\n       FIRSTNAME,\r\n       LASTNAME,\r\n       PRU_INDIVIDUALREFERENCENUMBER__C as PRU_INDIVIDUALREFNUM__C,\r\n       PRU_INDIVIDUALREFERENCENUMBERALT__C as PRU_INDIVIDUALREFNUMALT__C,\r\n       PRU_STATUS__C,\r\n       PRU_RegisteredIndividualReference__c as PRU_REGISTEREDINDIVIDUALREF__C,\r\n       PRU_AGENCYNUMBER__C,\r\n       PRU_AGENCYNUMBERSTATUS__C,\r\n       PRU_TYPE__C,\r\n       OTHERSTREET,\r\n       OTHERCITY,\r\n       OTHERSTATE,\r\n       cast(PRU_DATAQUALITYISSUE__C  as decimal(1,0)) as PRU_DATAQUALITYISSUE__C,\r\n       PRU_DATAQUALITYCOMMENT__C,\r\n       OTHERPOSTALCODE,\r\n       cast(PRU_RECORDREMOVED__C  as decimal(1,0)) as PRU_RECORDREMOVED__C,\r\n       cast(sysdatetimeoffset() at time zone 'GMT Standard Time' as datetime) as UPDATE_DATE_TIME\r\n  from STAGE_LOAD.TD_SFDC_ADVISER_RI_CONTACT_STG ",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "upsert",
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"PRU_AGENCYNUMBER__C"
+							]
+						},
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "SFDC_ADVISER_CONTACT_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "SFDC_ADVISER_CONTACT_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_AGENCYNUMBER__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_AGENCYNUMBER__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_PARTYROLEID__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_PARTYROLEID__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ACCOUNTID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "ACCOUNTID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "SALUTATION",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "SALUTATION",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "FIRSTNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "FIRSTNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "LASTNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "LASTNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_INDIVIDUALREFNUM__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_INDIVIDUALREFNUM__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_INDIVIDUALREFNUMALT__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_INDIVIDUALREFNUMALT__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_STATUS__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_STATUS__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_REGISTEREDINDIVIDUALREF__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_REGISTEREDINDIVIDUALREF__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_AGENCYNUMBERSTATUS__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_AGENCYNUMBERSTATUS__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_TYPE__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_TYPE__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OTHERSTREET",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "OTHERSTREET",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OTHERCITY",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "OTHERCITY",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OTHERSTATE",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "OTHERSTATE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OTHERPOSTALCODE",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "OTHERPOSTALCODE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_DATAQUALITYISSUE__C",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								},
+								"sink": {
+									"name": "PRU_DATAQUALITYISSUE__C",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_DATAQUALITYCOMMENT__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_DATAQUALITYCOMMENT__C",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_RECORDREMOVED__C",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								},
+								"sink": {
+									"name": "PRU_RECORDREMOVED__C",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "CREATE_USER_ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CREATE_USER_ID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "UPDATE_DATE_TIME",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "UPDATE_DATE_TIME",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": true
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_ASQLDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_LOAD",
+							"TABLE_NAME": "TD_SFDC_ADVISER_RI_CONTACT_STG",
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_ASQLDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "SFDC_ADVISER_RI_CONTACT_STG",
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-TD_SFDC_ADVISER_RI_CONTACT_STG",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-TD_SFDC_ADVISER_RI_CONTACT_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-TD_SFDC_ADVISER_RI_CONTACT_STG').output.billingReference.billableDuration[0].duration\n",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-TD_SFDC_ADVISER_RI_CONTACT_STG').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-TD_SFDC_ADVISER_RI_CONTACT_STG').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-TD_SFDC_ADVISER_RI_CONTACT_STG').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-TD_SFDC_ADVISER_RI_CONTACT_STG').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-TD_SFDC_ADVISER_RI_CONTACT_STG').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": "TD_SFDC_ADVISER_RI_CONTACT_STG",
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-SFDC_ADVISER_RI_CONTACT_STG",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-SFDC_ADVISER_RI_CONTACT_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-SFDC_ADVISER_RI_CONTACT_STG').output.billingReference.billableDuration[0].duration\n",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-SFDC_ADVISER_RI_CONTACT_STG').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-SFDC_ADVISER_RI_CONTACT_STG').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-SFDC_ADVISER_RI_CONTACT_STG').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-SFDC_ADVISER_RI_CONTACT_STG').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-SFDC_ADVISER_RI_CONTACT_STG').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": "SFDC_ADVISER_RI_CONTACT_STG",
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "Digital Account/Adviser"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-07-14T11:49:06Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,64 @@
+{
+	"name": "ls_MS_DYNAMICS",
+	"properties": {
+		"description": "Linked service for MS Dynamics",
+		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string"
+			},
+			"SHORT_LOCATION": {
+				"type": "string"
+			},
+			"MS_DYNAMICS_DB": {
+				"type": "string"
+			},
+			"MS_DYNAMICS_DB_HOST": {
+				"type": "string"
+			},
+			"MS_DYNAMICS_DB_PORT": {
+				"type": "string"
+			},
+			"MS_DYNAMICS_DB_USERNAME": {
+				"type": "string"
+			},
+			"MS_DYNAMICS_DB_SECRET_NAME": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "Integrated Security=True;Data Source=\"@{linkedService().MS_DYNAMICS_DB_HOST}, @{linkedService().MS_DYNAMICS_DB_PORT}\";Initial Catalog=@{linkedService().MS_DYNAMICS_DB}",
+			"userName": "@{linkedService().MS_DYNAMICS_DB_USERNAME}",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_KeyVaultCom",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@linkedService().ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@linkedService().SHORT_LOCATION",
+							"type": "Expression"
+						}
+					}
+				},
+				"secretName": {
+					"value": "@{linkedService().MS_DYNAMICS_DB_SECRET_NAME}",
+					"type": "Expression"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "Woking",
+			"type": "IntegrationRuntimeReference"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
+}

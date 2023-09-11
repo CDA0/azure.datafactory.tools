@@ -1,0 +1,61 @@
+{
+	"name": "ls_SFDC_MSDynamics",
+	"properties": {
+		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string"
+			},
+			"SHORT_LOCATION": {
+				"type": "string"
+			},
+			"SFDC_MS_DYNAMICS_URL": {
+				"type": "string"
+			},
+			"SFDC_MS_DYNAMICS_USER": {
+				"type": "string"
+			},
+			"SFDC_MS_DYNAMICS_API_VERSION": {
+				"type": "string"
+			},
+			"SFDC_MS_DYNAMICS_ORG": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Salesforce",
+		"typeProperties": {
+			"environmentUrl": "@{linkedService().SFDC_MS_DYNAMICS_URL}",
+			"username": "@{linkedService().SFDC_MS_DYNAMICS_USER}",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_KeyVaultCom",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@linkedService().ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@linkedService().SHORT_LOCATION",
+							"type": "Expression"
+						}
+					}
+				},
+				"secretName": {
+					"value": "SFDC-msdmigration-@{linkedService().SFDC_MS_DYNAMICS_ORG}",
+					"type": "Expression"
+				}
+			},
+			"apiVersion": "@{linkedService().SFDC_MS_DYNAMICS_API_VERSION}"
+		},
+		"connectVia": {
+			"referenceName": "Woking",
+			"type": "IntegrationRuntimeReference"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
+}

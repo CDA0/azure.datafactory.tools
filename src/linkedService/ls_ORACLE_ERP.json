@@ -1,0 +1,16 @@
+{
+    "name": "ls_ORACLE_ERP",
+    "type": "Microsoft.DataFactory/factories/linkedservices",
+    "properties": {
+        "description": "Connects to Oracle ERP for TLM extracts",
+        "annotations": [],
+        "type": "RestService",
+        "typeProperties": {
+            "url": "https://eigm-dev.fa.em2.oraclecloud.com/",
+            "enableServerCertificateValidation": true,
+            "authenticationType": "Basic",
+            "userName": "Pia.Interface",
+            "encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQERCQzFGRkYxLTNDMzMtNDY4MC1BRDc5LTNGRkQ5RUU4RUU4Ml9kNGI4ODY3YS0xODM5LTRkYTQtYjJhMy02YjEwMGEwNzdlZDciDQp9"
+        }
+    }
+}

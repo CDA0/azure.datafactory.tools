@@ -1,5 +1,5 @@
 {
-	"name": "dsADLSTest",
+	"name": "ds_ADLS",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_ADLS2",
@@ -9,6 +9,10 @@
 					"value": "@dataset().ENVIRONMENT",
 					"type": "Expression"
 				},
+				"LOGICAL_ENVIRONMENT": {
+					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
+				},
 				"SHORT_LOCATION": {
 					"value": "@dataset().SHORT_LOCATION",
 					"type": "Expression"
@@ -16,23 +20,23 @@
 			}
 		},
 		"parameters": {
-			"FILE_PATH": {
-				"type": "string"
-			},
-			"FILE_NAME": {
-				"type": "string"
+			"ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
 			},
 			"LOGICAL_ENVIRONMENT": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
 			},
-			"ENVIRONMENT": {
-				"type": "string",
-				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
-			},
 			"SHORT_LOCATION": {
 				"type": "string",
 				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
+			},
+			"FILE_PATH": {
+				"type": "string"
+			},
+			"FILE_NAME": {
+				"type": "string"
 			}
 		},
 		"annotations": [],
@@ -53,7 +57,7 @@
 					"type": "Expression"
 				}
 			},
-			"columnDelimiter": "|",
+			"columnDelimiter": ",",
 			"escapeChar": "\\",
 			"firstRowAsHeader": true,
 			"quoteChar": "\""

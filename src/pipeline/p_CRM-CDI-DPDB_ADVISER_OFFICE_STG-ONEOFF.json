@@ -1,0 +1,488 @@
+{
+	"name": "p_CRM-CDI-DPDB_ADVISER_OFFICE_STG-ONEOFF",
+	"properties": {
+		"description": "Name: Rizaul Kamal\nDate: 07/06/2023\nDescription: Copies existing data in DPDB_ADVISER_OFFICE_STG from STAGE_CRM to (Oracle) to STAGE_CDI as part of data migration. The RECORD_UPDATE_IND column is recalculated using SHA256",
+		"activities": [
+			{
+				"name": "lkp-BATCH_PARAMETER",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select count(1) as COPY_DATA\n  from STAGE_CDI.BATCH_PARAMETER\n where PROCESS_NAME = 'ORA_STAGE_CRM_TO_SQLDB_STAGE_CDI_ADVISER' \n   and PARAMETER_NAME = 'DPDB_ADVISER_OFFICE_STG'\n   and PARAMETER_VALUE_CHAR = 'P'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "ds_ASQLDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "BATCH_PARAMETER",
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+						}
+					},
+					"firstRowOnly": true
+				}
+			},
+			{
+				"name": "if-COPY-DATA",
+				"description": "Only copy data from Oracle to Azure if the value returned from lookup is 1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "lkp-BATCH_PARAMETER",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@activity('lkp-BATCH_PARAMETER').output.firstRow.COPY_DATA",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "lkp-UPDATE_BATCH_PARAMETER",
+							"description": "A query in the lookup is used to update the BATCH_PARAMETER to mark the processed table as 'C' - this will stop the table from being copied again if the pipeline is rerun",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "cp-DPDB_ADVISER_OFFICE_STG",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "update STAGE_CDI.BATCH_PARAMETER\n   set PARAMETER_VALUE_CHAR = 'C',\n\t   LASTMODIFIEDDT = (select cast(sysdatetimeoffset() at time zone 'GMT Standard Time' as datetime)),\n\t   LASTMODIFIEDBY = '@{pipeline().Pipeline}'\n where PROCESS_NAME = 'ORA_STAGE_CRM_TO_SQLDB_STAGE_CDI_ADVISER'\n   and PARAMETER_NAME = 'DPDB_ADVISER_OFFICE_STG'\n\nselect 0",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "ds_ASQLDB",
+									"type": "DatasetReference",
+									"parameters": {
+										"SCHEMA": "STAGE_CDI",
+										"TABLE_NAME": "BATCH_PARAMETER",
+										"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+										"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+										"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION"
+									}
+								}
+							}
+						},
+						{
+							"name": "cp-DPDB_ADVISER_OFFICE_STG",
+							"description": "",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.01:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "OracleSource",
+									"partitionOption": "None",
+									"queryTimeout": "02:00:00"
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"sqlWriterStoredProcedureName": "[STAGE_CDI].[PRC_CRM_CDI_DPDB_ADVISER_OFFICE_STG]",
+									"sqlWriterTableType": "STAGE_CDI.DPDB_ADVISER_OFFICE_STG_TYPE",
+									"storedProcedureTableTypeParameterName": "DPDB_ADVISER_OFFICE_STG",
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "PARTY_ROLE_ID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "PARTY_ROLE_ID",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "FIRM_PARTY_ROLE_ID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "FIRM_PARTY_ROLE_ID",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "PARTY_ROLE_NAME",
+												"type": "String"
+											},
+											"sink": {
+												"name": "PARTY_ROLE_NAME",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "STATUS",
+												"type": "String"
+											},
+											"sink": {
+												"name": "STATUS",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "PARTY_ROLE_TYPE_ID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "PARTY_ROLE_TYPE_ID",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "ADDRESS_LINE_1",
+												"type": "String"
+											},
+											"sink": {
+												"name": "ADDRESS_LINE_1",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "ADDRESS_LINE_2",
+												"type": "String"
+											},
+											"sink": {
+												"name": "ADDRESS_LINE_2",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "ADDRESS_LINE_3",
+												"type": "String"
+											},
+											"sink": {
+												"name": "ADDRESS_LINE_3",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "ADDRESS_LINE_4",
+												"type": "String"
+											},
+											"sink": {
+												"name": "ADDRESS_LINE_4",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "POSTCODE",
+												"type": "String"
+											},
+											"sink": {
+												"name": "POSTCODE",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "EMAIL_URL_ADDRESS",
+												"type": "String"
+											},
+											"sink": {
+												"name": "EMAIL_URL_ADDRESS",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "PHONE_FAX_NUMBER",
+												"type": "String"
+											},
+											"sink": {
+												"name": "PHONE_FAX_NUMBER",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "RECORD_UPDATE_IND",
+												"type": "String"
+											},
+											"sink": {
+												"name": "RECORD_UPDATE_IND",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "RECORD_DELETE_IND",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "RECORD_DELETE_IND",
+												"type": "Decimal",
+												"physicalType": "decimal",
+												"scale": 0,
+												"precision": 1
+											}
+										},
+										{
+											"source": {
+												"name": "CREATE_USER_ID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CREATE_USER_ID",
+												"type": "String",
+												"physicalType": "varchar"
+											}
+										},
+										{
+											"source": {
+												"name": "INSERT_DATE_TIME",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "INSERT_DATE_TIME",
+												"type": "DateTime",
+												"physicalType": "datetime2"
+											}
+										},
+										{
+											"source": {
+												"name": "UPDATE_DATE_TIME",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "UPDATE_DATE_TIME",
+												"type": "DateTime",
+												"physicalType": "datetime2"
+											}
+										}
+									],
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_STAGE_CRM",
+									"type": "DatasetReference",
+									"parameters": {
+										"ENVIRONMENT": {
+											"value": "@pipeline().globalParameters.ENVIRONMENT",
+											"type": "Expression"
+										},
+										"LOGICAL_ENVIRONMENT": {
+											"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+											"type": "Expression"
+										},
+										"SHORT_LOCATION": {
+											"value": "@pipeline().globalParameters.SHORT_LOCATION",
+											"type": "Expression"
+										},
+										"CRM_DB": "@pipeline().globalParameters.CRM_DB",
+										"CRM_DB_HOST": "@pipeline().globalParameters.CRM_DB_HOST",
+										"CRM_DB_PORT": "@pipeline().globalParameters.CRM_DB_PORT",
+										"SCHEMA": "STAGE_CRM",
+										"TABLE_NAME": "DPDB_ADVISER_OFFICE_STG"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_ASQLDB",
+									"type": "DatasetReference",
+									"parameters": {
+										"SCHEMA": "STAGE_CDI",
+										"TABLE_NAME": "DPDB_ADVISER_OFFICE_STG",
+										"ENVIRONMENT": {
+											"value": "@pipeline().globalParameters.ENVIRONMENT",
+											"type": "Expression"
+										},
+										"LOGICAL_ENVIRONMENT": {
+											"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+											"type": "Expression"
+										},
+										"SHORT_LOCATION": {
+											"value": "@pipeline().globalParameters.SHORT_LOCATION",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "sp-UPDATE_BATCH_AUDIT-DPDB_ADVISER_FIRM_STG_Del",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "cp-DPDB_ADVISER_OFFICE_STG",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+								"storedProcedureParameters": {
+									"p_billable_duration": {
+										"value": {
+											"value": "@activity('cp-DPDB_ADVISER_OFFICE_STG').output.billingReference.billableDuration[0].duration",
+											"type": "Expression"
+										},
+										"type": "Decimal"
+									},
+									"p_billable_unit": {
+										"value": {
+											"value": "@activity('cp-DPDB_ADVISER_OFFICE_STG').output.billingReference.billableDuration[0].unit",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"p_duration": {
+										"value": {
+											"value": "@activity('cp-DPDB_ADVISER_OFFICE_STG').output.copyDuration",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"p_pipeline_name": {
+										"value": {
+											"value": "@pipeline().Pipeline",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"p_process_start_dt": {
+										"value": {
+											"value": "@activity('cp-DPDB_ADVISER_OFFICE_STG').output.executionDetails[0].start",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"p_records_read": {
+										"value": {
+											"value": "@activity('cp-DPDB_ADVISER_OFFICE_STG').output.rowsRead",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"p_records_written": {
+										"value": {
+											"value": "@activity('cp-DPDB_ADVISER_OFFICE_STG').output.rowsCopied",
+											"type": "Expression"
+										},
+										"type": "Int32"
+									},
+									"p_table_name": {
+										"value": "DPDB_ADVISER_OFFICE_STG_Ora",
+										"type": "String"
+									},
+									"p_trigger_name": {
+										"value": {
+											"value": "@pipeline().TriggerName",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_AzureSQLDB",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"ENVIRONMENT": {
+										"value": "@pipeline().globalParameters.ENVIRONMENT",
+										"type": "Expression"
+									},
+									"SHORT_LOCATION": {
+										"value": "@pipeline().globalParameters.SHORT_LOCATION",
+										"type": "Expression"
+									},
+									"LOGICAL_ENVIRONMENT": {
+										"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"folder": {
+			"name": "Digital Account/Adviser - OneOff"
+		},
+		"annotations": []
+	}
+}

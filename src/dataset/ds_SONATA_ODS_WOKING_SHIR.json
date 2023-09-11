@@ -1,0 +1,97 @@
+{
+	"name": "ds_SONATA_ODS_WOKING_SHIR",
+	"properties": {
+		"description": "Dataset for tables in SONATA_ODS using Woking SHIR",
+		"linkedServiceName": {
+			"referenceName": "ls_SONATA_ODS_WOKING_SHIR",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"ENVIRONMENT": {
+					"value": "@dataset().ENVIRONMENT",
+					"type": "Expression"
+				},
+				"SHORT_LOCATION": {
+					"value": "@dataset().SHORT_LOCATION",
+					"type": "Expression"
+				},
+				"LOGICAL_ENVIRONMENT": {
+					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
+				},
+				"SONATA_ODS_DB": {
+					"value": "@dataset().SONATA_ODS_DB",
+					"type": "Expression"
+				},
+				"SONATA_ODS_DB_HOST": {
+					"value": "@dataset().SONATA_ODS_DB_HOST",
+					"type": "Expression"
+				},
+				"SONATA_ODS_DB_PORT": {
+					"value": "@dataset().SONATA_ODS_DB_PORT",
+					"type": "Expression"
+				},
+				"SONATA_ODS_DB_USERNAME": {
+					"value": "@dataset().SONATA_ODS_DB_USERNAME",
+					"type": "Expression"
+				},
+				"SONATA_ODS_DB_SECRET_NAME": {
+					"value": "@dataset().SONATA_ODS_DB_SECRET_NAME",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters..LOGICAL_ENVIRONMENT"
+			},
+			"SHORT_LOCATION": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
+			},
+			"SONATA_ODS_DB": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SONATA_ODS_DB"
+			},
+			"SONATA_ODS_DB_HOST": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SONATA_ODS_DB_HOST"
+			},
+			"SONATA_ODS_DB_PORT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SONATA_ODS_DB_PORT"
+			},
+			"SONATA_ODS_DB_USERNAME": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SONATA_ODS_DB_USERNAME"
+			},
+			"SONATA_ODS_DB_SECRET_NAME": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SONATA_ODS_DB_SECRET_NAME"
+			},
+			"SCHEMA": {
+				"type": "string"
+			},
+			"TABLE_NAME": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().SCHEMA",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().TABLE_NAME",
+				"type": "Expression"
+			}
+		}
+	}
+}

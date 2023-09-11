@@ -1,15 +1,23 @@
 {
 	"name": "p_DPDB-CDI-DPDB_ADVISER_FIRM_STG",
 	"properties": {
-		"description": "Author: Rizaul Kamal\nDate: 16/05/2023\nDescription: Extracts Adviser Frim data from DPDB",
+		"description": "Name : Nextpathway\nDate : 31/05/2023\nDescription : pulls data from oracle tables and loads into transient table. Compares transient table with staging table to identify new/updated records in the target/staging table and load target table.",
 		"activities": [
 			{
-				"name": "cp-TD_DPDB_ADVISER_FIRM_STG",
+				"name": "cd-TD_DPDB_ADVISER_FIRM_STG",
+				"description": "pulls data from oracle tables, loads into transient table.",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "sp-TRUNCATE-TD_DPDB_ADVISER_FIRM_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
-					"timeout": "0.01:00:00",
-					"retry": 1,
+					"timeout": "0.12:00:00",
+					"retry": 0,
 					"retryIntervalInSeconds": 30,
 					"secureOutput": false,
 					"secureInput": false
@@ -18,17 +26,17 @@
 				"typeProperties": {
 					"source": {
 						"type": "OracleSource",
-						"oracleReaderQuery": "with PARTY_DETAILS\nas\n(select P.ORGANISATION_NAME,\n        PR.PARTY_ROLE_ID,\n        PR.PARTY_ROLE_TYPE_ID,\n        OPR.STATUS,\n        OPR.FIRM_REFERENCE_NUMBER,\n        OPR.REGULATORY_STATUS_ID,\n        OPR.REGULATION_TYPE_ID\n   from DPARTNER.PARTY P\n  inner join DPARTNER.PARTY_ROLE PR\n     on (PR.PARTY_ID = P.PARTY_ID)\n  inner join DPARTNER.ORGANISATION_PARTY_ROLE OPR\n     on (OPR.PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n  where PR.PARTY_ROLE_TYPE_ID in ('adv_firm', 'par_org', 'os_firm', 'sp_firm')\n    and PR.PARTY_ROLE_ID in\n          (select distinct\n                  PRR.PARTY_ROLE_ID \n             from DPARTNER.COMMISSION_ACCOUNT CA\n            inner join DPARTNER.LEGACY_ACCOUNT_DETAIL LAD\n               on (CA.COMMISSION_ACCOUNT_ID = LAD.COMMISSION_ACCOUNT_ID)\n            inner join DPARTNER.PARTY_ROLE_RELATIONSHIP PRR\n               on (PRR.RELATED_PARTY_ROLE_ID = CA.PARTY_ROLE_ID)\n            where relationship_type_id = 'rel_afoff'\n          )\n),\nHEAD_OFFICE\nas\n(select PRR.PARTY_ROLE_ID,\n        PRR.RELATED_PARTY_ROLE_ID as HEAD_OFFICE_PARTY_ROLE_ID\n   from DPARTNER.PARTY_ROLE_RELATIONSHIP PRR\n  inner join DPARTNER.PARTY_ROLE PR\n     on (PRR.RELATED_PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\n  where PRR.RELATIONSHIP_TYPE_ID = 'rel_afoff'\n    and PRR.END_DATE is null\n    and PR.PARTY_ROLE_TYPE_ID = 'head_off'\n),\nHO_ADDRESS\nas\n(select ADDRESS.PARTY_ROLE_ID,\n        ADDRESS.ADDRESS_LINE_1,\n        ADDRESS.ADDRESS_LINE_2,\n        ADDRESS.ADDRESS_LINE_3,\n        ADDRESS.ADDRESS_LINE_4,\n        ADDRESS.POSTCODE\n   from (select CPR.PARTY_ROLE_ID,\n                trim(PA.ADDRESS_LINE_1) as ADDRESS_LINE_1,\n                trim(PA.ADDRESS_LINE_2) as ADDRESS_LINE_2,\n                trim(PA.ADDRESS_LINE_3) as ADDRESS_LINE_3,\n                trim(PA.ADDRESS_LINE_4) as ADDRESS_LINE_4,\n                trim(PA.POSTCODE) as POSTCODE,\n                row_number() over (partition by CPR.PARTY_ROLE_ID\n                                       order by CPR.UPDATED_DATE desc) RN\n           from DPARTNER.PARTY_ROLE PR\n          inner join DPARTNER.CONTACT_POINT_ROLE CPR\n             on (PR.PARTY_ROLE_ID = CPR.PARTY_ROLE_ID)  \n          inner join DPARTNER.CONTACT_POINT CP\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\n          inner join DPARTNER.POSTAL_ADDRESS PA\n             on (PA.CONTACT_POINT_ID  = CP.CONTACT_POINT_ID)\n          where CPR.END_DATE is null\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_addr'\n            and nvl(CPR.CONTACT_POINT_ROLE_TYPE_ID, 'A') != 'cpr_rig'\n            and PR.PARTY_ROLE_TYPE_ID = 'head_off') ADDRESS\n  where ADDRESS.RN = 1\n),\nPARTY_ROLE_NETWORK\nas\n(select nvl(STAGE2.PARTY_ROLE_ID, PRR.PARTY_ROLE_ID) as PARTY_ROLE_ID,\n       PRR.RELATED_PARTY_ROLE_ID\n  from DPARTNER.PARTY_ROLE_RELATIONSHIP PRR\n  left outer join (select PARTY_ROLE_ID,\n                          RELATED_PARTY_ROLE_ID\n                     from DPARTNER.PARTY_ROLE_RELATIONSHIP\n                    where RELATIONSHIP_TYPE_ID = 'rel_netmem'\n                      and END_DATE IS NULL\n                      and DEFAULT_REPORT_RELATIONSHIP = 'Y'\n                      and RELATED_PARTY_ROLE_ID in\n                           (select PARTY_ROLE_ID\n                                   from DPARTNER.ORGANISATION_PARTY_ROLE\n                                   where REGULATION_TYPE_ID = 'rt_apprep'\n                                     and status = 'A'\n                           )\n                  ) STAGE2\n    on (STAGE2.RELATED_PARTY_ROLE_ID = PRR.PARTY_ROLE_ID)\n  where PRR.RELATIONSHIP_TYPE_ID = 'rel_netmem'\n    and PRR.END_DATE IS NULL\n    and PRR.DEFAULT_REPORT_RELATIONSHIP = 'Y'\n    and PRR.RELATED_PARTY_ROLE_ID in\n          (select PARTY_ROLE_ID\n             from DPARTNER.ORGANISATION_PARTY_ROLE\n            where REGULATION_TYPE_ID = 'rt_apprep'\n              and status = 'A'\n          )\n),\nAUTHORISATION\nas\n(select PARTY_ROLE_ID,\n        PROD_GRP_ID \n   from DPARTNER.PRODUCT_AUTHORISATION\n  where END_DATE is null \n    and PROD_GRP_ID in (10002, 10003, 10004)\n),\nROLE_PERMISSION\nas\n(select PERMISSION_TYPE_ID,\n        PARTY_ROLE_ID \n   from DPARTNER.PARTY_ROLE_PERMISSIONS\n  where END_DATE is null\n    and PERMISSION_TYPE_ID = 'prp_penstrans'\n),\nHO_EMAIL\nas\n(select EMAIL.PARTY_ROLE_ID,\n        EMAIL.EMAIL_URL_ADDRESS\n   from (select CPR.PARTY_ROLE_ID,\n                trim(EUA.EMAIL_URL_ADDRESS) as EMAIL_URL_ADDRESS,\n                row_number() over (partition by CPR.PARTY_ROLE_ID\n                                       order by CPR.UPDATED_DATE desc) RN\n           from DPARTNER.CONTACT_POINT_ROLE CPR\n          inner join DPARTNER.CONTACT_POINT CP\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\n          inner join DPARTNER.EMAIL_URL_ADDRESS EUA\n             on (EUA.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\n          inner join DPARTNER.PARTY_ROLE PR\n             on (PR.PARTY_ROLE_ID = CPR.PARTY_ROLE_ID )\n          where CPR.END_DATE is null\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_email'\n            and PR.PARTY_ROLE_TYPE_ID = 'head_off') EMAIL\n  where EMAIL.RN = 1\n),\nHO_PHONE\nas\n(select PHONE.PARTY_ROLE_ID,\n        PHONE.PHONE_FAX_NUMBER\n   from (select CPR.PARTY_ROLE_ID,\n                PFN.PHONE_FAX_NUMBER,\n                row_number() over (partition by CPR.PARTY_ROLE_ID\n                                       order by CPR.UPDATED_DATE desc) RN\n           from DPARTNER.CONTACT_POINT_ROLE CPR\n          inner join DPARTNER.CONTACT_POINT CP\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\n          inner join DPARTNER.PHONE_FAX_NUMBER PFN\n             on (PFN.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\n          inner join DPARTNER.PARTY_ROLE PR\n             on (PR.PARTY_ROLE_ID = CPR.PARTY_ROLE_ID )\n          where CPR.END_DATE is null\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_phone'\n            and PR.PARTY_ROLE_TYPE_ID = 'head_off') PHONE\n  where PHONE.RN = 1\n)\nselect PD.PARTY_ROLE_ID,\n       PD.ORGANISATION_NAME, \n       PD.FIRM_REFERENCE_NUMBER,\n       PD.STATUS, \n       PD.REGULATORY_STATUS_ID, \n\t   PD.PARTY_ROLE_TYPE_ID,\n       nvl2(AIA.PROD_GRP_ID, 1, 0) as PERM_INVESTMENT_ADVICE,\n       nvl2(AMA.PROD_GRP_ID, 1, 0) as PERM_MORTGAGE_ADVICE,\n       nvl2(APA.PROD_GRP_ID, 1, 0) as PERM_INSURANCE_ADVICE,\n       nvl2(RP.PERMISSION_TYPE_ID, 1, 0) as PERM_PENSION_ADVICE,\n\t   HA.ADDRESS_LINE_1,\n       HA.ADDRESS_LINE_2,\n       HA.ADDRESS_LINE_3,\n       HA.ADDRESS_LINE_4,\n       HA.POSTCODE,\n\t   HE.EMAIL_URL_ADDRESS,\n       HP.PHONE_FAX_NUMBER\n  from PARTY_DETAILS PD\n  left outer join HEAD_OFFICE HO\n    on (PD.PARTY_ROLE_ID = HO.PARTY_ROLE_ID)\n  left outer join HO_ADDRESS HA\n    on HA.PARTY_ROLE_ID = HO.HEAD_OFFICE_PARTY_ROLE_ID\n  left outer join PARTY_ROLE_NETWORK PRN\n    on (PRN.RELATED_PARTY_ROLE_ID = PD.PARTY_ROLE_ID)\n  left outer join AUTHORISATION AIA\n    on (    AIA.PROD_GRP_ID = 10004\n        and AIA.PARTY_ROLE_ID = case\n                                  when PD.REGULATION_TYPE_ID = 'rt_apprep' then\n                                    PRN.PARTY_ROLE_ID\n                                else\n                                  PD.PARTY_ROLE_ID\n                                end)\n  left outer join AUTHORISATION AMA\n    on (    AMA.PROD_GRP_ID = 10003\n        and AMA.PARTY_ROLE_ID = case\n                                  when PD.REGULATION_TYPE_ID = 'rt_apprep' then\n                                    PRN.PARTY_ROLE_ID\n                                else\n                                  PD.PARTY_ROLE_ID\n                                end)\n  left outer join AUTHORISATION APA\n    on (    APA.PROD_GRP_ID = 10002\n        and APA.PARTY_ROLE_ID = case\n                                  when PD.REGULATION_TYPE_ID = 'rt_apprep' then\n                                    PRN.PARTY_ROLE_ID\n                                else\n                                  PD.PARTY_ROLE_ID\n                                end)\n  left outer join ROLE_PERMISSION RP\n    on (RP.PARTY_ROLE_ID = case\n                             when PD.REGULATION_TYPE_ID = 'rt_apprep' then\n                               PRN.PARTY_ROLE_ID\n                           else\n                             PD.PARTY_ROLE_ID\n                           end)\n  left outer join HO_PHONE HP\n    on (HP.PARTY_ROLE_ID = HO.HEAD_OFFICE_PARTY_ROLE_ID)\n  left outer join HO_EMAIL HE\n    on (HE.PARTY_ROLE_ID = HO.HEAD_OFFICE_PARTY_ROLE_ID)\n",
+						"oracleReaderQuery": "with PARTY_DETAILS\r\nas\r\n(select P.ORGANISATION_NAME,\r\n        PR.PARTY_ROLE_ID,\r\n        PR.PARTY_ROLE_TYPE_ID,\r\n        OPR.STATUS,\r\n        OPR.FIRM_REFERENCE_NUMBER,\r\n        OPR.REGULATORY_STATUS_ID,\r\n        OPR.REGULATION_TYPE_ID\r\n   from PARTY P\r\n  inner join PARTY_ROLE PR\r\n     on (PR.PARTY_ID = P.PARTY_ID)\r\n  inner join ORGANISATION_PARTY_ROLE OPR\r\n     on (OPR.PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\r\n  where PR.PARTY_ROLE_TYPE_ID in ('adv_firm', 'par_org', 'os_firm', 'sp_firm')\r\n    and PR.PARTY_ROLE_ID in\r\n          (select distinct\r\n                  PRR.PARTY_ROLE_ID \r\n             from COMMISSION_ACCOUNT CA\r\n            inner join LEGACY_ACCOUNT_DETAIL LAD\r\n               on (CA.COMMISSION_ACCOUNT_ID = LAD.COMMISSION_ACCOUNT_ID)\r\n            inner join PARTY_ROLE_RELATIONSHIP PRR\r\n               on (PRR.RELATED_PARTY_ROLE_ID = CA.PARTY_ROLE_ID)\r\n            where relationship_type_id = 'rel_afoff'\r\n          )\r\n),\r\nHEAD_OFFICE\r\nas\r\n(select PRR.PARTY_ROLE_ID,\r\n        PRR.RELATED_PARTY_ROLE_ID as HEAD_OFFICE_PARTY_ROLE_ID\r\n   from PARTY_ROLE_RELATIONSHIP PRR\r\n  inner join PARTY_ROLE PR\r\n     on (PRR.RELATED_PARTY_ROLE_ID = PR.PARTY_ROLE_ID)\r\n  where PRR.RELATIONSHIP_TYPE_ID = 'rel_afoff'\r\n    and PRR.END_DATE is null\r\n    and PR.PARTY_ROLE_TYPE_ID = 'head_off'\r\n),\r\nHO_ADDRESS\r\nas\r\n(select ADDRESS.PARTY_ROLE_ID,\r\n        ADDRESS.ADDRESS_LINE_1,\r\n        ADDRESS.ADDRESS_LINE_2,\r\n        ADDRESS.ADDRESS_LINE_3,\r\n        ADDRESS.ADDRESS_LINE_4,\r\n        ADDRESS.POSTCODE\r\n   from (select CPR.PARTY_ROLE_ID,\r\n                trim(PA.ADDRESS_LINE_1) as ADDRESS_LINE_1,\r\n                trim(PA.ADDRESS_LINE_2) as ADDRESS_LINE_2,\r\n                trim(PA.ADDRESS_LINE_3) as ADDRESS_LINE_3,\r\n                trim(PA.ADDRESS_LINE_4) as ADDRESS_LINE_4,\r\n                trim(PA.POSTCODE) as POSTCODE,\r\n                row_number() over (partition by CPR.PARTY_ROLE_ID\r\n                                       order by CPR.UPDATED_DATE desc) RN\r\n           from PARTY_ROLE PR\r\n          inner join CONTACT_POINT_ROLE CPR\r\n             on (PR.PARTY_ROLE_ID = CPR.PARTY_ROLE_ID)  \r\n          inner join CONTACT_POINT CP\r\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\r\n          inner join POSTAL_ADDRESS PA\r\n             on (PA.CONTACT_POINT_ID  = CP.CONTACT_POINT_ID)\r\n          where CPR.END_DATE is null\r\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_addr'\r\n            and nvl(CPR.CONTACT_POINT_ROLE_TYPE_ID, 'A') != 'cpr_rig'\r\n            and PR.PARTY_ROLE_TYPE_ID = 'head_off') ADDRESS\r\n  where ADDRESS.RN = 1\r\n),\r\nPARTY_ROLE_NETWORK\r\nas\r\n(select nvl(STAGE2.PARTY_ROLE_ID, PRR.PARTY_ROLE_ID) as PARTY_ROLE_ID,\r\n       PRR.RELATED_PARTY_ROLE_ID\r\n  from PARTY_ROLE_RELATIONSHIP PRR\r\n  left outer join (select PARTY_ROLE_ID,\r\n                          RELATED_PARTY_ROLE_ID\r\n                     from PARTY_ROLE_RELATIONSHIP\r\n                    where RELATIONSHIP_TYPE_ID = 'rel_netmem'\r\n                      and END_DATE IS NULL\r\n                      and DEFAULT_REPORT_RELATIONSHIP = 'Y'\r\n                      and RELATED_PARTY_ROLE_ID in\r\n                           (select PARTY_ROLE_ID\r\n                                   from ORGANISATION_PARTY_ROLE\r\n                                   where REGULATION_TYPE_ID = 'rt_apprep'\r\n                                     and status = 'A'\r\n                           )\r\n                  ) STAGE2\r\n    on (STAGE2.RELATED_PARTY_ROLE_ID = PRR.PARTY_ROLE_ID)\r\n  where PRR.RELATIONSHIP_TYPE_ID = 'rel_netmem'\r\n    and PRR.END_DATE IS NULL\r\n    and PRR.DEFAULT_REPORT_RELATIONSHIP = 'Y'\r\n    and PRR.RELATED_PARTY_ROLE_ID in\r\n          (select PARTY_ROLE_ID\r\n             from ORGANISATION_PARTY_ROLE\r\n            where REGULATION_TYPE_ID = 'rt_apprep'\r\n              and status = 'A'\r\n          )\r\n),\r\nAUTHORISATION\r\nas\r\n(select PARTY_ROLE_ID,\r\n        PROD_GRP_ID \r\n   from PRODUCT_AUTHORISATION\r\n  where END_DATE is null \r\n    and PROD_GRP_ID in (10002, 10003, 10004)\r\n),\r\nROLE_PERMISSION\r\nas\r\n(select PERMISSION_TYPE_ID,\r\n        PARTY_ROLE_ID \r\n   from PARTY_ROLE_PERMISSIONS\r\n  where END_DATE is null\r\n    and PERMISSION_TYPE_ID = 'prp_penstrans'\r\n),\r\nHO_EMAIL\r\nas\r\n(select EMAIL.PARTY_ROLE_ID,\r\n        EMAIL.EMAIL_URL_ADDRESS\r\n   from (select CPR.PARTY_ROLE_ID,\r\n                trim(EUA.EMAIL_URL_ADDRESS) as EMAIL_URL_ADDRESS,\r\n                row_number() over (partition by CPR.PARTY_ROLE_ID\r\n                                       order by CPR.UPDATED_DATE desc) RN\r\n           from CONTACT_POINT_ROLE CPR\r\n          inner join CONTACT_POINT CP\r\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\r\n          inner join EMAIL_URL_ADDRESS EUA\r\n             on (EUA.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\r\n          inner join PARTY_ROLE PR\r\n             on (PR.PARTY_ROLE_ID = CPR.PARTY_ROLE_ID )\r\n          where CPR.END_DATE is null\r\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_email'\r\n            and PR.PARTY_ROLE_TYPE_ID = 'head_off') EMAIL\r\n  where EMAIL.RN = 1\r\n),\r\nHO_PHONE\r\nas\r\n(select PHONE.PARTY_ROLE_ID,\r\n        PHONE.PHONE_FAX_NUMBER\r\n   from (select CPR.PARTY_ROLE_ID,\r\n                PFN.PHONE_FAX_NUMBER,\r\n                row_number() over (partition by CPR.PARTY_ROLE_ID\r\n                                       order by CPR.UPDATED_DATE desc,\r\n                                             PFN.CONTACT_POINT_ID) RN\r\n           from CONTACT_POINT_ROLE CPR\r\n          inner join CONTACT_POINT CP\r\n             on (CP.CONTACT_POINT_ID = CPR.CONTACT_POINT_ID)\r\n          inner join PHONE_FAX_NUMBER PFN\r\n             on (PFN.CONTACT_POINT_ID = CP.CONTACT_POINT_ID)\r\n          inner join PARTY_ROLE PR\r\n             on (PR.PARTY_ROLE_ID = CPR.PARTY_ROLE_ID )\r\n          where CPR.END_DATE is null\r\n            and CP.CONTACT_POINT_TYPE_ID = 'cp_phone'\r\n            and PR.PARTY_ROLE_TYPE_ID = 'head_off') PHONE\r\n  where PHONE.RN = 1\r\n)\r\nselect PD.PARTY_ROLE_ID,\r\n       PD.ORGANISATION_NAME, \r\n       PD.FIRM_REFERENCE_NUMBER,\r\n       PD.STATUS, \r\n       PD.REGULATORY_STATUS_ID, \r\n       PD.PARTY_ROLE_TYPE_ID,\r\n       nvl2(AIA.PROD_GRP_ID, 1, 0) as PERM_INVESTMENT_ADVICE,\r\n       nvl2(AMA.PROD_GRP_ID, 1, 0) as PERM_MORTGAGE_ADVICE,\r\n       nvl2(APA.PROD_GRP_ID, 1, 0) as PERM_INSURANCE_ADVICE,\r\n       nvl2(RP.PERMISSION_TYPE_ID, 1, 0) as PERM_PENSION_ADVICE,\r\n       HA.ADDRESS_LINE_1,\r\n       HA.ADDRESS_LINE_2,\r\n       HA.ADDRESS_LINE_3,\r\n       HA.ADDRESS_LINE_4,\r\n       HA.POSTCODE,\r\n       HE.EMAIL_URL_ADDRESS,\r\n       HP.PHONE_FAX_NUMBER\r\n  from PARTY_DETAILS PD\r\n  left outer join HEAD_OFFICE HO\r\n    on (PD.PARTY_ROLE_ID = HO.PARTY_ROLE_ID)\r\n  left outer join HO_ADDRESS HA\r\n    on HA.PARTY_ROLE_ID = HO.HEAD_OFFICE_PARTY_ROLE_ID\r\n  left outer join PARTY_ROLE_NETWORK PRN\r\n    on (PRN.RELATED_PARTY_ROLE_ID = PD.PARTY_ROLE_ID)\r\n  left outer join AUTHORISATION AIA\r\n    on (    AIA.PROD_GRP_ID = 10004\r\n        and AIA.PARTY_ROLE_ID = case\r\n                                  when     PD.REGULATION_TYPE_ID = 'rt_apprep'\r\n                                       and PRN.PARTY_ROLE_ID is not null then\r\n                                    PRN.PARTY_ROLE_ID\r\n                                else\r\n                                  PD.PARTY_ROLE_ID\r\n                                end)\r\n  left outer join AUTHORISATION AMA\r\n    on (    AMA.PROD_GRP_ID = 10003\r\n        and AMA.PARTY_ROLE_ID = case\r\n                                  when     PD.REGULATION_TYPE_ID = 'rt_apprep'\r\n                                      and PRN.PARTY_ROLE_ID is not null then\r\n                                    PRN.PARTY_ROLE_ID\r\n                                else\r\n                                  PD.PARTY_ROLE_ID\r\n                                end)\r\n  left outer join AUTHORISATION APA\r\n    on (    APA.PROD_GRP_ID = 10002\r\n        and APA.PARTY_ROLE_ID = case\r\n                                  when     PD.REGULATION_TYPE_ID = 'rt_apprep' \r\n                                       and PRN.PARTY_ROLE_ID is not null then\r\n                                    PRN.PARTY_ROLE_ID\r\n                                else\r\n                                  PD.PARTY_ROLE_ID\r\n                                end)\r\n  left outer join ROLE_PERMISSION RP\r\n    on (RP.PARTY_ROLE_ID = case\r\n                             when PD.REGULATION_TYPE_ID = 'rt_apprep' then\r\n                               PRN.PARTY_ROLE_ID\r\n                           else\r\n                             PD.PARTY_ROLE_ID\r\n                           end)\r\n  left outer join HO_PHONE HP\r\n    on (HP.PARTY_ROLE_ID = HO.HEAD_OFFICE_PARTY_ROLE_ID)\r\n  left outer join HO_EMAIL HE\r\n    on (HE.PARTY_ROLE_ID = HO.HEAD_OFFICE_PARTY_ROLE_ID)\r\n where PD.FIRM_REFERENCE_NUMBER is not null",
 						"partitionOption": "None",
 						"queryTimeout": "02:00:00"
 					},
 					"sink": {
 						"type": "AzureSqlSink",
 						"writeBehavior": "insert",
-						"sqlWriterUseTableLock": false
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
-					"enableSkipIncompatibleRow": true,
 					"translator": {
 						"type": "TabularTranslator",
 						"mappings": [
@@ -105,8 +113,10 @@
 								},
 								"sink": {
 									"name": "PERM_INVESTMENT_ADVICE",
-									"type": "Boolean",
-									"physicalType": "bit"
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
 								}
 							},
 							{
@@ -116,8 +126,10 @@
 								},
 								"sink": {
 									"name": "PERM_MORTGAGE_ADVICE",
-									"type": "Boolean",
-									"physicalType": "bit"
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
 								}
 							},
 							{
@@ -127,8 +139,10 @@
 								},
 								"sink": {
 									"name": "PERM_INSURANCE_ADVICE",
-									"type": "Boolean",
-									"physicalType": "bit"
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
 								}
 							},
 							{
@@ -138,8 +152,10 @@
 								},
 								"sink": {
 									"name": "PERM_PENSION_ADVICE",
-									"type": "Boolean",
-									"physicalType": "bit"
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
 								}
 							},
 							{
@@ -232,18 +248,6 @@
 						"referenceName": "ds_DPDB",
 						"type": "DatasetReference",
 						"parameters": {
-							"SCHEMA": "DPARTNER",
-							"TABLE": "VARIOUS"
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "ds_ASQLDB_SHIR",
-						"type": "DatasetReference",
-						"parameters": {
-							"SCHEMA": "STAGE_LOAD",
-							"TABLE_NAME": "TD_DPDB_ADVISER_FIRM_STG",
 							"ENVIRONMENT": {
 								"value": "@pipeline().globalParameters.ENVIRONMENT",
 								"type": "Expression"
@@ -255,25 +259,69 @@
 							"SHORT_LOCATION": {
 								"value": "@pipeline().globalParameters.SHORT_LOCATION",
 								"type": "Expression"
-							}
+							},
+							"DPDB": {
+								"value": "@pipeline().globalParameters.DPDB",
+								"type": "Expression"
+							},
+							"DPDB_HOST": {
+								"value": "@pipeline().globalParameters.DPDB_HOST",
+								"type": "Expression"
+							},
+							"DPDB_PORT": {
+								"value": "@pipeline().globalParameters.DPDB_PORT",
+								"type": "Expression"
+							},
+							"DPDB_USERNAME": {
+								"value": "@pipeline().globalParameters.DPDB_USERNAME",
+								"type": "Expression"
+							},
+							"DPDB_SECRET_NAME": {
+								"value": "@pipeline().globalParameters.DPDB_SECRET_NAME",
+								"type": "Expression"
+							},
+							"SCHEMA": "DPARTNER",
+							"TABLE_NAME": "PARTY"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_ASQLDB_SHIR",
+						"type": "DatasetReference",
+						"parameters": {
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							},
+							"SCHEMA": "STAGE_LOAD",
+							"TABLE_NAME": "TD_DPDB_ADVISER_FIRM_STG"
 						}
 					}
 				]
 			},
 			{
-				"name": "cp-DPDB_ADVISER_FIRM_STG_Upsert",
-				"description": "Add any delta changes to the target",
+				"name": "cd-DPDB_ADVISER_FIRM_STG_Upsert",
+				"description": "compares transient table with staging table to identify new/updated records in the target/staging table.",
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "cp-TD_DPDB_ADVISER_FIRM_STG",
+						"activity": "cd-TD_DPDB_ADVISER_FIRM_STG",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					}
 				],
 				"policy": {
-					"timeout": "0.01:00:00",
+					"timeout": "0.12:00:00",
 					"retry": 0,
 					"retryIntervalInSeconds": 30,
 					"secureOutput": false,
@@ -292,7 +340,7 @@
 								}
 							}
 						],
-						"sqlReaderQuery": "select TDAFS.PARTY_ROLE_ID,\r\n       TDAFS.ORGANISATION_NAME,\r\n       TDAFS.FIRM_REFERENCE_NUMBER,\r\n       TDAFS.STATUS,\r\n       TDAFS.REGULATORY_STATUS_ID,\r\n       TDAFS.PARTY_ROLE_TYPE_ID,\r\n       TDAFS.PERM_INVESTMENT_ADVICE,\r\n       TDAFS.PERM_MORTGAGE_ADVICE,\r\n       TDAFS.PERM_INSURANCE_ADVICE,\r\n       TDAFS.PERM_PENSION_ADVICE,\r\n       TDAFS.ADDRESS_LINE_1,\r\n       TDAFS.ADDRESS_LINE_2,\r\n       TDAFS.ADDRESS_LINE_3,\r\n       TDAFS.ADDRESS_LINE_4,\r\n       TDAFS.POSTCODE,\r\n       TDAFS.EMAIL_URL_ADDRESS,\r\n       TDAFS.PHONE_FAX_NUMBER,\r\n       TDAFS.RECORD_UPDATE_IND,\r\n       0 as RECORD_DELETE_IND,\r\n       cast(sysdatetimeoffset() at time zone 'GMT Standard Time' as datetime) as UPDATE_DATE_TIME\r\n  from (select PARTY_ROLE_ID,\r\n               ORGANISATION_NAME,\r\n               FIRM_REFERENCE_NUMBER,\r\n               STATUS,\r\n               REGULATORY_STATUS_ID,\r\n               PARTY_ROLE_TYPE_ID,\r\n               PERM_INVESTMENT_ADVICE,\r\n               PERM_MORTGAGE_ADVICE,\r\n               PERM_INSURANCE_ADVICE,\r\n               PERM_PENSION_ADVICE,\r\n               ADDRESS_LINE_1,\r\n               ADDRESS_LINE_2,\r\n               ADDRESS_LINE_3,\r\n               ADDRESS_LINE_4,\r\n               POSTCODE,\r\n               EMAIL_URL_ADDRESS,\r\n               PHONE_FAX_NUMBER,\r\n               convert(nvarchar(32), HashBytes('SHA2_256', concat(PARTY_ROLE_ID,\r\n                                                                  ORGANISATION_NAME,\r\n                                                                  FIRM_REFERENCE_NUMBER,\r\n                                                                  STATUS,\r\n                                                                  REGULATORY_STATUS_ID,\r\n                                                                  PARTY_ROLE_TYPE_ID,\r\n                                                                  PERM_INVESTMENT_ADVICE,\r\n                                                                  PERM_MORTGAGE_ADVICE,\r\n                                                                  PERM_INSURANCE_ADVICE,\r\n                                                                  PERM_PENSION_ADVICE,\r\n                                                                  ADDRESS_LINE_1,\r\n                                                                  ADDRESS_LINE_2,\r\n                                                                  ADDRESS_LINE_3,\r\n                                                                  ADDRESS_LINE_4,\r\n                                                                  POSTCODE,\r\n                                                                  EMAIL_URL_ADDRESS,\r\n                                                                  PHONE_FAX_NUMBER)), 2) as RECORD_UPDATE_IND\r\n          from STAGE_LOAD.TD_DPDB_ADVISER_FIRM_STG \r\n       ) TDAFS\r\n  left outer join STAGE_CDI.DPDB_ADVISER_FIRM_STG DAFS\r\n    on (    TDAFS.PARTY_ROLE_ID = DAFS.PARTY_ROLE_ID\r\n        and TDAFS.RECORD_UPDATE_IND = DAFS.RECORD_UPDATE_IND)\r\n where DAFS.PARTY_ROLE_ID is null\r\n",
+						"sqlReaderQuery": "select TDAFS.PARTY_ROLE_ID,\n       TDAFS.ORGANISATION_NAME,\n       TDAFS.FIRM_REFERENCE_NUMBER,\n       TDAFS.STATUS,\n       TDAFS.REGULATORY_STATUS_ID,\n       TDAFS.PARTY_ROLE_TYPE_ID,\n       cast(TDAFS.PERM_INVESTMENT_ADVICE as bit) as PERM_INVESTMENT_ADVICE,\n       cast(TDAFS.PERM_MORTGAGE_ADVICE as bit) as PERM_MORTGAGE_ADVICE,\n       cast(TDAFS.PERM_INSURANCE_ADVICE as bit) as PERM_INSURANCE_ADVICE,\n       cast(TDAFS.PERM_PENSION_ADVICE as bit) as PERM_PENSION_ADVICE,\n       TDAFS.ADDRESS_LINE_1,\n       TDAFS.ADDRESS_LINE_2,\n       TDAFS.ADDRESS_LINE_3,\n       TDAFS.ADDRESS_LINE_4,\n       TDAFS.POSTCODE,\n       TDAFS.EMAIL_URL_ADDRESS,\n       TDAFS.PHONE_FAX_NUMBER,\n       TDAFS.RECORD_UPDATE_IND,\n       cast(0 as bit) as RECORD_DELETE_IND,\n       cast(sysdatetimeoffset() at time zone 'GMT STANDARD Time' as datetime) as UPDATE_DATE_TIME\n  from (select PARTY_ROLE_ID,\n               ORGANISATION_NAME,\n               FIRM_REFERENCE_NUMBER,\n               STATUS,\n               REGULATORY_STATUS_ID,\n               PARTY_ROLE_TYPE_ID,\n               PERM_INVESTMENT_ADVICE,\n               PERM_MORTGAGE_ADVICE,\n               PERM_INSURANCE_ADVICE,\n               PERM_PENSION_ADVICE,\n               ADDRESS_LINE_1,\n               ADDRESS_LINE_2,\n               ADDRESS_LINE_3,\n               ADDRESS_LINE_4,\n               POSTCODE,\n               EMAIL_URL_ADDRESS,\n               PHONE_FAX_NUMBER,\n               convert(nvarchar(32), HashBytes('sha2_256', concat(ORGANISATION_NAME,\n                                                                  FIRM_REFERENCE_NUMBER,\n                                                                  STATUS,\n                                                                  REGULATORY_STATUS_ID,\n                                                                  PARTY_ROLE_TYPE_ID,\n                                                                  PERM_INVESTMENT_ADVICE,\n                                                                  PERM_MORTGAGE_ADVICE,\n                                                                  PERM_INSURANCE_ADVICE,\n                                                                  PERM_PENSION_ADVICE,\n                                                                  ADDRESS_LINE_1,\n                                                                  ADDRESS_LINE_2,\n                                                                  ADDRESS_LINE_3,\n                                                                  ADDRESS_LINE_4,\n                                                                  POSTCODE,\n                                                                  EMAIL_URL_ADDRESS,\n                                                                  PHONE_FAX_NUMBER)), 2) as RECORD_UPDATE_IND\n          from STAGE_LOAD.TD_DPDB_ADVISER_FIRM_STG\n       ) TDAFS\n  left outer join STAGE_CDI.DPDB_ADVISER_FIRM_STG DAFS\n    on (    DAFS.RECORD_DELETE_IND = 0\n        and TDAFS.PARTY_ROLE_ID = DAFS.PARTY_ROLE_ID\n        and TDAFS.RECORD_UPDATE_IND = DAFS.RECORD_UPDATE_IND)\n where DAFS.PARTY_ROLE_ID is null",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -531,15 +579,13 @@
 							{
 								"source": {
 									"name": "RECORD_DELETE_IND",
-									"type": "Int32",
-									"physicalType": "int"
+									"type": "Boolean",
+									"physicalType": "bit"
 								},
 								"sink": {
 									"name": "RECORD_DELETE_IND",
-									"type": "Decimal",
-									"physicalType": "decimal",
-									"scale": 0,
-									"precision": 1
+									"type": "Boolean",
+									"physicalType": "bit"
 								}
 							},
 							{
@@ -619,19 +665,19 @@
 				]
 			},
 			{
-				"name": "cp-DPDB_ADVISER_FIRM_STG_Del",
-				"description": "Logically mark records no longer available in the source",
+				"name": "cd-DPDB_ADVISER_FIRM_STG_Del",
+				"description": "compares transient table with staging table to identify deleted records in the target/staging table.",
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "cp-DPDB_ADVISER_FIRM_STG_Upsert",
+						"activity": "cd-DPDB_ADVISER_FIRM_STG_Upsert",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					}
 				],
 				"policy": {
-					"timeout": "0.01:00:00",
+					"timeout": "0.12:00:00",
 					"retry": 0,
 					"retryIntervalInSeconds": 30,
 					"secureOutput": false,
@@ -641,7 +687,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "select DAFS.PARTY_ROLE_ID,\r\n       1 as RECORD_DELETE_IND,\r\n       cast(sysdatetimeoffset() at time zone 'GMT Standard Time' as datetime) as UPDATE_DATE_TIME\r\n  from STAGE_CDI.DPDB_ADVISER_FIRM_STG DAFS\r\n  left outer join STAGE_LOAD.TD_DPDB_ADVISER_FIRM_STG TDAFS\r\n    on (TDAFS.PARTY_ROLE_ID = DAFS.PARTY_ROLE_ID)\r\n where TDAFS.PARTY_ROLE_ID is NULL",
+						"sqlReaderQuery": "select DAFS.PARTY_ROLE_ID,\n       cast(1 as bit) as RECORD_DELETE_IND,\n       cast(sysdatetimeoffset() at time zone 'GMT Standard Time' as datetime) as UPDATE_DATE_TIME\n  from STAGE_CDI.DPDB_ADVISER_FIRM_STG DAFS\n  left outer join STAGE_LOAD.TD_DPDB_ADVISER_FIRM_STG TDAFS\n    on (TDAFS.PARTY_ROLE_ID = DAFS.PARTY_ROLE_ID)\n where DAFS.RECORD_DELETE_IND = 0\n   and TDAFS.PARTY_ROLE_ID is null",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -676,15 +722,13 @@
 							{
 								"source": {
 									"name": "RECORD_DELETE_IND",
-									"type": "Int32",
-									"physicalType": "int"
+									"type": "Boolean",
+									"physicalType": "bit"
 								},
 								"sink": {
 									"name": "RECORD_DELETE_IND",
-									"type": "Decimal",
-									"physicalType": "decimal",
-									"scale": 0,
-									"precision": 1
+									"type": "Boolean",
+									"physicalType": "bit"
 								}
 							},
 							{
@@ -751,11 +795,370 @@
 						}
 					}
 				]
+			},
+			{
+				"name": "sp-TRUNCATE-TD_DPDB_ADVISER_FIRM_STG",
+				"description": "This step truncates the transient table, TD_DPDB_ADVISER_FIRM_STG.",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_LOAD].[PRC_TRUNCATE_TD_TABLE]",
+					"storedProcedureParameters": {
+						"p_table_name": {
+							"value": {
+								"value": "TD_DPDB_ADVISER_FIRM_STG",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-TD_DPDB_ADVISER_FIRM_STG",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-TD_DPDB_ADVISER_FIRM_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-TD_DPDB_ADVISER_FIRM_STG').output.billingReference.billableDuration[0].duration\n",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-TD_DPDB_ADVISER_FIRM_STG').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-TD_DPDB_ADVISER_FIRM_STG').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-TD_DPDB_ADVISER_FIRM_STG').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-TD_DPDB_ADVISER_FIRM_STG').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-TD_DPDB_ADVISER_FIRM_STG').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": "TD_DPDB_ADVISER_FIRM_STG",
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-DPDB_ADVISER_FIRM_STG_Upsert",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-DPDB_ADVISER_FIRM_STG_Upsert",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.billingReference.billableDuration[0].duration\n",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Upsert').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": "DPDB_ADVISER_FIRM_STG",
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-DPDB_ADVISER_FIRM_STG_Del",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-DPDB_ADVISER_FIRM_STG_Del",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Del').output.billingReference.billableDuration[0].duration\n",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Del').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Del').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Del').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Del').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-DPDB_ADVISER_FIRM_STG_Del').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": "DPDB_ADVISER_FIRM_STG-Del",
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
+		"variables": {
+			"v-RUN-PIPELINES": {
+				"type": "Boolean"
+			}
+		},
 		"folder": {
 			"name": "Digital Account/Adviser"
 		},
-		"annotations": []
+		"annotations": [],
+		"lastPublishTime": "2023-06-19T18:04:45Z"
 	}
 }

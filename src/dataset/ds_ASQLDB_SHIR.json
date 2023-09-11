@@ -1,7 +1,7 @@
 {
 	"name": "ds_ASQLDB_SHIR",
 	"properties": {
-		"description": "Data set for accessing tables in Azure SQL DB when connecting from / to an on-premise database",
+		"description": "Data set for accessing tables in Azure SQL DB when connecting from / to an on-premise database in Lansing",
 		"linkedServiceName": {
 			"referenceName": "ls_AzureSQLDB_SHIR",
 			"type": "LinkedServiceReference",
@@ -10,34 +10,34 @@
 					"value": "@dataset().ENVIRONMENT",
 					"type": "Expression"
 				},
-				"SHORT_LOCATION": {
-					"value": "@dataset().SHORT_LOCATION",
-					"type": "Expression"
-				},
 				"LOGICAL_ENVIRONMENT": {
 					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
+				},
+				"SHORT_LOCATION": {
+					"value": "@dataset().SHORT_LOCATION",
 					"type": "Expression"
 				}
 			}
 		},
 		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+			},
+			"SHORT_LOCATION": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
+			},
 			"SCHEMA": {
 				"type": "string"
 			},
 			"TABLE_NAME": {
 				"type": "string"
-			},
-			"ENVIRONMENT": {
-				"type": "string",
-				"defaultValue": "@dataset().ENVIRONMENT"
-			},
-			"LOGICAL_ENVIRONMENT": {
-				"type": "string",
-				"defaultValue": "@dataset().SHORT_LOCATION"
-			},
-			"SHORT_LOCATION": {
-				"type": "string",
-				"defaultValue": "@dataset().LOGICAL_ENVIRONMENT"
 			}
 		},
 		"annotations": [],

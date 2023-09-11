@@ -1,0 +1,2264 @@
+{
+	"name": "p_MSD-CDI-CRM_PLAT_DYN_CONTACT_STG",
+	"properties": {
+		"description": "Name - Nikita Varnwal\nDate - Sept 2023\nProject - CRM Migration, implemented under CHG######\nDescription - This pipeline will pull all the data from the required fields of Contact table on a truncate and reload strategy from CRM and load it into CRM_PLAT_DYN_CONTACT_STG table in MsDynamics STAGE_CDI. ",
+		"activities": [
+			{
+				"name": "cd-CRM_PLAT_DYN_CONTACT_STG",
+				"description": "Name - Nikita Varnwal\nDate - Sept 2023\nProject - CRM Migration, implemented under CHG######\nDescription - This copy activity will copy all the selected field's data from CONATCT table of CRM to CRM_PLAT_DYN_DIVORCECLAIM_STG table of STAGE_CDI CRM_PLAT_DYN_CONATCT_STG table. ",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "sp-truncate-CRM_PLAT_DYN_CONTACT_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "select\r\n\t  CONTACTID,\r\n\t  CUSTOMERTYPECODE,\r\n\t  NEW_CONTACTCATEGORYCODE,\r\n\t  PARENTCUSTOMERID,\r\n\t  PARENTCUSTOMERIDNAME,\r\n\t  OWNERID,\r\n\t  OWNERIDNAME,\r\n\t  FULLNAME,\r\n\t  ASC_BLUEBUTTONREF,\r\n\t  ASC_SONATACLIENTID,\r\n\t  ASC_SONATASTATUS,\r\n\t  ASC_SONATAOUTLETID,\r\n\t  ASC_SONATAOUTLETTYPE,\r\n\t  ASC_SONATAOUTLETSTATUS,\r\n\t  ASC_CALLERID,\r\n\t  JOBTITLE,\r\n\t  NEW_JOBCATEGORY,\r\n\t  EMAILADDRESS1,\r\n\t  ASC_CANOTIFICATIONALTERNATEEMAIL,\r\n\t  ASC_CANOTIFICATIONCCEMAIL,\r\n\t  TELEPHONE1,\r\n\t  MOBILEPHONE,\r\n\t  FAX,\r\n\t  ADDRESS1_COMPOSITE,\r\n\t  ASC_INTERNALCONTACT,\r\n\t  NEW_INACTIVEATCOMPANY,\r\n\t  NEW_ACCOUNTEXECVALIDATED,\r\n\t  NEW_REFERENCEACCEXECVALIDATIONID,\r\n\t  ASC_VIP,\r\n\t  ASC_VIPSETDATE,\r\n\t  ASC_VIPSETBYID,\r\n\t  ASC_REASONFORVIPSTATUS,\r\n\t  NEW_FINANCIALSDATE,\r\n\t  NEW_FINANCIALFREEASSETS,\r\n\t  NEW_FINANCIALCLIENTCOUNT,\r\n\t  NEW_FINANCIALTOTALASSETS,\r\n\t  NEW_FINANCIALCASH,\r\n\t  ASC_SONATAFINANCIALSDATE,\r\n\t  ASC_SONATAFREEASSETS,\r\n\t  ASC_SONATAPENDINGPURCHASES,\r\n\t  ASC_SONATACLIENTCOUNT,\r\n\t  ASC_SONATATOTALASSETS,\r\n\t  ASC_SONATACASH,\r\n\t  NEW_ACCEXEC_FSA_NO,\r\n\t  NEW_ACCEXEC_ACCT_EXEC,\r\n\t  ASC_MATRIXFIRMNAME,\r\n\t  ASC_MATRIXCONTACTID,\r\n\t  NEW_PROSPECTPHONEWORK,\r\n\t  ASC_DDIPHONE,\r\n\t  NEW_PROSPECTADDRESSNAME,\r\n\t  NEW_PROSPECTPHONEMOBILE,\r\n\t  NEW_PROSPECTADDRESSLINE1,\r\n\t  NEW_PROSPECTADDRESSLINE2,\r\n\t  NEW_PROSPECTADDRESSLINE3,\r\n\t  NEW_PROSPECTADDRESSLINE4,\r\n\t  NEW_PROSPECTADDRESSLINE5,\r\n\t  ASC_TWITTERUSERID,\r\n\t  ASC_TWITTERURL,\r\n\t  EMAILADDRESS2,\r\n\t  EMAILADDRESS3,\r\n\t  NEW_PROSPECTADDRESSPOSTCODE,\r\n\t  ASC_PARTNERMARKETING,\r\n\t  NEW_PROSPECTADDRESSCOUNTRY,\r\n\t  NEW_INDIVIDUAL_TEL_WKDAYS_FROM_W,\r\n\t  NEW_INDIVIDUAL_TEL_EXT_W,\r\n\t  NEW_INDIVIDUAL_TEL_WKDAYS_TO_W,\r\n\t  NEW_INDIVIDUAL_TEL_WEEKEND_W,\r\n\t  TELEPHONE2,\r\n\t  NEW_INDIVIDUAL_TEL_WKDAYS_FROM_H,\r\n\t  NEW_INDIVIDUAL_TEL_WKDAYS_TO_H,\r\n\t  NEW_INDIVIDUAL_TEL_EXT_H,\r\n\t  NEW_INDIVIDUAL_TEL_WEEKEND_H,\r\n\t  NEW_INDIVIDUAL_TEL_WKDAYS_FROM_M,\r\n\t  NEW_INDIVIDUAL_TEL_WKDAYS_TO_M,\r\n\t  NEW_INDIVIDUAL_TEL_EXT_M,\r\n\t  NEW_INDIVIDUAL_TEL_WEEKEND_M,\r\n\t  NEW_TEAM_TEL_W,\r\n\t  NEW_TEAM_WKDAYS_FROM_W,\r\n\t  NEW_TEAM_WKDAYS_TO_W,\r\n\t  NEW_TEAM_EXT_W,\r\n\t  NEW_TEAM_WEEKEND_W,\r\n\t  NEW_TEAM_TEL_F,\r\n\t  NEW_TEAM_WKDAYS_FROM_F,\r\n\t  NEW_TEAM_WKDAYS_TO_F,\r\n\t  NEW_TEAM_EXT_F,\r\n\t  NEW_TEAM_WEEKEND_F,\r\n\t  NEW_TEAM_TEL_H,\r\n\t  NEW_TEAM_WKDAYS_FROM_H,\r\n\t  NEW_TEAM_WKDAYS_TO_H,\r\n\t  NEW_TEAM_EXT_H,\r\n\t  NEW_TEAM_WEEKEND_H,\r\n\t  NEW_TEAM_TEL_M,\r\n\t  NEW_TEAM_WKDAYS_FROM_M,\r\n\t  NEW_TEAM_WKDAYS_TO_M,\r\n\t  NEW_TEAM_EXT_M,\r\n\t  NEW_TEAM_WEEKEND_M,\r\n\t  GENDERCODE,\r\n\t  FAMILYSTATUSCODE,\r\n\t  SPOUSESNAME,\r\n\t  BIRTHDATE,\r\n\t  ANNIVERSARY,\r\n\t  ORIGINATINGLEADID,\r\n\t  LASTUSEDINCAMPAIGN,\r\n\t  DONOTSENDMM,\r\n\t  TRANSACTIONCURRENCYID,\r\n\t  CREDITLIMIT,\r\n\t  CREDITONHOLD,\r\n\t  PAYMENTTERMSCODE,\r\n\t  DESCRIPTION,\r\n\t  PREFERREDCONTACTMETHODCODE,\r\n\t  DONOTEMAIL,\r\n\t  DONOTBULKEMAIL,\r\n\t  DONOTPHONE,\r\n\t  DONOTFAX,\r\n\t  DONOTPOSTALMAIL,\r\n\t  ADDRESS1_SHIPPINGMETHODCODE,\r\n\t  ADDRESS1_FREIGHTTERMSCODE,\r\n\t  NEW_REFERENCEMANUALLYCREATEDBYID,\r\n\t  NEW_REFERENCEMANUALLYCREATEDBYIDNAME,\r\n\t  NEW_UPDATEDBYBLUEBUTTONON,\r\n\t  CREATEDBY,\r\n\t  CREATEDBYNAME,\r\n\t  CREATEDON,\r\n\t  MODIFIEDBY,\r\n\t  MODIFIEDBYNAME,\r\n\t  MODIFIEDON,\r\n\t  ASC_LASTUPDATEDBYSONATAON,\r\n\t  NEW_MIGRATIONTAG,\r\n\t  NEW_ALT_ADDRESSNAME,\r\n\t  NEW_ALT_ADDRESSLINE_1,\r\n\t  NEW_ALT_ADDRESSLINE_2,\r\n\t  NEW_ALT_ADDRESSLINE_3,\r\n\t  NEW_ALT_ADDRESSLINE_4,\r\n\t  NEW_ALT_ADDRESSLINE_5,\r\n\t  NEW_ALT_ADDRESSLINE_POSTCODE,\r\n\t  NEW_ALT_ADDRESSLINE_COUNTRY,\r\n\t  ASC_PROFESSIONALBODY,\r\n\t  ASC_PROFESSIONALBODYOTHER,\r\n\t  ASC_SALESMANAGER,\r\n\t  ASC_BDTEAM,\r\n\t  ASC_CSTEAMID,\r\n\t  ASC_CSCONTACTID,\r\n\t  ASC_INDIVIDUALFSANUMBER,\r\n\t  ADDRESS1_LINE1,\r\n\t  ADDRESS1_LINE2,\r\n\t  ADDRESS1_LINE3,\r\n\t  ADDRESS1_CITY,\r\n\t  ADDRESS1_POSTALCODE,\r\n\t  ADDRESS1_COUNTRY,\r\n\t  MASTERCONTACTIDNAME,\r\n\t  ADDRESS1_NAME,\r\n\t  ACCOUNTIDNAME,\r\n\t  PARENTCONTACTIDNAME,\r\n\t  FIRSTNAME,\r\n\t  LASTNAME,\r\n\t  MIDDLENAME,\r\n\t  ADDRESS1_STATEORPROVINCE,\r\n\t  TELEPHONE3,\r\n\t  NEW_PROSPECTPHONEHOME,\r\n\t  NEW_PROSPECTEMAIL1,\r\n\t  SALUTATION\r\nfrom CONTACT",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "CONTACTID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "CONTACTID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "CUSTOMERTYPECODE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "CUSTOMERTYPECODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_CONTACTCATEGORYCODE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_CONTACTCATEGORYCODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "PARENTCUSTOMERID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "PARENTCUSTOMERID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PARENTCUSTOMERIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "PARENTCUSTOMERIDNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OWNERID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "OWNERID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "OWNERIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "OWNERIDNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "FULLNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "FULLNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_BLUEBUTTONREF",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_BLUEBUTTONREF",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_SONATACLIENTID",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_SONATACLIENTID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_SONATASTATUS",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_SONATASTATUS",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_SONATAOUTLETID",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_SONATAOUTLETID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_SONATAOUTLETTYPE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ASC_SONATAOUTLETTYPE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_SONATAOUTLETSTATUS",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ASC_SONATAOUTLETSTATUS",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CALLERID",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_CALLERID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "JOBTITLE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "JOBTITLE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_JOBCATEGORY",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_JOBCATEGORY",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "EMAILADDRESS1",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "EMAILADDRESS1",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CANOTIFICATIONALTERNATEEMAIL",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_CANOTIFICATIONALTERNATEEMAIL",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CANOTIFICATIONCCEMAIL",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_CANOTIFICATIONCCEMAIL",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "TELEPHONE1",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "TELEPHONE1",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "MOBILEPHONE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "MOBILEPHONE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "FAX",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "FAX",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ADDRESS1_COMPOSITE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ADDRESS1_COMPOSITE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_INTERNALCONTACT",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "ASC_INTERNALCONTACT",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_INACTIVEATCOMPANY",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "NEW_INACTIVEATCOMPANY",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_ACCOUNTEXECVALIDATED",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "NEW_ACCOUNTEXECVALIDATED",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_REFERENCEACCEXECVALIDATIONID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "NEW_REFERENCEACCEXECVALIDATIONID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_VIP",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "ASC_VIP",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_VIPSETDATE",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "ASC_VIPSETDATE",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_VIPSETBYID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "ASC_VIPSETBYID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_REASONFORVIPSTATUS",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_REASONFORVIPSTATUS",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_FINANCIALSDATE",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "NEW_FINANCIALSDATE",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_FINANCIALFREEASSETS",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 10,
+									"precision": 23
+								},
+								"sink": {
+									"name": "NEW_FINANCIALFREEASSETS",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 10,
+									"precision": 23
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_FINANCIALCLIENTCOUNT",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_FINANCIALCLIENTCOUNT",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_FINANCIALTOTALASSETS",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 10,
+									"precision": 23
+								},
+								"sink": {
+									"name": "NEW_FINANCIALTOTALASSETS",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 10,
+									"precision": 23
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_FINANCIALCASH",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 10,
+									"precision": 23
+								},
+								"sink": {
+									"name": "NEW_FINANCIALCASH",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 10,
+									"precision": 23
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_SONATAFINANCIALSDATE",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "ASC_SONATAFINANCIALSDATE",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_SONATAFREEASSETS",
+									"type": "Decimal",
+									"physicalType": "money",
+									"scale": 4,
+									"precision": 19
+								},
+								"sink": {
+									"name": "ASC_SONATAFREEASSETS",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 4,
+									"precision": 19
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_SONATAPENDINGPURCHASES",
+									"type": "Decimal",
+									"physicalType": "money",
+									"scale": 4,
+									"precision": 19
+								},
+								"sink": {
+									"name": "ASC_SONATAPENDINGPURCHASES",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 4,
+									"precision": 19
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_SONATACLIENTCOUNT",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ASC_SONATACLIENTCOUNT",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_SONATATOTALASSETS",
+									"type": "Decimal",
+									"physicalType": "money",
+									"scale": 4,
+									"precision": 19
+								},
+								"sink": {
+									"name": "ASC_SONATATOTALASSETS",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 4,
+									"precision": 19
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_SONATACASH",
+									"type": "Decimal",
+									"physicalType": "money",
+									"scale": 4,
+									"precision": 19
+								},
+								"sink": {
+									"name": "ASC_SONATACASH",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 4,
+									"precision": 19
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_ACCEXEC_FSA_NO",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_ACCEXEC_FSA_NO",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_ACCEXEC_ACCT_EXEC",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_ACCEXEC_ACCT_EXEC",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_MATRIXFIRMNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_MATRIXFIRMNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_MATRIXCONTACTID",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_MATRIXCONTACTID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_PROSPECTPHONEWORK",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_PROSPECTPHONEWORK",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_DDIPHONE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_DDIPHONE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_PROSPECTADDRESSNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_PROSPECTADDRESSNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_PROSPECTPHONEMOBILE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_PROSPECTPHONEMOBILE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_PROSPECTADDRESSLINE1",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_PROSPECTADDRESSLINE1",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_PROSPECTADDRESSLINE2",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_PROSPECTADDRESSLINE2",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_PROSPECTADDRESSLINE3",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_PROSPECTADDRESSLINE3",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_PROSPECTADDRESSLINE4",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_PROSPECTADDRESSLINE4",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_PROSPECTADDRESSLINE5",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_PROSPECTADDRESSLINE5",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_TWITTERUSERID",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_TWITTERUSERID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_TWITTERURL",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_TWITTERURL",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "EMAILADDRESS2",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "EMAILADDRESS2",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "EMAILADDRESS3",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "EMAILADDRESS3",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_PROSPECTADDRESSPOSTCODE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_PROSPECTADDRESSPOSTCODE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_PARTNERMARKETING",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "ASC_PARTNERMARKETING",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_PROSPECTADDRESSCOUNTRY",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_PROSPECTADDRESSCOUNTRY",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_INDIVIDUAL_TEL_WKDAYS_FROM_W",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_INDIVIDUAL_TEL_WKDAYS_FROM_W",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_INDIVIDUAL_TEL_EXT_W",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_INDIVIDUAL_TEL_EXT_W",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_INDIVIDUAL_TEL_WKDAYS_TO_W",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_INDIVIDUAL_TEL_WKDAYS_TO_W",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_INDIVIDUAL_TEL_WEEKEND_W",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_INDIVIDUAL_TEL_WEEKEND_W",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "TELEPHONE2",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "TELEPHONE2",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_INDIVIDUAL_TEL_WKDAYS_FROM_H",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_INDIVIDUAL_TEL_WKDAYS_FROM_H",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_INDIVIDUAL_TEL_WKDAYS_TO_H",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_INDIVIDUAL_TEL_WKDAYS_TO_H",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_INDIVIDUAL_TEL_EXT_H",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_INDIVIDUAL_TEL_EXT_H",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_INDIVIDUAL_TEL_WEEKEND_H",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_INDIVIDUAL_TEL_WEEKEND_H",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_INDIVIDUAL_TEL_WKDAYS_FROM_M",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_INDIVIDUAL_TEL_WKDAYS_FROM_M",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_INDIVIDUAL_TEL_WKDAYS_TO_M",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_INDIVIDUAL_TEL_WKDAYS_TO_M",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_INDIVIDUAL_TEL_EXT_M",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_INDIVIDUAL_TEL_EXT_M",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_INDIVIDUAL_TEL_WEEKEND_M",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_INDIVIDUAL_TEL_WEEKEND_M",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_TEL_W",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_TEAM_TEL_W",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_WKDAYS_FROM_W",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_TEAM_WKDAYS_FROM_W",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_WKDAYS_TO_W",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_TEAM_WKDAYS_TO_W",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_EXT_W",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_TEAM_EXT_W",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_WEEKEND_W",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_TEAM_WEEKEND_W",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_TEL_F",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_TEAM_TEL_F",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_WKDAYS_FROM_F",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_TEAM_WKDAYS_FROM_F",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_WKDAYS_TO_F",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_TEAM_WKDAYS_TO_F",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_EXT_F",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_TEAM_EXT_F",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_WEEKEND_F",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_TEAM_WEEKEND_F",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_TEL_H",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_TEAM_TEL_H",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_WKDAYS_FROM_H",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_TEAM_WKDAYS_FROM_H",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_WKDAYS_TO_H",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_TEAM_WKDAYS_TO_H",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_EXT_H",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_TEAM_EXT_H",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_WEEKEND_H",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_TEAM_WEEKEND_H",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_TEL_M",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_TEAM_TEL_M",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_WKDAYS_FROM_M",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_TEAM_WKDAYS_FROM_M",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_WKDAYS_TO_M",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "NEW_TEAM_WKDAYS_TO_M",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_EXT_M",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_TEAM_EXT_M",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_TEAM_WEEKEND_M",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_TEAM_WEEKEND_M",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "GENDERCODE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "GENDERCODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "FAMILYSTATUSCODE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "FAMILYSTATUSCODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "SPOUSESNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "SPOUSESNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "BIRTHDATE",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "BIRTHDATE",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ANNIVERSARY",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "ANNIVERSARY",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ORIGINATINGLEADID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "ORIGINATINGLEADID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "LASTUSEDINCAMPAIGN",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "LASTUSEDINCAMPAIGN",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "DONOTSENDMM",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "DONOTSENDMM",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "TRANSACTIONCURRENCYID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "TRANSACTIONCURRENCYID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "CREDITLIMIT",
+									"type": "Decimal",
+									"physicalType": "money",
+									"scale": 4,
+									"precision": 19
+								},
+								"sink": {
+									"name": "CREDITLIMIT",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 4,
+									"precision": 19
+								}
+							},
+							{
+								"source": {
+									"name": "CREDITONHOLD",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "CREDITONHOLD",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "PAYMENTTERMSCODE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "PAYMENTTERMSCODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "DESCRIPTION",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "DESCRIPTION",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PREFERREDCONTACTMETHODCODE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "PREFERREDCONTACTMETHODCODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "DONOTEMAIL",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "DONOTEMAIL",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "DONOTBULKEMAIL",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "DONOTBULKEMAIL",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "DONOTPHONE",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "DONOTPHONE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "DONOTFAX",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "DONOTFAX",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "DONOTPOSTALMAIL",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "DONOTPOSTALMAIL",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 1
+								}
+							},
+							{
+								"source": {
+									"name": "ADDRESS1_SHIPPINGMETHODCODE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ADDRESS1_SHIPPINGMETHODCODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ADDRESS1_FREIGHTTERMSCODE",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ADDRESS1_FREIGHTTERMSCODE",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_REFERENCEMANUALLYCREATEDBYID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "NEW_REFERENCEMANUALLYCREATEDBYID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_REFERENCEMANUALLYCREATEDBYIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_REFERENCEMANUALLYCREATEDBYIDNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_UPDATEDBYBLUEBUTTONON",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "NEW_UPDATEDBYBLUEBUTTONON",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "CREATEDBY",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "CREATEDBY",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "CREATEDBYNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "CREATEDBYNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "CREATEDON",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "CREATEDON",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "MODIFIEDBY",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "MODIFIEDBY",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "MODIFIEDBYNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "MODIFIEDBYNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "MODIFIEDON",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "MODIFIEDON",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_LASTUPDATEDBYSONATAON",
+									"type": "DateTime",
+									"physicalType": "datetime"
+								},
+								"sink": {
+									"name": "ASC_LASTUPDATEDBYSONATAON",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_MIGRATIONTAG",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_MIGRATIONTAG",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_ALT_ADDRESSNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_ALT_ADDRESSNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_ALT_ADDRESSLINE_1",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_ALT_ADDRESSLINE_1",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_ALT_ADDRESSLINE_2",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_ALT_ADDRESSLINE_2",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_ALT_ADDRESSLINE_3",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_ALT_ADDRESSLINE_3",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_ALT_ADDRESSLINE_4",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_ALT_ADDRESSLINE_4",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_ALT_ADDRESSLINE_5",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_ALT_ADDRESSLINE_5",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_ALT_ADDRESSLINE_POSTCODE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_ALT_ADDRESSLINE_POSTCODE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_ALT_ADDRESSLINE_COUNTRY",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_ALT_ADDRESSLINE_COUNTRY",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_PROFESSIONALBODY",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ASC_PROFESSIONALBODY",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_PROFESSIONALBODYOTHER",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_PROFESSIONALBODYOTHER",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_SALESMANAGER",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "ASC_SALESMANAGER",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_BDTEAM",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "ASC_BDTEAM",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 0,
+									"precision": 10
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CSTEAMID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "ASC_CSTEAMID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_CSCONTACTID",
+									"type": "Guid",
+									"physicalType": "uniqueidentifier"
+								},
+								"sink": {
+									"name": "ASC_CSCONTACTID",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ASC_INDIVIDUALFSANUMBER",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ASC_INDIVIDUALFSANUMBER",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ADDRESS1_LINE1",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ADDRESS1_LINE1",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ADDRESS1_LINE2",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ADDRESS1_LINE2",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ADDRESS1_LINE3",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ADDRESS1_LINE3",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ADDRESS1_CITY",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ADDRESS1_CITY",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ADDRESS1_POSTALCODE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ADDRESS1_POSTALCODE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ADDRESS1_COUNTRY",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ADDRESS1_COUNTRY",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "MASTERCONTACTIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "MASTERCONTACTIDNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ADDRESS1_NAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ADDRESS1_NAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ACCOUNTIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ACCOUNTIDNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "PARENTCONTACTIDNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "PARENTCONTACTIDNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "FIRSTNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "FIRSTNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "LASTNAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "LASTNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "MIDDLENAME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "MIDDLENAME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ADDRESS1_STATEORPROVINCE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ADDRESS1_STATEORPROVINCE",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "TELEPHONE3",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "TELEPHONE3",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_PROSPECTPHONEHOME",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_PROSPECTPHONEHOME",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "NEW_PROSPECTEMAIL1",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "NEW_PROSPECTEMAIL1",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "SALUTATION",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "SALUTATION",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": true
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_MS_DYNAMICS",
+						"type": "DatasetReference",
+						"parameters": {
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+							"MS_DYNAMICS_DB": "@pipeline().globalParameters.MS_DYNAMICS_DB",
+							"MS_DYNAMICS_DB_HOST": "@pipeline().globalParameters.MS_DYNAMICS_DB_HOST",
+							"MS_DYNAMICS_DB_PORT": "@pipeline().globalParameters.MS_DYNAMICS_DB_PORT",
+							"MS_DYNAMICS_DB_USERNAME": "@pipeline().globalParameters.MS_DYNAMICS_DB_USERNAME",
+							"MS_DYNAMICS_DB_SECRET_NAME": "@pipeline().globalParameters.MS_DYNAMICS_DB_SECRET_NAME",
+							"SCHEMA": "dbo",
+							"TABLE_NAME": "Contact"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_ASQLDB_WOKING_SHIR",
+						"type": "DatasetReference",
+						"parameters": {
+							"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "CRM_PLAT_DYN_CONTACT_STG"
+						}
+					}
+				]
+			},
+			{
+				"name": "sp-truncate-CRM_PLAT_DYN_CONTACT_STG",
+				"description": "Name - Nikita Varnwal\nDate - Sept 2023\nProject - CRM Mirgation, implemented under CHG#####\nDescription - As a part of truncate and reload strategy ,this stored procedure will truncate the table CRM_PLAT_DYN_CONTACT_STG before loading any data into it .",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_TRUNCATE_NAMED_TABLE]",
+					"storedProcedureParameters": {
+						"p_table_name": {
+							"value": "CRM_PLAT_DYN_CONTACT_STG",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+						"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+						"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+					}
+				}
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-CRM_PLAT_DYN_CONTACT_STG",
+				"description": "Name - Nikita Varnwal\nDate - Sept 2023\nProject - CRM Migration. implemented under CHG#####\nDescription - This stored procedure is updating the BATCH_AUDIT table in STAGE_CDI with the required information of pipeline run .",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-CRM_PLAT_DYN_CONTACT_STG",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_CONTACT_STG').output.billingReference.billableDuration[0].duration",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_CONTACT_STG').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_CONTACT_STG').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_CONTACT_STG').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_CONTACT_STG').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-CRM_PLAT_DYN_CONTACT_STG').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": {
+								"value": "CRM_PLAT_DYN_CONTACT_STG",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": "@pipeline().globalParameters.ENVIRONMENT",
+						"SHORT_LOCATION": "@pipeline().globalParameters.SHORT_LOCATION",
+						"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "MSDynamics Migration"
+		},
+		"annotations": []
+	}
+}

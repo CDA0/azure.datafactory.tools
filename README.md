@@ -10,10 +10,19 @@ Deploys Azure Data Factory configuration, i.e. pipelines, linked services, integ
 
 ### Config
 
+* [fat1](https://dev.azure.com/mpcoderepo/Guppy/_git/fat-config?path=/config/compounds/data-pipelines/fat1)
+* [fat2](https://dev.azure.com/mpcoderepo/Guppy/_git/fat-config?path=/config/compounds/data-pipelines/fat2)
+* [fat3](https://dev.azure.com/mpcoderepo/Guppy/_git/fat-config?path=/config/compounds/data-pipelines/fat3)
 * [ci1](https://dev.azure.com/mpcoderepo/Guppy/_git/fat-config?path=/config/compounds/data-pipelines/ci1)
 * [sit1](https://dev.azure.com/mpcoderepo/Guppy/_git/sit-config?path=/config/compounds/data-pipelines/sit1)
+* [sit2](https://dev.azure.com/mpcoderepo/Guppy/_git/sit-config?path=/config/compounds/data-pipelines/sit2)
+* [sit3](https://dev.azure.com/mpcoderepo/Guppy/_git/sit-config?path=/config/compounds/data-pipelines/sit3)
 * [uat1](https://dev.azure.com/mpcoderepo/Guppy/_git/uat-config?path=/config/compounds/data-pipelines/uat1)
-* [prd1](https://dev.azure.com/mpcoderepo/Guppy/_git/prd-config?path=/config/compounds/data-pipelines/prd1)
+* [uat2](https://dev.azure.com/mpcoderepo/Guppy/_git/uat-config?path=/config/compounds/data-pipelines/uat2)
+* [uat3](https://dev.azure.com/mpcoderepo/Guppy/_git/uat-config?path=/config/compounds/data-pipelines/uat3)
+* [uat4](https://dev.azure.com/mpcoderepo/Guppy/_git/uat-config?path=/config/compounds/data-pipelines/uat4)
+* [pre](https://dev.azure.com/mpcoderepo/Guppy/_git/prd-config?path=/config/compounds/data-pipelines/pre)
+* [prd](https://dev.azure.com/mpcoderepo/Guppy/_git/prd-config?path=/config/compounds/data-pipelines/prd)
 
 ### Secrets
 

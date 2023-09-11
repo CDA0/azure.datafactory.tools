@@ -7,6 +7,9 @@
 			},
 			"SHORT_LOCATION": {
 				"type": "string"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string"
 			}
 		},
 		"annotations": [],

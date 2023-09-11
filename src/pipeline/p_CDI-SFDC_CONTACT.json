@@ -1,0 +1,515 @@
+{
+	"name": "p_CDI-SFDC_CONTACT",
+	"properties": {
+		"description": "Name : Nextpathway\nDate : 03/06/2023\nDescription : Pulls data from Azure SQL and Upsert data in SFDC-Contact table",
+		"activities": [
+			{
+				"name": "cd-CONTACT",
+				"description": "Pulls data from Azure SQL and loads to Salesforce",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "with REGISTERED_INDIVIDUAL\r\nas\r\n(select RI.PARTY_ROLE_ID,\r\n        RI.OFFICE_PARTY_ROLE_ID,\r\n        RI.FIRM_PARTY_ROLE_ID,\r\n        RI.REL_OFFICE_PARTY_ROLE_ID,\r\n        RI.REL_FIRM_PARTY_ROLE_ID,\r\n        RI.TITLE_ID,\r\n        STAGE_CDI.F_INITCAP(RI.FORENAME) as FORENAME, \r\n        STAGE_CDI.F_INITCAP(RI.SURNAME) as SURNAME,\r\n        RI.INDIVIDUAL_REFERENCE_NUMBER, \r\n        RI.STATUS, \r\n        RI.FIRM_REFERENCE_NUMBER, \r\n        RI.ACCOUNT_NUMBER, \r\n        RI.ACCOUNT_STATUS, \r\n        RI.JOB_TITLE_ID,\r\n        case \r\n         when RI.ADDRESS_LINE_1 is null then \r\n          null \r\n         else STAGE_CDI.F_INITCAP(STAGE_CDI.F_DEPERSONALISE(RI.ADDRESS_LINE_1)) \r\n        end as ADDRESS_LINE_1, \r\n        case\r\n         when RI.ADDRESS_LINE_2 is null then \r\n          null \r\n         else STAGE_CDI.F_INITCAP(STAGE_CDI.F_DEPERSONALISE(RI.ADDRESS_LINE_2)) \r\n        end as ADDRESS_LINE_2,\r\n        case \r\n         when RI.ADDRESS_LINE_3 is null then \r\n          null \r\n         else STAGE_CDI.F_INITCAP(STAGE_CDI.F_DEPERSONALISE(RI.ADDRESS_LINE_3)) \r\n        end as ADDRESS_LINE_3,\r\n        case \r\n         when RI.ADDRESS_LINE_4 is null then \r\n          null \r\n         else STAGE_CDI.F_INITCAP(STAGE_CDI.F_DEPERSONALISE(RI.ADDRESS_LINE_4)) \r\n        end as ADDRESS_LINE_4,\r\n        case \r\n         when RI.POSTCODE is null then \r\n          null \r\n         else STAGE_CDI.F_DEPERSONALISE(RI.POSTCODE) \r\n        end as POSTCODE, \r\n        RI.RECORD_DELETE_IND,\r\n        RI.UPDATE_DATE_TIME,\r\n        case \r\n         when ltrim(rtrim(RI.SURNAME)) is null then\r\n            1\r\n         else\r\n            0\r\n        end as LASTNAME_VAL_IND\r\n   from STAGE_CDI.DPDB_REGISTERED_INDIVIDUAL_STG RI\r\n  where ((select PARAMETER_VALUE_DT \r\n            from STAGE_CDI.BATCH_PARAMETER\r\n           where PROCESS_NAME = 'p_CDI-SFDC_CONTACT' \r\n             and PARAMETER_NAME = 'prm_EXTRACTDT') = '1900-01-01 01:00:00' \r\n        and RI.STATUS = 'A' \r\n        and RI.ACCOUNT_STATUS = 'A' \r\n        )\r\n     or (   (select PARAMETER_VALUE_DT \r\n               from STAGE_CDI.BATCH_PARAMETER\r\n              where PROCESS_NAME = 'p_CDI-SFDC_CONTACT'  \r\n                and PARAMETER_NAME = 'prm_EXTRACTDT') != '1900-01-01 01:00:00' \r\n        and RI.UPDATE_DATE_TIME > (select PARAMETER_VALUE_DT as PRM_EXTRACTDT\r\n                                     from STAGE_CDI.BATCH_PARAMETER\r\n                                    where PROCESS_NAME = 'p_CDI-SFDC_CONTACT' \r\n                                      and PARAMETER_NAME = 'prm_EXTRACTDT')\r\n        )\r\n    and RI.ACCOUNT_TYPE_ID = 'at_commto_sonata'\r\n),\r\nRI_CONTACT\r\nas\r\n(select SFDC_ADVISER_CONTACT_ID,\r\n        PRU_AGENCYNUMBER__C,\r\n        PRU_STATUS__C,\r\n        PRU_AGENCYNUMBERSTATUS__C\r\n   from STAGE_CDI.SFDC_ADVISER_RI_CONTACT_STG \r\n)\r\n,\r\nACCOUNT\r\nas\r\n(select SFDC_ADVISER_ACCOUNT_ID,\r\n        PRU_PARTYROLEID__C,\r\n        RECORDTYPE\r\n   from STAGE_CDI.SFDC_ADVISER_ACCOUNT_STG\r\n  where RECORDTYPE = 'Business Account Office' \r\n),\r\nREF_TRANSLATION\r\nas\r\n(select CATEGORY,\r\n        LKP_CODE,\r\n        RTN_DESC\r\n   from STAGE_CDI.REF_DPDB_TRANSLATION \r\n)\r\nselect FIRSTNAME,\r\n       OTHERPOSTALCODE,\r\n       PRU_AGENCYNUMBER__C,\r\n       PRU_INDIVIDUALREFERENCENUMBERALT__C,\r\n       PRU_PARTYROLEID__C,\r\n       RECORD_DELETE_IND as PRU_RecordRemoved__c,\r\n       ACCOUNT_ID as ACCOUNTID,\r\n       LASTNAME,\r\n       OTHERCITY,\r\n       OTHERSTATE,\r\n       OTHERSTREET,\r\n       PRU_AGENCYNUMBERSTATUS__C,\r\n       PRU_DATAQUALITYCOMMENT__C,\r\n       cast(PRU_DATAQUALITYISSUE__C as bit) as PRU_DATAQUALITYISSUE__C,\r\n       PRU_INDIVIDUALREFERENCENUMBER__C,\r\n       PRU_REGISTEREDINDIVIDUALREFERENCE__C,\r\n       PRU_STATUS__C,\r\n       PRU_TYPE__C,\r\n       SALUTATION\r\n  from (select RI.FORENAME as FIRSTNAME,\r\n               RI.POSTCODE as OTHERPOSTALCODE,\r\n               RI.ACCOUNT_NUMBER as PRU_AGENCYNUMBER__C,\r\n               RI.INDIVIDUAL_REFERENCE_NUMBER as PRU_INDIVIDUALREFERENCENUMBERALT__C,\r\n               RI.PARTY_ROLE_ID as PRU_PARTYROLEID__C,\r\n               RI.RECORD_DELETE_IND,\r\n               ACC_ID.SFDC_ADVISER_ACCOUNT_ID as ACCOUNT_ID,\r\n               case \r\n                when LASTNAME_VAL_IND = 1 then\r\n                '<Not known>'\r\n                else\r\n                RI.SURNAME\r\n                end as LASTNAME, \r\n               case \r\n                when ADDRESS_LINE_3 is null then\r\n                RI.ADDRESS_LINE_4\r\n                else\r\n                RI.ADDRESS_LINE_3\r\n                end as OTHERCITY,\r\n               case \r\n                when RI.ADDRESS_LINE_3 is null then\r\n                null\r\n                else\r\n                RI.ADDRESS_LINE_4\r\n                end as OTHERSTATE,\r\n               concat(RI.ADDRESS_LINE_1 , char(10) ,RI.ADDRESS_LINE_2) as OTHERSTREET,\r\n               case \r\n                when RT_AS.RTN_DESC is null then\r\n                 RI.ACCOUNT_STATUS\r\n                else\r\n                 RT_AS.RTN_DESC\r\n                end as PRU_AGENCYNUMBERSTATUS__C,\r\n               case \r\n                when LASTNAME_VAL_IND = 1 then\r\n                 case \r\n                  when LASTNAME_VAL_IND = 1 then \r\n                   'Last name is unknown'\r\n                  else \r\n                   null\r\n                  end\r\n               else\r\n                null\r\n               end as PRU_DATAQUALITYCOMMENT__C,\r\n               case \r\n                when LASTNAME_VAL_IND = 1 then\r\n                 1\r\n                else\r\n                 0\r\n               end as PRU_DATAQUALITYISSUE__C,\r\n               substring(RI.INDIVIDUAL_REFERENCE_NUMBER,1,8) as PRU_INDIVIDUALREFERENCENUMBER__C,\r\n               concat(RI.PARTY_ROLE_ID, '_' ,RI.FIRM_REFERENCE_NUMBER, '_' ,RI.ACCOUNT_NUMBER) as PRU_REGISTEREDINDIVIDUALREFERENCE__C,\r\n               case \r\n                when RI.FIRM_PARTY_ROLE_ID = RI.REL_FIRM_PARTY_ROLE_ID then\r\n                 case \r\n                  when RT_S.RTN_DESC is null then \r\n                   RI.STATUS\r\n                  else \r\n                   RT_S.RTN_DESC\r\n                 end\r\n                else\r\n                'Inactive'\r\n               end as PRU_STATUS__C,\r\n               case \r\n                when RT_T.RTN_DESC is null then\r\n                 RI.JOB_TITLE_ID\r\n                else\r\n                 RT_T.RTN_DESC\r\n               end as PRU_TYPE__C,\r\n               case \r\n                when RT_SAL.RTN_DESC is null then\r\n                 RI.TITLE_ID\r\n                else\r\n                 RT_SAL.RTN_DESC\r\n               end as SALUTATION,\r\n               case \r\n                when RI_FLG.PRU_AGENCYNUMBER__C is null then\r\n                 1\r\n                else\r\n                 0\r\n               end as UPS_FLAG    \r\n          from REGISTERED_INDIVIDUAL RI\r\n          left outer join RI_CONTACT RI_C\r\n            on (RI.ACCOUNT_NUMBER = RI_C.PRU_AGENCYNUMBER__C)\r\n          left outer join RI_CONTACT RI_FLG\r\n            on (RI.PARTY_ROLE_ID = RI_FLG.PRU_AGENCYNUMBER__C)\r\n          left outer join ACCOUNT ACC_ID\r\n            on (RI.OFFICE_PARTY_ROLE_ID = ACC_ID.PRU_PARTYROLEID__C)\r\n          left outer join REF_TRANSLATION RT_AS\r\n            on (RI.ACCOUNT_STATUS = RT_AS.LKP_CODE)\r\n          left outer join REF_TRANSLATION RT_S\r\n            on (RI.STATUS = RT_S.LKP_CODE)\r\n          left outer join REF_TRANSLATION RT_T\r\n            on (RI.JOB_TITLE_ID = RT_T.LKP_CODE)\r\n          left outer join REF_TRANSLATION RT_SAL\r\n            on (RI.TITLE_ID = RT_SAL.LKP_CODE)\r\n       ) SRC\r\n where SRC.UPS_FLAG = 1",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SalesforceSink",
+						"writeBatchSize": 5000,
+						"writeBehavior": "upsert",
+						"externalIdFieldName": "PRU_AGENCYNUMBER__C",
+						"ignoreNullValues": false
+					},
+					"enableStaging": false,
+					"enableSkipIncompatibleRow": true,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "ls_ADLS2",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"ENVIRONMENT": {
+										"value": "@pipeline().globalParameters.ENVIRONMENT",
+										"type": "Expression"
+									},
+									"SHORT_LOCATION": {
+										"value": "@pipeline().globalParameters.SHORT_LOCATION",
+										"type": "Expression"
+									},
+									"LOGICAL_ENVIRONMENT": {
+										"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+										"type": "Expression"
+									}
+								}
+							},
+							"path": "crm/ErrorLogs"
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ACCOUNTID",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "AccountId",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "LASTNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "LastName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "FIRSTNAME",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "FirstName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SALUTATION",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "Salutation",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OTHERSTREET",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "OtherStreet",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OTHERCITY",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "OtherCity",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OTHERSTATE",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "OtherState",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OTHERPOSTALCODE",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "OtherPostalCode",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_AGENCYNUMBERSTATUS__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_AgencyNumberStatus__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_DATAQUALITYCOMMENT__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_DataQualityComment__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_DATAQUALITYISSUE__C",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "PRU_DataQualityIssue__c",
+									"type": "Boolean"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_AGENCYNUMBER__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_AgencyNumber__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_INDIVIDUALREFERENCENUMBERALT__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_IndividualReferenceNumberAlt__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_INDIVIDUALREFERENCENUMBER__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_IndividualReferenceNumber__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_PARTYROLEID__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_PartyRoleID__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_RecordRemoved__c",
+									"type": "Boolean",
+									"physicalType": "bit"
+								},
+								"sink": {
+									"name": "PRU_RecordRemoved__c",
+									"type": "Boolean"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_REGISTEREDINDIVIDUALREFERENCE__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_RegisteredIndividualReference__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_STATUS__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_Status__c",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRU_TYPE__C",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "PRU_Type__c",
+									"type": "String"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": true
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ds_ASQLDB_WOKING_SHIR",
+						"type": "DatasetReference",
+						"parameters": {
+							"SCHEMA": "STAGE_CDI",
+							"TABLE_NAME": "DPDB_REGISTERED_INDIVIDUAL_STG",
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"LOGICAL_ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_SFDC_DPDB",
+						"type": "DatasetReference",
+						"parameters": {
+							"ENVIRONMENT": {
+								"value": "@pipeline().globalParameters.ENVIRONMENT",
+								"type": "Expression"
+							},
+							"SHORT_LOCATION": {
+								"value": "@pipeline().globalParameters.SHORT_LOCATION",
+								"type": "Expression"
+							},
+							"SFDC_DPDB_URL": {
+								"value": "@pipeline().globalParameters.SFDC_DPDB_URL",
+								"type": "Expression"
+							},
+							"SFDC_DPDB_USERNAME": {
+								"value": "@pipeline().globalParameters.SFDC_DPDB_USERNAME",
+								"type": "Expression"
+							},
+							"OBJECT_NAME": "Contact",
+							"SFDC_DPDB_API_VERSION": {
+								"value": "@pipeline().globalParameters.SFDC_DPDB_API_VERSION",
+								"type": "Expression"
+							},
+							"SFDC_DPDB_ORG": "@pipeline().globalParameters.SFDC_DPDB_ORG",
+							"LOGICAL_ENVIRONMENT": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+						}
+					}
+				]
+			},
+			{
+				"name": "sp-UPDATE-BATCH_PARAMETER",
+				"description": "Update BATCH_PARAMETER",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-CONTACT",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_UPDATE_PARAMETER_VIA_TABLE]",
+					"storedProcedureParameters": {
+						"p_column_name": {
+							"value": "UPDATE_DATE_TIME",
+							"type": "String"
+						},
+						"p_parameter_name": {
+							"value": "prm_EXTRACTDT",
+							"type": "String"
+						},
+						"p_process_name": {
+							"value": "p_CDI-SFDC_CONTACT",
+							"type": "String"
+						},
+						"p_table_name": {
+							"value": "STAGE_CDI.DPDB_REGISTERED_INDIVIDUAL_STG",
+							"type": "String"
+						},
+						"p_updated_by": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "sp-UPDATE_BATCH_AUDIT-CONTACT",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "cd-CONTACT",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[STAGE_CDI].[PRC_BATCH_AUDIT]",
+					"storedProcedureParameters": {
+						"p_billable_duration": {
+							"value": {
+								"value": "@activity('cd-CONTACT').output.billingReference.billableDuration[0].duration\n",
+								"type": "Expression"
+							},
+							"type": "Decimal"
+						},
+						"p_billable_unit": {
+							"value": {
+								"value": "@activity('cd-CONTACT').output.billingReference.billableDuration[0].unit",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_duration": {
+							"value": {
+								"value": "@activity('cd-CONTACT').output.copyDuration",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_pipeline_name": {
+							"value": {
+								"value": "@pipeline().Pipeline",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_process_start_dt": {
+							"value": {
+								"value": "@activity('cd-CONTACT').output.executionDetails[0].start",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"p_records_read": {
+							"value": {
+								"value": "@activity('cd-CONTACT').output.rowsRead",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_records_written": {
+							"value": {
+								"value": "@activity('cd-CONTACT').output.rowsCopied",
+								"type": "Expression"
+							},
+							"type": "Int32"
+						},
+						"p_table_name": {
+							"value": "CONTACT",
+							"type": "String"
+						},
+						"p_trigger_name": {
+							"value": {
+								"value": "@pipeline().TriggerName",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSQLDB",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"SHORT_LOCATION": {
+							"value": "@pipeline().globalParameters.SHORT_LOCATION",
+							"type": "Expression"
+						},
+						"LOGICAL_ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT",
+							"type": "Expression"
+						},
+						"ENVIRONMENT": {
+							"value": "@pipeline().globalParameters.ENVIRONMENT",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "Digital Account/Adviser"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-07-13T10:03:17Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

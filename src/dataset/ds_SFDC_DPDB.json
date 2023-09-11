@@ -1,0 +1,81 @@
+{
+	"name": "ds_SFDC_DPDB",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_SFDC_DPDB",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"ENVIRONMENT": {
+					"value": "@dataset().ENVIRONMENT",
+					"type": "Expression"
+				},
+				"LOGICAL_ENVIRONMENT": {
+					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
+				},
+				"SHORT_LOCATION": {
+					"value": "@dataset().SHORT_LOCATION",
+					"type": "Expression"
+				},
+				"SFDC_DPDB_URL": {
+					"value": "@dataset().SFDC_DPDB_URL",
+					"type": "Expression"
+				},
+				"SFDC_DPDB_USERNAME": {
+					"value": "@dataset().SFDC_DPDB_USERNAME",
+					"type": "Expression"
+				},
+				"SFDC_DPDB_API_VERSION": {
+					"value": "@dataset().SFDC_DPDB_API_VERSION",
+					"type": "Expression"
+				},
+				"SFDC_DPDB_ORG": {
+					"value": "@dataset().SFDC_DPDB_ORG",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+			},
+			"SHORT_LOCATION": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
+			},
+			"SFDC_DPDB_URL": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SFDC_DPDB_URL"
+			},
+			"SFDC_DPDB_USERNAME": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SFDC_DPDB_USERNAME"
+			},
+			"SFDC_DPDB_API_VERSION": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SFDC_DPDB_API_VERSION"
+			},
+			"SFDC_DPDB_ORG": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SFDC_DPDB_ORG"
+			},
+			"OBJECT_NAME": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SalesforceObject",
+		"schema": [],
+		"typeProperties": {
+			"objectApiName": {
+				"value": "@dataset().OBJECT_NAME",
+				"type": "Expression"
+			}
+		}
+	}
+}

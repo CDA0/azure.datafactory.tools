@@ -1,12 +1,15 @@
 {
 	"name": "ds_STAGE_CRM",
 	"properties": {
-		"description": "Connects to STAGE_CRM (CRM01A)",
+		"description": "Dataset for tables in STAGE_CRM",
 		"linkedServiceName": {
-			"referenceName": "ls_STAGE_CRM_ORACLE",
+			"referenceName": "ls_STAGE_CRM",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"ENVIRONMENT": "@dataset().ENVIRONMENT",
+				"ENVIRONMENT": {
+					"value": "@dataset().ENVIRONMENT",
+					"type": "Expression"
+				},
 				"LOGICAL_ENVIRONMENT": {
 					"value": "@dataset().LOGICAL_ENVIRONMENT",
 					"type": "Expression"
@@ -14,23 +17,50 @@
 				"SHORT_LOCATION": {
 					"value": "@dataset().SHORT_LOCATION",
 					"type": "Expression"
+				},
+				"CRM_DB": {
+					"value": "@dataset().CRM_DB",
+					"type": "Expression"
+				},
+				"CRM_DB_HOST": {
+					"value": "@dataset().CRM_DB_HOST",
+					"type": "Expression"
+				},
+				"CRM_DB_PORT": {
+					"value": "@dataset().CRM_DB_PORT",
+					"type": "Expression"
 				}
 			}
 		},
 		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+			},
+			"SHORT_LOCATION": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
+			},
+			"CRM_DB": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.CRM_DB"
+			},
+			"CRM_DB_HOST": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.CRM_DB_HOST"
+			},
+			"CRM_DB_PORT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.CRM_DB_PORT"
+			},
 			"SCHEMA": {
 				"type": "string"
 			},
-			"TABLE": {
-				"type": "string"
-			},
-			"ENVIRONMENT": {
-				"type": "string"
-			},
-			"LOGICAL_ENVIRONMENT": {
-				"type": "string"
-			},
-			"SHORT_LOCATION": {
+			"TABLE_NAME": {
 				"type": "string"
 			}
 		},
@@ -43,7 +73,7 @@
 				"type": "Expression"
 			},
 			"table": {
-				"value": "@dataset().TABLE",
+				"value": "@dataset().TABLE_NAME",
 				"type": "Expression"
 			}
 		}

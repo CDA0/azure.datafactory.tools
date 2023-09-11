@@ -1,0 +1,63 @@
+{
+	"name": "ls_STAGE_CRM",
+	"properties": {
+		"description": "Connects to BI Integration Hub (STAGE_CRM) via Lansing SHIR using the STAGE_CRM_ADF account",
+		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+			},
+			"SHORT_LOCATION": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
+			},
+			"CRM_DB": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.CRM_DB"
+			},
+			"CRM_DB_HOST": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.CRM_DB_HOST"
+			},
+			"CRM_DB_PORT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.CRM_DB_PORT"
+			}
+		},
+		"annotations": [],
+		"type": "Oracle",
+		"typeProperties": {
+			"connectionString": "host=@{linkedService().CRM_DB_HOST};port=@{linkedService().CRM_DB_PORT};sid=@{linkedService().CRM_DB};user id=STAGE_CRM_ADF",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "ls_KeyVaultCom",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"ENVIRONMENT": {
+							"value": "@linkedService().ENVIRONMENT",
+							"type": "Expression"
+						},
+						"SHORT_LOCATION": {
+							"value": "@linkedService().SHORT_LOCATION",
+							"type": "Expression"
+						}
+					}
+				},
+				"secretName": {
+					"value": "@{linkedService().LOGICAL_ENVIRONMENT}-@{linkedService().CRM_DB}-stage-crm-adf",
+					"type": "Expression"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "Lansing",
+			"type": "IntegrationRuntimeReference"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
+}

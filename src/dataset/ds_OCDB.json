@@ -1,0 +1,97 @@
+{
+	"name": "ds_OCDB",
+	"properties": {
+		"description": "Dataset for tables in OCDB",
+		"linkedServiceName": {
+			"referenceName": "ls_OCDB",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"ENVIRONMENT": {
+					"value": "@dataset().ENVIRONMENT",
+					"type": "Expression"
+				},
+				"LOGICAL_ENVIRONMENT": {
+					"value": "@dataset().LOGICAL_ENVIRONMENT",
+					"type": "Expression"
+				},
+				"SHORT_LOCATION": {
+					"value": "@dataset().SHORT_LOCATION",
+					"type": "Expression"
+				},
+				"OCDB": {
+					"value": "@dataset().OCDB",
+					"type": "Expression"
+				},
+				"OCDB_HOST": {
+					"value": "@dataset().OCDB_HOST",
+					"type": "Expression"
+				},
+				"OCDB_PORT": {
+					"value": "@dataset().OCDB_PORT",
+					"type": "Expression"
+				},
+				"OCDB_USERNAME": {
+					"value": "@dataset().OCDB_USERNAME",
+					"type": "Expression"
+				},
+				"OCDB_SECRET_NAME": {
+					"value": "@dataset().OCDB_SECRET_NAME",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.ENVIRONMENT"
+			},
+			"SHORT_LOCATION": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.SHORT_LOCATION"
+			},
+			"LOGICAL_ENVIRONMENT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.LOGICAL_ENVIRONMENT"
+			},
+			"OCDB": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.OCDB"
+			},
+			"OCDB_HOST": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.OCDB_HOST"
+			},
+			"OCDB_PORT": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.OCDB_PORT"
+			},
+			"OCDB_USERNAME": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.OCDB_USERNAME"
+			},
+			"OCDB_SECRET_NAME": {
+				"type": "string",
+				"defaultValue": "@pipeline().globalParameters.OCDB_SECRET_NAME"
+			},
+			"SCHEMA": {
+				"type": "string"
+			},
+			"TABLE_NAME": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "OracleTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().SCHEMA",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().TABLE_NAME",
+				"type": "Expression"
+			}
+		}
+	}
+}
