@@ -75,7 +75,11 @@ $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName 
 $adfIns.AllObjects() | ForEach-Object {
     $name = $_.Name
     $type = $_.GetType().Name
-    $simtype = Get-SimplifiedType -Type "$type"
+    $simtype = $type
+    if ($type -like 'PS*') { $simtype = $type.Substring(2) }
+    if ($type -like 'AdfPS*') { $simtype = $type.Substring(5) }     # New internal type
+    if ($simtype -like '*IntegrationRuntime') { $simtype = 'IntegrationRuntime' }
+    if ($simtype -like '*managedPrivateEndpoint') { $simtype = 'managedPrivateEndpoint' }
     Write-Host $name $simtype
     $included -Contains "$simtype.$name"
 }
