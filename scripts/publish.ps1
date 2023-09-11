@@ -40,11 +40,13 @@ $options.StopStartTriggers = $StopStartTriggers
 
 $filterText = Get-Content $FilterTextFile -Raw -Encoding 'UTF8'
 $filterArray = $filterText.Replace(',', "`n").Replace("`r`n", "`n").Split("`n");
+$included = @()
 
 $filterArray | Where-Object { ($_.Trim().Length -gt 0 -or $_.Trim().StartsWith('+')) -and (!$_.Trim().StartsWith('-')) } | ForEach-Object {
     $i = $_.Trim().Replace('+', '')
     Write-Verbose "- Include: $i"
     $options.Includes.Add($i, "");
+    $included.Add($i)
 }
 Write-Host "$($options.Includes.Count) rule(s)/object(s) added to be included in deployment."
 
@@ -64,7 +66,7 @@ $null = Publish-AdfV2FromJson `
     -Option $options `
     -Method "$PublishMethod"
 
-$options.Includes | ForEach-Object {
+$included| ForEach-Object {
     Write-Host "in"
     Write-Host $_
 }
@@ -72,5 +74,5 @@ $options.Includes | ForEach-Object {
 $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
 $adfIns.AllObjects() | ForEach-Object {
     Write-Host $_.Name $_.GetType().Name
-    $options.Includes -Contains $_.Name
+    $included -Contains $_.Name
 }
