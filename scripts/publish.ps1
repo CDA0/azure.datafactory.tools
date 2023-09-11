@@ -46,7 +46,7 @@ $filterArray | Where-Object { ($_.Trim().Length -gt 0 -or $_.Trim().StartsWith('
     $i = $_.Trim().Replace('+', '')
     Write-Verbose "- Include: $i"
     $options.Includes.Add($i, "");
-    $included.Add($i)
+    $included.Add($i.split(".")[1])
 }
 Write-Host "$($options.Includes.Count) rule(s)/object(s) added to be included in deployment."
 
