@@ -46,7 +46,7 @@ $filterArray | Where-Object { ($_.Trim().Length -gt 0 -or $_.Trim().StartsWith('
     $i = $_.Trim().Replace('+', '')
     Write-Verbose "- Include: $i"
     $options.Includes.Add($i, "");
-    $included.Add($i.split(".")[1])
+    $included.Add($i)
 }
 Write-Host "$($options.Includes.Count) rule(s)/object(s) added to be included in deployment."
 
@@ -73,6 +73,9 @@ $included| ForEach-Object {
 
 $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
 $adfIns.AllObjects() | ForEach-Object {
-    Write-Host $_.Name $_.GetType().Name
-    $included -Contains $_.Name
+    $name = $_.Name
+    $type = $_.GetType().Name
+    $simtype = Get-SimplifiedType -Type "$type"
+    Write-Host $name $simtype
+    $included -Contains "$simtype.$name"
 }
