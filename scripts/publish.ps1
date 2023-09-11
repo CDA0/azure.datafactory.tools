@@ -64,9 +64,13 @@ $null = Publish-AdfV2FromJson `
     -Option $options `
     -Method "$PublishMethod"
 
+$options.Includes | ForEach-Object {
+    Write-Host $_
+}
+
 $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
 $adfIns.AllObjects() | ForEach-Object {
-    Write-Host $_
+    Write-Host $_.Name $_.GetType().Name
     Write-Host $options.Includes
-    $options.Includes -Contains $_
+    $options.Includes -Contains $_.Name
 }
