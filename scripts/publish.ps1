@@ -78,7 +78,9 @@ $adfIns.AllObjects() | ForEach-Object {
     Write-Host $name $simtype
     $byName = $included -Contains "$simtype.$name"
     $byWildCard = $included -Contains "$simtype.*"
-    Write-Host $byName
-    Write-Host $byWildCard
-    Write-Host (!$byName -and !$byWildCard)
+    $delete = (!$byName -and !$byWildCard)
+    Write-Host 'Deleting $simtype.$name'
+
+    Get-Command Remove-AzDataFactoryV2Dataset
+
 }
