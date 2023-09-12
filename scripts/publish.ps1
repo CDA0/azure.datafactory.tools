@@ -78,5 +78,7 @@ $adfIns.AllObjects() | ForEach-Object {
     Write-Host $name $simtype
     $byName = $included -Contains "$simtype.$name"
     $byWildCard -Contains "$simtype.*"
-    Write-Host $byName $byWildCard (!$byName -and !$byWildCard)
+    Write-Host 'Name $simtype.$name $byName'
+    Write-Host 'Wildcard $simtype.* $byWildCard'
+    Write-Host !$byName -and !$byWildCard
 }
