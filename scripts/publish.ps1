@@ -77,8 +77,8 @@ $adfIns.AllObjects() | ForEach-Object {
     if ($simtype -like '*managedPrivateEndpoint') { $simtype = 'managedPrivateEndpoint' }
     Write-Host $name $simtype
     $byName = $included -Contains "$simtype.$name"
-    $byWildCard -Contains "$simtype.*"
-    Write-Host 'Name $simtype.$name $byName'
-    Write-Host 'Wildcard $simtype.* $byWildCard'
-    Write-Host !$byName -and !$byWildCard
+    $byWildCard = $included -Contains "$simtype.*"
+    Write-Host $byName
+    Write-Host $byWildCard
+    Write-Host (!$byName -and !$byWildCard)
 }
