@@ -66,11 +66,6 @@ $null = Publish-AdfV2FromJson `
     -Option $options `
     -Method "$PublishMethod"
 
-$included| ForEach-Object {
-    Write-Host "in"
-    Write-Host $_
-}
-
 $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
 $adfIns.AllObjects() | ForEach-Object {
     $name = $_.Name
@@ -82,4 +77,5 @@ $adfIns.AllObjects() | ForEach-Object {
     if ($simtype -like '*managedPrivateEndpoint') { $simtype = 'managedPrivateEndpoint' }
     Write-Host $name $simtype
     $included -Contains "$simtype.$name"
+    $included -Contains "$simtype.*"
 }
