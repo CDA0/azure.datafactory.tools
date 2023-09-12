@@ -87,5 +87,5 @@ $adfIns.AllObjects() | ForEach-Object {
     Get-Command Remove-AzDataFactoryV2LinkedService
     Get-Command Remove-AzDataFactoryV2IntegrationRuntime
     Get-Command Remove-AzDataFactoryV2Trigger
-    Get-Command Remove-AdfObjectRestAPI
+    # Get-Command Remove-AdfObjectRestAPI
 }
