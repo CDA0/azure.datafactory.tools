@@ -71,9 +71,9 @@ $adfIns.AllObjects() | ForEach-Object {
     $byWildCard = ($included -Contains "$simtype.*") -or ($included -Contains "*.*")
     $delete = (!$byName -and !$byWildCard)
     Write-Host "*.*"
-    Write-Host $included -Contains "*.*"
-    Write-Host $included -Contains "$simtype.*"
-    Write-Host $included -Contains "$simtype.$name"
+    $included -Contains "*.*"
+    $included -Contains "$simtype.*"
+    $included -Contains "$simtype.$name"
     Write-Host "Deleting $simtype.$name"
 
     # if ($delete) {
