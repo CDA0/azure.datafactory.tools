@@ -116,7 +116,7 @@ $toDeleteDS | ForEach-Object {
     Remove-AzDataFactoryV2Dataset `
         -ResourceGroupName $ResourceGroupName `
         -DataFactoryName $DataFactoryName `
-        -Name $$_ `
+        -Name $_ `
         -Force -ErrorVariable err -ErrorAction Stop | Out-Null
 }
 
