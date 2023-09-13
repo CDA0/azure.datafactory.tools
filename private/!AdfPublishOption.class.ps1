@@ -22,6 +22,7 @@ class AdfPublishOption {
     [Boolean] $IgnoreLackOfReferencedObject = $false
     [Boolean] $DoNotStopStartExcludedTriggers = $false
     [Boolean] $DoNotDeleteExcludedObjects = $true
+    [Boolean] $DeleteNotIncludedObjects = $false
     [Boolean] $IncrementalDeployment = $false
     [TriggerStopTypes] $TriggerStopMethod = [TriggerStopTypes]::AllEnabled
     [TriggerStartTypes] $TriggerStartMethod = [TriggerStartTypes]::BasedOnSourceCode
