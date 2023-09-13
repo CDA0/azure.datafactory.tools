@@ -89,17 +89,16 @@ $adfIns.AllObjects() | ForEach-Object {
                 $toDeleteDF.Add("$name")
             }
             "pipeline" {
-                $toDeleteP.Add("$simtype.$name")
+                $toDeleteP.Add("$name")
             }
             "linkedservice" {
-                $toDeleteLS.Add("$simtype.$name")
+                $toDeleteLS.Add("$name")
             }
             "integrationruntime" {
                 $toDeleteIR.Add("$name")
             }
             "trigger" {
                 $toDeleteT.Add("$name")
-                Write-Host "Deleting $simtype.$name"
             }
             "credential" {
                 $toDeleteC.Add("$name")
