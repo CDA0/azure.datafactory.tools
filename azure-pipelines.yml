@@ -24,18 +24,18 @@ extends:
   template: pipelines/compound.yml@templates
   parameters:
     deployStages:
-      - template: stages/deploy.yml@templates
-        parameters:
-          dependsOn: build
-          deploySteps:
-            - template: ./azure-pipelines.deploy.yml
-              parameters:
-                environment: fat
-                logicalEnvironment: fat1
-                deploySql: ${{ parameters.deploySql }}
-          environment: fat
-          logicalEnvironment: fat1
-          runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
+      # - template: stages/deploy.yml@templates
+      #   parameters:
+      #     dependsOn: build
+      #     deploySteps:
+      #       - template: ./azure-pipelines.deploy.yml
+      #         parameters:
+      #           environment: fat
+      #           logicalEnvironment: fat1
+      #           deploySql: ${{ parameters.deploySql }}
+      #     environment: fat
+      #     logicalEnvironment: fat1
+      #     runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
       - template: stages/deploy.yml@templates
         parameters:
           dependsOn: build
@@ -48,29 +48,29 @@ extends:
           environment: fat
           logicalEnvironment: fat2
           runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
-      - template: stages/deploy.yml@templates
-        parameters:
-          dependsOn: build
-          deploySteps:
-            - template: ./azure-pipelines.deploy.yml
-              parameters:
-                environment: fat
-                logicalEnvironment: fat3
-                deploySql: ${{ parameters.deploySql }}
-          environment: fat
-          logicalEnvironment: fat3
-          runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
-      - template: stages/deploy.yml@templates
-        parameters:
-          dependsOn: build
-          deploySteps:
-            - template: ./azure-pipelines.deploy.yml
-              parameters:
-                environment: fat
-                logicalEnvironment: ci1
-                deploySql: ${{ parameters.deploySql }}
-          environment: fat
-          logicalEnvironment: ci1
+      # - template: stages/deploy.yml@templates
+      #   parameters:
+      #     dependsOn: build
+      #     deploySteps:
+      #       - template: ./azure-pipelines.deploy.yml
+      #         parameters:
+      #           environment: fat
+      #           logicalEnvironment: fat3
+      #           deploySql: ${{ parameters.deploySql }}
+      #     environment: fat
+      #     logicalEnvironment: fat3
+      #     runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
+      # - template: stages/deploy.yml@templates
+      #   parameters:
+      #     dependsOn: build
+      #     deploySteps:
+      #       - template: ./azure-pipelines.deploy.yml
+      #         parameters:
+      #           environment: fat
+      #           logicalEnvironment: ci1
+      #           deploySql: ${{ parameters.deploySql }}
+      #     environment: fat
+      #     logicalEnvironment: ci1
           runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
       - ${{ if eq(parameters.deploySql, true) }}:
           - template: stages/deploy.yml@templates
