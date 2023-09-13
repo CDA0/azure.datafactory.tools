@@ -71,7 +71,7 @@ extends:
       #           deploySql: ${{ parameters.deploySql }}
       #     environment: fat
       #     logicalEnvironment: ci1
-          runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
+          # runIfNotMainOrMaster: ${{ eq(parameters.action, 'Deploy') }}
       - ${{ if eq(parameters.deploySql, true) }}:
           - template: stages/deploy.yml@templates
             parameters:
