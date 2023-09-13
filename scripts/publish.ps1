@@ -57,15 +57,6 @@ $filterArray | Where-Object { $_.Trim().StartsWith('-') } | ForEach-Object {
 }
 Write-Host "$($options.Excludes.Count) rule(s)/object(s) added to be excluded from deployment."
 
-$null = Publish-AdfV2FromJson `
-    -RootFolder "$DataFactoryCodePath" `
-    -ResourceGroupName "$ResourceGroupName" `
-    -DataFactoryName "$DataFactoryName" `
-    -Location "$Location" `
-    -Stage "$StageConfigFile" `
-    -Option $options `
-    -Method "$PublishMethod"
-
 $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
 $adfIns.AllObjects() | ForEach-Object {
     $name = $_.Name
@@ -81,11 +72,81 @@ $adfIns.AllObjects() | ForEach-Object {
     $delete = (!$byName -and !$byWildCard)
     Write-Host "Deleting $simtype.$name"
 
-    Get-Command Remove-AzDataFactoryV2Dataset
-    Get-Command Remove-AzDataFactoryV2DataFlow
-    Get-Command Remove-AzDataFactoryV2Pipeline
-    Get-Command Remove-AzDataFactoryV2LinkedService
-    Get-Command Remove-AzDataFactoryV2IntegrationRuntime
-    Get-Command Remove-AzDataFactoryV2Trigger
-    # Get-Command Remove-AdfObjectRestAPI
+    if ($delete) {
+        switch -Exact ($action) {
+            "Dataset" {
+                Remove-AzDataFactoryV2Dataset `
+                    -ResourceGroupName $ResourceGroupName `
+                    -DataFactoryName $DataFactoryName `
+                    -Name $name `
+                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+            }
+            "DataFlow" {
+                Remove-AzDataFactoryV2DataFlow `
+                    -ResourceGroupName $ResourceGroupName `
+                    -DataFactoryName $DataFactoryName `
+                    -Name $name `
+                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+            }
+            "Pipeline" {
+                Remove-AzDataFactoryV2Pipeline `
+                    -ResourceGroupName $ResourceGroupName `
+                    -DataFactoryName $DataFactoryName `
+                    -Name $name `
+                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+            }
+            "LinkedService" {
+                Remove-AzDataFactoryV2LinkedService `
+                    -ResourceGroupName $ResourceGroupName `
+                    -DataFactoryName $DataFactoryName `
+                    -Name $name `
+                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+            }
+            "IntegrationRuntime" {
+                Remove-AzDataFactoryV2IntegrationRuntime `
+                    -ResourceGroupName $ResourceGroupName `
+                    -DataFactoryName $DataFactoryName `
+                    -Name $name `
+                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+            }
+            "Trigger" {
+                # Stop trigger if enabled before delete it
+                if ($obj.RuntimeState -eq 'Started') {
+                    Write-Verbose "Disabling trigger: $name..."
+                    Stop-AzDataFactoryV2Trigger `
+                        -ResourceGroupName $ResourceGroupName `
+                        -DataFactoryName $DataFactoryName `
+                        -Name $name `
+                        -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+                }
+                Remove-AzDataFactoryV2Trigger `
+                    -ResourceGroupName $ResourceGroupName `
+                    -DataFactoryName $DataFactoryName `
+                    -Name $name `
+                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+            }
+            "Credential" {
+                Remove-AdfObjectRestAPI `
+                    -type_plural 'credentials' `
+                    -name $name `
+                    -adfInstance $adfInstance `
+                    -ErrorVariable err -ErrorAction Stop | Out-Null
+            }
+            "DoNothing" {
+
+            }
+            default {
+                Write-Error "ADFT0018: Type $($obj.GetType().Name) is not supported."
+            }
+        }
+    }
 }
+
+$null = Publish-AdfV2FromJson `
+    -RootFolder "$DataFactoryCodePath" `
+    -ResourceGroupName "$ResourceGroupName" `
+    -DataFactoryName "$DataFactoryName" `
+    -Location "$Location" `
+    -Stage "$StageConfigFile" `
+    -Option $options `
+    -Method "$PublishMethod"
