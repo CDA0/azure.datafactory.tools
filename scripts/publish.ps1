@@ -74,13 +74,11 @@ $adfIns.AllObjects() | ForEach-Object {
     if ($simtype -like '*IntegrationRuntime') { $simtype = 'IntegrationRuntime' }
     if ($simtype -like '*managedPrivateEndpoint') { $simtype = 'managedPrivateEndpoint' }
     $simtype = $simtype.toLower()
-    Write-Host $name $simtype
     $byName = $included -Contains "$simtype.$name"
     $byWildCard = $included -Contains "$simtype.*" -or $included -Contains "*.*"
     $delete = !$byName -and !$byWildCard
 
     if ($delete) {
-        Write-Host "Deleting $simtype.$name"
         switch -Exact ($simtype) {
             "dataset" {
                 $toDeleteDS.Add("$name")
