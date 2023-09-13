@@ -76,6 +76,7 @@ $adfIns.AllObjects() | ForEach-Object {
         Write-Host "Deleting $simtype.$name"
         switch -Exact ($action) {
             "Dataset" {
+                Write-Host "Deleting $simtype.$name"
                 Remove-AzDataFactoryV2Dataset `
                     -ResourceGroupName $ResourceGroupName `
                     -DataFactoryName $DataFactoryName `
@@ -83,6 +84,7 @@ $adfIns.AllObjects() | ForEach-Object {
                     -Force -ErrorVariable err -ErrorAction Stop | Out-Null
             }
             "DataFlow" {
+                Write-Host "Deleting $simtype.$name"
                 Remove-AzDataFactoryV2DataFlow `
                     -ResourceGroupName $ResourceGroupName `
                     -DataFactoryName $DataFactoryName `
@@ -90,6 +92,7 @@ $adfIns.AllObjects() | ForEach-Object {
                     -Force -ErrorVariable err -ErrorAction Stop | Out-Null
             }
             "Pipeline" {
+                Write-Host "Deleting $simtype.$name"
                 Remove-AzDataFactoryV2Pipeline `
                     -ResourceGroupName $ResourceGroupName `
                     -DataFactoryName $DataFactoryName `
@@ -97,6 +100,7 @@ $adfIns.AllObjects() | ForEach-Object {
                     -Force -ErrorVariable err -ErrorAction Stop | Out-Null
             }
             "LinkedService" {
+                Write-Host "Deleting $simtype.$name"
                 Remove-AzDataFactoryV2LinkedService `
                     -ResourceGroupName $ResourceGroupName `
                     -DataFactoryName $DataFactoryName `
@@ -104,6 +108,7 @@ $adfIns.AllObjects() | ForEach-Object {
                     -Force -ErrorVariable err -ErrorAction Stop | Out-Null
             }
             "IntegrationRuntime" {
+                Write-Host "Deleting $simtype.$name"
                 Remove-AzDataFactoryV2IntegrationRuntime `
                     -ResourceGroupName $ResourceGroupName `
                     -DataFactoryName $DataFactoryName `
@@ -111,6 +116,7 @@ $adfIns.AllObjects() | ForEach-Object {
                     -Force -ErrorVariable err -ErrorAction Stop | Out-Null
             }
             "Trigger" {
+                Write-Host "Deleting $simtype.$name"
                 # Stop trigger if enabled before delete it
                 if ($obj.RuntimeState -eq 'Started') {
                     Write-Verbose "Disabling trigger: $name..."
