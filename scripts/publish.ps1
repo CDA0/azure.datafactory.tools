@@ -66,6 +66,7 @@ $adfIns.AllObjects() | ForEach-Object {
     if ($type -like 'AdfPS*') { $simtype = $type.Substring(5) }     # New internal type
     if ($simtype -like '*IntegrationRuntime') { $simtype = 'IntegrationRuntime' }
     if ($simtype -like '*managedPrivateEndpoint') { $simtype = 'managedPrivateEndpoint' }
+    $simtype = $simtype.toLower()
     Write-Host $name $simtype
     $byName = $included -Contains "$simtype.$name"
     $byWildCard = ($included -Contains "$simtype.*") -or ($included -Contains "*.*")
