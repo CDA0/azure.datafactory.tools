@@ -110,6 +110,15 @@ $adfIns.AllObjects() | ForEach-Object {
     }
 }
 
+$toDeleteP | ForEach-Object {
+    Write-Host "Deleting $_"
+    Remove-AzDataFactoryV2Pipeline `
+        -ResourceGroupName $ResourceGroupName `
+        -DataFactoryName $DataFactoryName `
+        -Name $_ `
+        -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+}
+
 $toDeleteDS | ForEach-Object {
     Write-Host "Deleting $_"
     Remove-AzDataFactoryV2Dataset `
@@ -122,15 +131,6 @@ $toDeleteDS | ForEach-Object {
 $toDeleteDF | ForEach-Object {
     Write-Host "Deleting $_"
     Remove-AzDataFactoryV2DataFlow `
-        -ResourceGroupName $ResourceGroupName `
-        -DataFactoryName $DataFactoryName `
-        -Name $_ `
-        -Force -ErrorVariable err -ErrorAction Stop | Out-Null
-}
-
-$toDeleteP | ForEach-Object {
-    Write-Host "Deleting $_"
-    Remove-AzDataFactoryV2Pipeline `
         -ResourceGroupName $ResourceGroupName `
         -DataFactoryName $DataFactoryName `
         -Name $_ `
