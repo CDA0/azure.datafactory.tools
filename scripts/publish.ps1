@@ -57,13 +57,13 @@ $filterArray | Where-Object { $_.Trim().StartsWith('-') } | ForEach-Object {
 }
 Write-Host "$($options.Excludes.Count) rule(s)/object(s) added to be excluded from deployment."
 
-$toDeleteLS = [System.Collections.ArrayList]@()
-$toDeleteP = [System.Collections.ArrayList]@()
-$toDeleteDS = [System.Collections.ArrayList]@()
-$toDeleteDF = [System.Collections.ArrayList]@()
-$toDeleteIR = [System.Collections.ArrayList]@()
-$toDeleteT = [System.Collections.ArrayList]@()
-$toDeleteC = [System.Collections.ArrayList]@()
+$toDeleteLS = @()
+$toDeleteP = @()
+$toDeleteDS = @()
+$toDeleteDF = @()
+$toDeleteIR = @()
+$toDeleteT = @()
+$toDeleteC = @()
 $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
 $adfIns.AllObjects() | ForEach-Object {
     $name = $_.Name
@@ -81,25 +81,25 @@ $adfIns.AllObjects() | ForEach-Object {
     if ($delete) {
         switch -Exact ($simtype) {
             "dataset" {
-                $toDeleteDS.Add("$name")
+                $toDeleteDS += $name
             }
             "dataflow" {
-                $toDeleteDF.Add("$name")
+                $toDeleteDF += $name
             }
             "pipeline" {
-                $toDeleteP.Add("$name")
+                $toDeleteP += $name
             }
             "linkedservice" {
-                $toDeleteLS.Add("$name")
+                $toDeleteLS += $name
             }
             "integrationruntime" {
-                $toDeleteIR.Add("$name")
+                $toDeleteIR += $name
             }
             "trigger" {
-                $toDeleteT.Add("$name")
+                $toDeleteT += $name
             }
             "credential" {
-                $toDeleteC.Add("$name")
+                $toDeleteC += $name
             }
             default {
                 Write-Error "ADFT0018: Type $simtype is not supported."
