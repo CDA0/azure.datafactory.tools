@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.10.0
+* Remove items from ADF that are not in the included list.
+
 ## 1.9.0
 * Fix SQL deploy order, remove Windows line breaks from sql.txt config.
 
