@@ -57,7 +57,13 @@ $filterArray | Where-Object { $_.Trim().StartsWith('-') } | ForEach-Object {
 }
 Write-Host "$($options.Excludes.Count) rule(s)/object(s) added to be excluded from deployment."
 
-$toDelete = [System.Collections.ArrayList]@()
+$toDeleteLS = [System.Collections.ArrayList]@()
+$toDeleteP = [System.Collections.ArrayList]@()
+$toDeleteDS = [System.Collections.ArrayList]@()
+$toDeleteDF = [System.Collections.ArrayList]@()
+$toDeleteIR = [System.Collections.ArrayList]@()
+$toDeleteT = [System.Collections.ArrayList]@()
+$toDeleteC = [System.Collections.ArrayList]@()
 $adfIns = Get-AdfFromService -FactoryName "$DataFactoryName" -ResourceGroupName "$ResourceGroupName"
 $adfIns.AllObjects() | ForEach-Object {
     $name = $_.Name
@@ -74,72 +80,29 @@ $adfIns.AllObjects() | ForEach-Object {
     $delete = !$byName -and !$byWildCard
 
     if ($delete) {
-        $toDelete.Add("$simtype.$name")
         Write-Host "Deleting $simtype.$name"
         switch -Exact ($simtype) {
             "dataset" {
-                Write-Host "Deleting $simtype.$name"
-                Remove-AzDataFactoryV2Dataset `
-                    -ResourceGroupName $ResourceGroupName `
-                    -DataFactoryName $DataFactoryName `
-                    -Name $name `
-                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+                $toDeleteDS.Add("$name")
             }
             "dataflow" {
-                Write-Host "Deleting $simtype.$name"
-                Remove-AzDataFactoryV2DataFlow `
-                    -ResourceGroupName $ResourceGroupName `
-                    -DataFactoryName $DataFactoryName `
-                    -Name $name `
-                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+                $toDeleteDF.Add("$name")
             }
             "pipeline" {
-                Write-Host "Deleting $simtype.$name"
-                Remove-AzDataFactoryV2Pipeline `
-                    -ResourceGroupName $ResourceGroupName `
-                    -DataFactoryName $DataFactoryName `
-                    -Name $name `
-                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+                $toDeleteP.Add("$simtype.$name")
             }
             "linkedservice" {
-                Write-Host "Deleting $simtype.$name"
-                Remove-AzDataFactoryV2LinkedService `
-                    -ResourceGroupName $ResourceGroupName `
-                    -DataFactoryName $DataFactoryName `
-                    -Name $name `
-                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+                $toDeleteLS.Add("$simtype.$name")
             }
             "integrationruntime" {
-                Write-Host "Deleting $simtype.$name"
-                Remove-AzDataFactoryV2IntegrationRuntime `
-                    -ResourceGroupName $ResourceGroupName `
-                    -DataFactoryName $DataFactoryName `
-                    -Name $name `
-                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+                $toDeleteIR.Add("$name")
             }
             "trigger" {
+                $toDeleteT.Add("$name")
                 Write-Host "Deleting $simtype.$name"
-                # Stop trigger if enabled before delete it
-                if ($obj.RuntimeState -eq 'Started') {
-                    Write-Verbose "Disabling trigger: $name..."
-                    Stop-AzDataFactoryV2Trigger `
-                        -ResourceGroupName $ResourceGroupName `
-                        -DataFactoryName $DataFactoryName `
-                        -Name $name `
-                        -Force -ErrorVariable err -ErrorAction Stop | Out-Null
-                }
-                Remove-AzDataFactoryV2Trigger `
-                    -ResourceGroupName $ResourceGroupName `
-                    -DataFactoryName $DataFactoryName `
-                    -Name $name `
-                    -Force -ErrorVariable err -ErrorAction Stop | Out-Null
             }
             "credential" {
-                Remove-AdfObjectRestAPI `
-                    -type_plural 'credentials' `
-                    -name $name `
-                    -adfInstance $adfInstance `
-                    -ErrorVariable err -ErrorAction Stop | Out-Null
+                $toDeleteC.Add("$name")
             }
             default {
                 Write-Error "ADFT0018: Type $simtype is not supported."
@@ -148,81 +111,59 @@ $adfIns.AllObjects() | ForEach-Object {
     }
 }
 
-# $toDelete | ForEach-Object {
-#         Write-Host "Deleting $simtype.$name"
-#         switch -Exact ($$_) {
-#             "Dataset" {
-#                 Write-Host "Deleting $simtype.$name"
-#                 Remove-AzDataFactoryV2Dataset `
-#                     -ResourceGroupName $ResourceGroupName `
-#                     -DataFactoryName $DataFactoryName `
-#                     -Name $name `
-#                     -Force -ErrorVariable err -ErrorAction Stop | Out-Null
-#             }
-#             "DataFlow" {
-#                 Write-Host "Deleting $simtype.$name"
-#                 Remove-AzDataFactoryV2DataFlow `
-#                     -ResourceGroupName $ResourceGroupName `
-#                     -DataFactoryName $DataFactoryName `
-#                     -Name $name `
-#                     -Force -ErrorVariable err -ErrorAction Stop | Out-Null
-#             }
-#             "Pipeline" {
-#                 Write-Host "Deleting $simtype.$name"
-#                 Remove-AzDataFactoryV2Pipeline `
-#                     -ResourceGroupName $ResourceGroupName `
-#                     -DataFactoryName $DataFactoryName `
-#                     -Name $name `
-#                     -Force -ErrorVariable err -ErrorAction Stop | Out-Null
-#             }
-#             "LinkedService" {
-#                 Write-Host "Deleting $simtype.$name"
-#                 Remove-AzDataFactoryV2LinkedService `
-#                     -ResourceGroupName $ResourceGroupName `
-#                     -DataFactoryName $DataFactoryName `
-#                     -Name $name `
-#                     -Force -ErrorVariable err -ErrorAction Stop | Out-Null
-#             }
-#             "IntegrationRuntime" {
-#                 Write-Host "Deleting $simtype.$name"
-#                 Remove-AzDataFactoryV2IntegrationRuntime `
-#                     -ResourceGroupName $ResourceGroupName `
-#                     -DataFactoryName $DataFactoryName `
-#                     -Name $name `
-#                     -Force -ErrorVariable err -ErrorAction Stop | Out-Null
-#             }
-#             "Trigger" {
-#                 Write-Host "Deleting $simtype.$name"
-#                 # Stop trigger if enabled before delete it
-#                 if ($obj.RuntimeState -eq 'Started') {
-#                     Write-Verbose "Disabling trigger: $name..."
-#                     Stop-AzDataFactoryV2Trigger `
-#                         -ResourceGroupName $ResourceGroupName `
-#                         -DataFactoryName $DataFactoryName `
-#                         -Name $name `
-#                         -Force -ErrorVariable err -ErrorAction Stop | Out-Null
-#                 }
-#                 Remove-AzDataFactoryV2Trigger `
-#                     -ResourceGroupName $ResourceGroupName `
-#                     -DataFactoryName $DataFactoryName `
-#                     -Name $name `
-#                     -Force -ErrorVariable err -ErrorAction Stop | Out-Null
-#             }
-#             "Credential" {
-#                 Remove-AdfObjectRestAPI `
-#                     -type_plural 'credentials' `
-#                     -name $name `
-#                     -adfInstance $adfInstance `
-#                     -ErrorVariable err -ErrorAction Stop | Out-Null
-#             }
-#             "DoNothing" {
+$toDeleteDS | ForEach-Object {
+    Write-Host "Deleting $_"
+    Remove-AzDataFactoryV2Dataset `
+        -ResourceGroupName $ResourceGroupName `
+        -DataFactoryName $DataFactoryName `
+        -Name $$_ `
+        -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+}
 
-#             }
-#             default {
-#                 Write-Error "ADFT0018: Type $($obj.GetType().Name) is not supported."
-#             }
-#         }
-# }
+$toDeleteDF | ForEach-Object {
+    Write-Host "Deleting $_"
+    Remove-AzDataFactoryV2DataFlow `
+        -ResourceGroupName $ResourceGroupName `
+        -DataFactoryName $DataFactoryName `
+        -Name $_ `
+        -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+}
+
+$toDeleteP | ForEach-Object {
+    Write-Host "Deleting $_"
+    Remove-AzDataFactoryV2Pipeline `
+        -ResourceGroupName $ResourceGroupName `
+        -DataFactoryName $DataFactoryName `
+        -Name $_ `
+        -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+}
+
+$toDeleteLS | ForEach-Object {
+    Write-Host "Deleting $_"
+    Remove-AzDataFactoryV2LinkedService `
+        -ResourceGroupName $ResourceGroupName `
+        -DataFactoryName $DataFactoryName `
+        -Name $_ `
+        -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+}
+
+$toDeleteIR | ForEach-Object {
+    Write-Host "Deleting $_"
+    Remove-AzDataFactoryV2IntegrationRuntime `
+        -ResourceGroupName $ResourceGroupName `
+        -DataFactoryName $DataFactoryName `
+        -Name $_ `
+        -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+}
+
+$toDeleteT | ForEach-Object {
+    Write-Host "Deleting $_"
+    Remove-AzDataFactoryV2Trigger `
+        -ResourceGroupName $ResourceGroupName `
+        -DataFactoryName $DataFactoryName `
+        -Name $_ `
+        -Force -ErrorVariable err -ErrorAction Stop | Out-Null
+}
 
 $null = Publish-AdfV2FromJson `
     -RootFolder "$DataFactoryCodePath" `
